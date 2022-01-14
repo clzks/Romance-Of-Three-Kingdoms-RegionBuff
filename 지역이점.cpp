@@ -7258,8 +7258,8 @@
         {
             //pk::list<pk::force@> force_sel = pk::force_selector(pk::u8encode("세력 선택"), pk::u8encode("교류의 대상을 선택합니다."), forceList, 1, 1);
 
-            pk::list<pk::city@> city_sel = pk::city_selector2(pk::u8encode("도시 선택"), const string & desc, const list< city@> &items,
-                int min, int max, const list< city@> &selected_items = list< city@>())
+            //pk::list<pk::city@> city_sel = pk::city_selector2(pk::u8encode("도시 선택"), const string & desc, const list< city@> &items,
+            //    int min, int max, const list< city@> &selected_items = list< city@>())
             return true;
         }
 
