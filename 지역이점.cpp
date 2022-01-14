@@ -72,7 +72,7 @@
     // ============================================== Customize ======================================================
     // ===============================================================================================================
 
-    bool 플레이어_모든이점_적용 = false;                           // true시, 지역이점은 적용되지만, 교역 레벨은 그대로
+    bool 플레이어_모든이점_적용 = true;                           // true시, 지역이점은 적용되지만, 교역 레벨은 그대로
     bool AI_모든이점_적용 = false;
 
 
@@ -84,7 +84,7 @@
     const int 교역_기교 = 1000;
     const int 교역_일수 = 36;          // (1 ~ 99 사이, 1 = 10일)
     const int 화친_기교 = 1000;
-    const int 화친_일수 = 3;          // (1 ~ 3 사이, 1 = 10일)
+    const int 화친_일수 = 1;          // (1 ~ 3 사이, 1 = 10일)
     const int AI_교역_페널티 = 18;    // (1 = 10일, 교역 일수와 합이 99를 넘지 않게 해야함)
     const int AI_화친_레벨당_페널티 = 18; // (1 = 10일, 99까지 권장)
 
@@ -4030,11 +4030,18 @@
 
             if (unitArray.length > 0)
             {
-                pk::say(pk::u8encode(s), pk::get_person(unitArray[0].leader), unitArray[0]);
-
+                bool isDone = false;
                 for (int i = 0; i < unitArray.length; ++i)
                 {
-                    pk::remove(unitArray[i]);
+                    if (true == unitArray[i].is_alive() && null != unitArray[i])
+                    {
+                        if (false == isDone)
+                        {
+                            pk::say(pk::u8encode(s), pk::get_person(unitArray[i].leader), unitArray[i]);
+                            isDone = true;
+                        }
+                        pk::kill(unitArray[i]);
+                    }
                 }
             }
 
@@ -4043,15 +4050,16 @@
             {
                 // 이 콜백은 도시 별로 호출되기 때문에 맵 상에 건물이 많을 수록 리스트로 접근하면 속도가 느려지므로 배열로 변환.
                 array<pk::building@> arr = pk::list_to_array(pk::get_building_list());
-
-                for (int i = 0; i < arr.length; i++)
+            
+                for (int j = 0; j < arr.length; j++)
                 {
-                    pk::building@ building = arr[i];
-                    if (building.get_force_id() == forceId)
+                    pk::building@ building = arr[j];
+                    
+                    if (building.facility == 시설_본거지1 || building.facility == 시설_본거지2)
                     {
-                        if (building.facility == 시설_본거지1 || building.facility == 시설_본거지2)
+                        if (building.get_force_id() == forceId && true == building.is_alive())
                         {
-                            pk::remove(building);
+                            pk::kill(building);
                         }
                     }
                 }
