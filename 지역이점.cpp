@@ -64,6 +64,11 @@
     array<int> 남만_영향력 = { 형남, 익주, 남중 };
     array<int> 산월_영향력 = { 회남, 서주, 양주, 형북 };
 
+    const int 이민족_철군_동맹 = 0;
+    const int 이민족_철군_기한 = 1;
+    const int 이민족_철군_진상 = 2;
+    const int 이민족_철군_끝 = 3;
+
     // ============================================== Customize ======================================================
     // ===============================================================================================================
 
@@ -176,7 +181,7 @@
             AddPrintRegionBuffMenu();                                 // Shift 우클릭 지역이점 현황 표시
             AddTradeMenu();                                           // 외국 교역 메뉴 추가
             AddrapprochementMenu();                                   // 이민족 교류 메뉴 추가
-            //AddSupportMenu();                                         // 이민족 지원요청 메뉴 추가
+            AddSupportMenu();                                         // 이민족 지원요청 메뉴 추가
         }
 
         // 게임 최초 실행시 지역이점 적용여부 확인작업
@@ -3974,6 +3979,85 @@
 
             return value;
         }
+
+        void ExecuteSupport(int type, array<pk::point> pointArray)
+        {
+
+        }
+
+        void ResetBarbarianUnits(int forceType, int removeType)
+        {
+            int forceId;
+
+            if (우호_오환 == forceType)
+            {
+                forceId = 세력_오환;
+            }
+            else if (우호_강 == forceType)
+            {
+                forceId = 세력_강;
+            }
+            else if (우호_남만 == forceType)
+            {
+                forceId = 세력_남만;
+            }
+            else if (우호_산월 == forceType)
+            {
+                forceId = 세력_산월;
+            }
+            else
+            {
+                return;
+            }
+
+            string s = "";
+
+            if (removeType == 이민족_철군_동맹)
+            {
+                s = "철군 명령이 떨어졌다. 이만 돌아가야겠군";
+            }
+            else if (removeType == 이민족_철군_기한)
+            {
+                s = "약속한 기한이 지났으니 우리는 물러나도록 하겠소.";
+            }
+            else if (removeType == 이민족_철군_진상)
+            {
+                s = "흥. 성의를 봐서 한번 봐주도록 할까.";
+            }
+            
+            pk::list<pk::unit@> list = pk::get_unit_list(pk::get_force(forceId));
+            array<pk::unit@> unitArray = pk::list_to_array(list);
+
+            if (unitArray.length > 0)
+            {
+                pk::say(pk::u8encode(s), pk::get_person(unitArray[0].leader), unitArray[0]);
+
+                for (int i = 0; i < unitArray.length; ++i)
+                {
+                    pk::remove(unitArray[i]);
+                }
+            }
+
+            // 이민족과의 동맹으로 인한 철군인 경우에만 본거지 철거 실시
+            if (이민족_철군_동맹 == removeType)
+            {
+                // 이 콜백은 도시 별로 호출되기 때문에 맵 상에 건물이 많을 수록 리스트로 접근하면 속도가 느려지므로 배열로 변환.
+                array<pk::building@> arr = pk::list_to_array(pk::get_building_list());
+
+                for (int i = 0; i < arr.length; i++)
+                {
+                    pk::building@ building = arr[i];
+                    if (building.get_force_id() == forceId)
+                    {
+                        if (building.facility == 시설_본거지1 || building.facility == 시설_본거지2)
+                        {
+                            pk::remove(building);
+                        }
+                    }
+                }
+            }
+        }
+
         // ================================================= 101 징병 치안 증감 =====================================================================
 
         int func101(pk::city@ city, const pk::detail::arrayptr<pk::person@>& in actors, int troops)
@@ -6693,6 +6777,11 @@
                 }
             }
 
+            if (eventRapprochmentLevel == 0)
+            {
+                ResetBarbarianUnits(eventAlienId, 이민족_철군_동맹);
+            }
+
             pk::history_log(eventKunshu.get_pos(), force.color, pk::u8encode(pk::format("\x1b[1x{}\x1b[0x과 \x1b[1x{}\x1b[0x의 우호가 상승", pk::u8decode(forceName), 교역대상_이름[eventAlienId])));
         }
 
@@ -7064,7 +7153,7 @@
             item.init = pk::building_menu_item_init_t(SupportInit);
             item.is_enabled = pk::menu_item_is_enabled_t(SupportEnabled);
             item.get_text = pk::menu_item_get_text_t(GetSupportText);
-            item.get_desc = pk::menu_item_get_desc_t(GetTradeDescription);
+            item.get_desc = pk::menu_item_get_desc_t(GetSupportDescription);
             item.handler = pk::menu_item_handler_t(SupportHandler);
             pk::add_menu_item(item);
         }
@@ -7081,99 +7170,96 @@
 
         bool SupportEnabled()
         {
-            bool enabled = false;
+            int i = 0;
 
             if (tradeForce.tp < 이민족_원군요청_기교)
             {
                 return false;
             }
 
-            if (3 >= GetRelationLevel(tradeForce, 우호_오환))
+            if (3 <= GetRelationLevel(tradeForce, 우호_오환))
             {
-
+                i += 1;
             }
 
-            return enabled;
+            if (3 <= GetRelationLevel(tradeForce, 우호_강))
+            {
+                i += 1;
+            }
+
+            if (3 <= GetRelationLevel(tradeForce, 우호_남만))
+            {
+                i += 1;
+            }
+
+            if (3 <= GetRelationLevel(tradeForce, 우호_산월))
+            {
+                i += 1;
+            }
+
+            if (i > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         string GetSupportText()
         {
-            return  pk::u8encode("교역");
+            return  pk::u8encode("이민족 요청");
         }
 
         string GetSupportDescription()
         {
-            return pk::u8encode(pk::format("이민족에게 지원군을 요청합니다. (기교P {} 사용)", 교역_기교));
+            bool enabled = false;
+            int i = 0;
+
+            if (tradeForce.tp < 이민족_원군요청_기교)
+            {
+                return  pk::u8encode(pk::format("기교가 부족합니다. (기교 P{})", 이민족_원군요청_기교));
+            }
+            else
+            {
+                if (3 <= GetRelationLevel(tradeForce, 우호_오환))
+                {
+                    i += 1;
+                }
+
+                if (3 <= GetRelationLevel(tradeForce, 우호_강))
+                {
+                    i += 1;
+                }
+
+                if (3 <= GetRelationLevel(tradeForce, 우호_남만))
+                {
+                    i += 1;
+                }
+
+                if (3 <= GetRelationLevel(tradeForce, 우호_산월))
+                {
+                    i += 1;
+                }
+
+                if (i > 0)
+                {
+                    return pk::u8encode(pk::format("이민족에게 지원군을 요청합니다. (기교P {} 사용)", 교역_기교));
+                }
+                else
+                {
+                    return  pk::u8encode("요청 가능한 이민족이 없습니다.");
+                }
+            }
         }
 
         bool SupportHandler()
         {
-            int level;
-            int count = 0;
+            //pk::list<pk::force@> force_sel = pk::force_selector(pk::u8encode("세력 선택"), pk::u8encode("교류의 대상을 선택합니다."), forceList, 1, 1);
 
-            // 대진국
-            if (tradeData % 2 == 1)
-            {
-                level = GetRelationLevel(tradeForce, 우호_대진국);
-                tradeForceArray[count] = 0;
-                tempArray[count] = pk::u8encode(pk::format("\x1b[2x대진국\x1b[0x (현재 우호도 {})", level));
-                count += 1;
-            }
-            // 안식국
-            if ((tradeData / 2) % 2 == 1)
-            {
-                level = GetRelationLevel(tradeForce, 우호_안식국);
-                tradeForceArray[count] = 1;
-                tempArray[count] = pk::u8encode(pk::format("\x1b[2x안식국\x1b[0x (현재 우호도 {})", level));
-                count += 1;
-            }
-            // 천축국
-            if ((tradeData / 4) % 2 == 1)
-            {
-                level = GetRelationLevel(tradeForce, 우호_천축국);
-                tradeForceArray[count] = 2;
-                tempArray[count] = pk::u8encode(pk::format("\x1b[2x천축국\x1b[0x (현재 우호도 {})", level));
-                count += 1;
-            }
-            // 귀상국
-            if ((tradeData / 8) % 2 == 1)
-            {
-                level = GetRelationLevel(tradeForce, 우호_귀상국);
-                tradeForceArray[count] = 3;
-                tempArray[count] = pk::u8encode(pk::format("\x1b[2x귀상국\x1b[0x (현재 우호도 {})", level));
-                count += 1;
-            }
-            array<string> menuArray(count + 1);
-
-            for (int i = 0; i < count; ++i)
-            {
-                menuArray[i] = tempArray[i];
-            }
-
-            menuArray[count] = pk::u8encode("취소");
-
-            int choose = pk::choose(pk::u8encode("교역을 실행할 세력을 선택하십시오."), menuArray);
-
-            if (choose == count)
-            {
-                return false;
-            }
-            else
-            {
-                if (false == pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x과 교역을 실행하시겠습니까? \n\n(금{} 군량{} 병력{} 소모)", 교역대상_이름[choose], 교역_금[level], 교역_군량[level], 교역_병사[level]))))
-                {
-                    return TradeHandler();
-                }
-            }
-
-            int selectForce = tradeForceArray[choose];
-            int selectLevel = GetRelationLevel(tradeForce, selectForce);
-            pk::add_tp(tradeForce, -교역_기교, tradeBuilding.get_pos());
-            pk::add_gold(tradeBuilding, -교역_금[selectLevel], true);
-            pk::add_food(tradeBuilding, -교역_군량[selectLevel], true);
-            pk::add_troops(tradeBuilding, -교역_병사[selectLevel], true);
-            ExecuteTrade(tradeForce, selectForce);
-            RelationStartEvent(tradeForce, selectForce);
+            pk::list<pk::city@> city_sel = pk::city_selector2(pk::u8encode("도시 선택"), const string & desc, const list< city@> &items,
+                int min, int max, const list< city@> &selected_items = list< city@>())
             return true;
         }
 
