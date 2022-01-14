@@ -251,7 +251,7 @@
             ExecuteXuZhouHp(force);
             ExecuteYuZhou(force);
             UpdateAITradeTimer(force);
-            DevelopementKousekiUpdate(force);
+            //DevelopementKousekiUpdate(force);
         }
 
         // 부대 행동 완료 시 적용될 것

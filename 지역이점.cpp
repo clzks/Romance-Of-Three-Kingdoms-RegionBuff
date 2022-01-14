@@ -257,7 +257,7 @@
             ExecuteXuZhouHp(force);
             ExecuteYuZhou(force);
             UpdateAITradeTimer(force);
-            DevelopementKousekiUpdate(force);
+            //DevelopementKousekiUpdate(force);
         }
 
         // 부대 행동 완료 시 적용될 것
@@ -3710,7 +3710,7 @@
 
         // ======================================================================== Ver2 =========================================================================================================
 
-        // 개발 중 공적획득
+        // 개발 중 공적획득 (적용 안함)
         void DevelopementKousekiUpdate(pk::force@ force)
         {
             if (true == IsValidForce(force))
@@ -3920,7 +3920,7 @@
         {
             int value = 0;
 
-            if (3 >= GetRelationLevel(force, 우호_오환))
+            if (3 <= GetRelationLevel(force, 우호_오환))
             {
                 if (false == IsActiveForce(우호_오환))
                 {
@@ -3933,7 +3933,7 @@
                 }
             }
 
-            if (3 >= GetRelationLevel(force, 우호_강))
+            if (3 <= GetRelationLevel(force, 우호_강))
             {
                 if (false == IsActiveForce(우호_강))
                 {
@@ -3946,7 +3946,7 @@
                 }
             }
             
-            if (3 >= GetRelationLevel(force, 우호_남만))
+            if (3 <= GetRelationLevel(force, 우호_남만))
             {
                 if (false == IsActiveForce(우호_남만))
                 {
@@ -3959,7 +3959,7 @@
                 }
             }
 
-            if (3 >= GetRelationLevel(force, 우호_산월))
+            if (3 <= GetRelationLevel(force, 우호_산월))
             {
                 if (false == IsActiveForce(우호_산월))
                 {
@@ -7178,34 +7178,12 @@
 
         bool SupportEnabled()
         {
-            int i = 0;
-
             if (tradeForce.tp < 이민족_원군요청_기교)
             {
                 return false;
             }
 
-            if (3 <= GetRelationLevel(tradeForce, 우호_오환))
-            {
-                i += 1;
-            }
-
-            if (3 <= GetRelationLevel(tradeForce, 우호_강))
-            {
-                i += 1;
-            }
-
-            if (3 <= GetRelationLevel(tradeForce, 우호_남만))
-            {
-                i += 1;
-            }
-
-            if (3 <= GetRelationLevel(tradeForce, 우호_산월))
-            {
-                i += 1;
-            }
-
-            if (i > 0)
+            if (GetSupportData(tradeForce) > 0)
             {
                 return true;
             }
@@ -7222,36 +7200,13 @@
 
         string GetSupportDescription()
         {
-            bool enabled = false;
-            int i = 0;
-
             if (tradeForce.tp < 이민족_원군요청_기교)
             {
                 return  pk::u8encode(pk::format("기교가 부족합니다. (기교 P{})", 이민족_원군요청_기교));
             }
             else
             {
-                if (3 <= GetRelationLevel(tradeForce, 우호_오환))
-                {
-                    i += 1;
-                }
-
-                if (3 <= GetRelationLevel(tradeForce, 우호_강))
-                {
-                    i += 1;
-                }
-
-                if (3 <= GetRelationLevel(tradeForce, 우호_남만))
-                {
-                    i += 1;
-                }
-
-                if (3 <= GetRelationLevel(tradeForce, 우호_산월))
-                {
-                    i += 1;
-                }
-
-                if (i > 0)
+                if (GetSupportData(tradeForce) > 0)
                 {
                     return pk::u8encode(pk::format("이민족에게 지원군을 요청합니다. (기교P {} 사용)", 교역_기교));
                 }
