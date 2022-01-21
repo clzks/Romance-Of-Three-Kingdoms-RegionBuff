@@ -152,7 +152,7 @@
             {null, null, null, null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null, null, null, null}
-        };                      // 이민족 무장 재활용 배열
+        };                                                              // 이민족 무장 재활용 배열
         RegionBuff()
         {
             pk::bind(102, pk::trigger102_t(Init));
@@ -204,7 +204,6 @@
             // 좌표(0,0)에 건물이 존재할 시 지역이점 db가 생성된 것으로 간주함
             if (building != null)
             {
-                //InitBarbarianAlly();        // 이민족과 동맹 체크 
                 return;
             }
             else

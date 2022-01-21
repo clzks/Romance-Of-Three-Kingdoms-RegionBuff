@@ -49,6 +49,7 @@
     
     array<string> 주_이름 = {"유주", "병주", "기주", "청주", "서주", "회남", "연주", "예주", "사예", "경조", "량주", "양주", "형북", "형남", "익주", "남중"};
     array<string> 교역대상_이름 = { "대진국", "안식국", "천축국", "귀상국", "오환", "선비", "강", "남만", "산월" };
+    array<int> 교역대상_아이디 = { -1, -1, -1, -1, 세력_오환, -1, 세력_강, 세력_남만, 세력_산월 };
 
     const int 교역불가_교역중 = 0;
     const int 교역불가_지역이점없음 = 1;
@@ -56,20 +57,21 @@
     const int 교역불가_물자부족 = 3;
     const int 교역불가_최대 = 4;
 
-    const int 이민족_공격 = 0;
-    const int 이민족_수비 = 1;
-
     array<int> 오환_영향력 = { 유주, 병주, 기주, 청주, 연주 };
     array<int> 강_영향력 = { 예주,  사예, 경조 , 량주 };
     array<int> 남만_영향력 = { 형남, 익주, 남중 };
     array<int> 산월_영향력 = { 회남, 서주, 양주, 형북 };
+
+    const int 이민족_철군_동맹 = 0;
+    const int 이민족_철군_기한 = 1;
+    const int 이민족_철군_진상 = 2;
+    const int 이민족_철군_끝 = 3;
 
     // ============================================== Customize ======================================================
     // ===============================================================================================================
 
     bool 플레이어_모든이점_적용 = false;                           // true시, 지역이점은 적용되지만, 교역 레벨은 그대로
     bool AI_모든이점_적용 = false;
-
 
     /* %로 설명해놓은 숫자들은 되도록 (0~100)사이의 값을 추천합니다. 0보다 작아지거나 아주 숫자가 커지면 의도하지 않은 결과가 나올 가능성이 있습니다 */
 
@@ -99,7 +101,6 @@
     const int 귀상_2단계_궁병공격 = 10;       // (%)
     const int 귀상_3단계_진정확률 = 20;       // (%) // (0% ~ 100%)
 
-    
     const int 오환_3단계_포박상승 = 15;      // 0% 일경우는 효과 없음.  1%의 확률일 경우 -> 16%로 상승.
 
     const int 강_3단계_퇴각상승 = 25;       // (25일 경우 -> 포박확률을 기존의 75%로 경감시킴)  
@@ -130,8 +131,12 @@
     const int 형북_지역이점_기교획득 = 100;
     const int 형북_지역이점_등용상승 = 20;            // (20일 경우 -> 기본확률 x 1.2)  기본확률이 0% 경우 효과없음
 
-    const int 이민족_지속기간 = 9;           // 1 = 10일 
-    const int 이민족_원군요청_기교 = 2000;
+    const int 이민족_지속기간 = 9;           // 1 = 10일 , (군량은 90일분으로 출전함)
+    const int 이민족_원군요청_기교 = 1000;
+    const int 이민족_원군요청_기본금 = 2000;
+    const int 이민족_원군요청_추가금 = 500;  // 1년마다 늘어나는 필요 금 
+    const int AI_이민족지원_기본확률 = 2;    // 요청이 가능한 경우 턴마다 지원요청을 실행할 확률
+    const int AI_이민족지원_추가확률 = 2;    // 2년이 지날때마다 추가될 확률 (최대 4번 추가됨) 
     // ==================================================================================================================================
     // ==================================================================================================================================
     class RegionBuff
@@ -141,6 +146,13 @@
         array<array<pk::point>> dataPointArray(도시_끝);               // 세력별 data건물 위치 배열
         array<pk::point> barbarianDataArray(4);                       // 이민족 원군요청 데이터
         bool loadSuccess = false;
+        array<array<pk::person@>> barbarianMooArray =
+        {
+            {null, null, null, null, null, null, null, null, null, null},
+            {null, null, null, null, null, null, null, null, null, null},
+            {null, null, null, null, null, null, null, null, null, null},
+            {null, null, null, null, null, null, null, null, null, null}
+        };                                                          // 이민족 무장 재활용 배열
         RegionBuff()
         {
             pk::bind(102, pk::trigger102_t(Init));
@@ -151,6 +163,7 @@
             pk::bind(109, pk::trigger109_t(UpdateSeasonStart));
             pk::bind(111, pk::trigger111_t(UpdateTurnStart));
             pk::bind(112, pk::trigger112_t(UpdateTurnEnd));
+            pk::bind(171, pk::trigger171_t(UpdateUnitRemove));
             pk::bind(174, pk::trigger174_t(UpdateUnitTurnEnd));
 
             pk::reset_func(101);
@@ -176,6 +189,7 @@
             AddPrintRegionBuffMenu();                                 // Shift 우클릭 지역이점 현황 표시
             AddTradeMenu();                                           // 외국 교역 메뉴 추가
             AddrapprochementMenu();                                   // 이민족 교류 메뉴추가
+            AddSupportMenu();                                         // 이민족 지원요청 메뉴 추가
         }
 
         // 게임 최초 실행시 지역이점 적용여부 확인작업
@@ -184,6 +198,7 @@
             ArrayInit();
             loadSuccess = true;
             BarbarianDataSetting();
+            InitBarbarianMooArray();
             pk::building@ building = pk::get_building(rb_checkPoint);
             // 지역이점 적용 여부 확인 후 시작
             // 좌표(0,0)에 건물이 존재할 시 지역이점 db가 생성된 것으로 간주함
@@ -217,6 +232,7 @@
         void UpdateDayStart()
         {
             validForceTrigger();
+            UpdateBarbarianForce();
         }
 
         // 새달 적용될 것
@@ -258,6 +274,25 @@
         void UpdateUnitTurnEnd(pk::unit@ unit)
         {
             ExecuteParthianLevelThree(unit);
+        }
+
+        void UpdateUnitRemove(pk::unit@ unit, int type)
+        {
+            int forceId = unit.get_force_id();
+
+            // 이민족 세력일 경우 패스
+            if (forceId == 세력_오환 || forceId == 세력_강 || forceId == 세력_남만 || forceId == 세력_산월)
+            {
+                return;
+            }
+
+            // 이민족 세력이 아니지만 이민족 무장일 경우 수동처리
+            if (unit.leader >= 적장_시작 && unit.leader < 적장_끝)
+            {
+                pk::person@ barbarian = pk::get_person(unit.leader);
+                pk::set_district(pk::get_person(unit.leader), -1);
+                barbarian.mibun = 신분_없음;
+            }
         }
 
         void Test()
@@ -309,6 +344,8 @@
                         SetAIRapprochmentTerm(force, (AI_화친_레벨당_페널티 + 3) + AI_화친_레벨당_페널티 * GetRelationLevel(force, targetId));
                     }
                 }
+
+                ExecuteAISupport(force);
 
                 // AI의 외국 교역
                 int targetId = AITrade(force);
@@ -3703,7 +3740,7 @@
 
         // ======================================================================== Ver2 =========================================================================================================
 
-        // 개발 중 공적획득
+         // 개발 중 공적획득 (적용 안함)
         void DevelopementKousekiUpdate(pk::force@ force)
         {
             if (true == IsValidForce(force))
@@ -3730,118 +3767,1009 @@
             }
         }
 
+        void SetBarbarianForceData(int type, int day)
+        {
+            int index = -1;
+
+            if (우호_오환 == type)
+            {
+                index = 0;
+            }
+            else if (우호_강 == type)
+            {
+                index = 1;
+            }
+            else if (우호_남만 == type)
+            {
+                index = 2;
+            }
+            else if (우호_산월 == type)
+            {
+                index = 3;
+            }
+
+            pk::point point = barbarianDataArray[index];
+            pk::building@ data = pk::get_building(point);
+            data.hp = day;
+        }
+
         void UpdateBarbarianForce()
         {
             for (int i = 0; i < 4; ++i)
             {
                 pk::point point = barbarianDataArray[i];
                 pk::building@ data = pk::get_building(point);
+                int barbarianType = -1;
+
+                if (0 == i)
+                {
+                    barbarianType = 우호_오환;
+                }
+                else if (1 == i)
+                {
+                    barbarianType = 우호_강;
+                }
+                else if (2 == i)
+                {
+                    barbarianType = 우호_남만;
+                }
+                else if (3 == i)
+                {
+                    barbarianType = 우호_산월;
+                }
 
                 // 기한이 남았을 경우 차감
                 if (data.hp % 100 > 0)
                 {
                     data.hp -= 1;
-                }
-                else  // 0인경우 패스
-                {
-                    continue;
-                }
 
-                // 기한이 모두 소진되었을 경우 군세 삭제
-                if (data.hp % 100 == 0)
-                {
-                    data.hp = 0;
+                    // 기한이 모두 소진되었을 경우 군세 삭제
+                    if (data.hp % 100 == 0)
+                    {
+                        data.hp = 0;
+
+                        ResetBarbarianUnits(barbarianType, 이민족_철군_기한);
+                    }
                 }
             }
         }
 
-        void SummonBarbarianForce(pk::city@ city, int barbarianOrder, int type)
+        bool IsActiveForce(int type)
         {
-            
-            if (0 == type)
+            if (type == 우호_오환)
             {
+                pk::point point = barbarianDataArray[0];
+                pk::building@ data = pk::get_building(point);
 
+                if (data.hp <= 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
-            else if (1 == type)
-            {
 
+            if (type == 우호_강)
+            {
+                pk::point point = barbarianDataArray[1];
+                pk::building@ data = pk::get_building(point);
+
+                if (data.hp <= 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
-            else if (2 == type)
-            {
 
+            if (type == 우호_남만)
+            {
+                pk::point point = barbarianDataArray[2];
+                pk::building@ data = pk::get_building(point);
+
+                if (data.hp <= 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
-            else if (3 == type)
-            {
 
+            if (type == 우호_산월)
+            {
+                pk::point point = barbarianDataArray[3];
+                pk::building@ data = pk::get_building(point);
+
+                if (data.hp <= 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void SummonBarbarianForce(pk::force@ force, pk::city@ city, int barbarianOrder, int type, int count, int troops)
+        {
+            pk::force@ barbarianForce;
+            switch (type)
+            {
+            case 우호_오환:
+                @barbarianForce = pk::get_force(세력_오환);
+                break;
+
+            case 우호_강:
+                @barbarianForce = pk::get_force(세력_강);
+                break;
+
+            case 우호_남만:
+                @barbarianForce = pk::get_force(세력_남만);
+                break;
+
+            case 우호_산월:
+                @barbarianForce = pk::get_force(세력_산월);
+                break;
+            }
+
+            array<pk::point> posArray = pk::range(city.get_pos(), 4, 6);
+            int length = 0;
+
+            for (int i = 0; i < posArray.length; ++i)
+            {
+                pk::point pos = posArray[i];
+
+                if (true == IsValidSummonPos(posArray[i]))
+                {
+                    length = length + 1;
+                }
+            }
+
+            if (length == 0)
+            {
+                return;
+            }
+
+            array<pk::point> validPointArray(length);
+            int start = 0;
+
+            for (int i = 0; i < posArray.length; ++i)
+            {
+                if (true == IsValidSummonPos(posArray[i]))
+                {
+                    validPointArray[start] = posArray[i];
+                    start = start + 1;
+                }
+            }
+
+            array<pk::point> destPointArray = GetRandomValidPointArray(validPointArray, count);
+
+            for (int i = 0; i < destPointArray.length; ++i)
+            {
+                CreateBarbarianUnit(force, type, pk::city_to_building(city), barbarianOrder, destPointArray[i], troops);
+            }
+
+            pk::history_log(city.get_pos(), barbarianForce.color, pk::u8encode(pk::format("\x1b[1x{}\x1b[0x 부근에 \x1b[2x{}군\x1b[0x 출현", pk::u8decode(pk::get_name(city)), 교역대상_이름[type])));
+        }
+
+        array<pk::point> GetRandomValidPointArray(array<pk::point> source, int count)
+        {
+            int c = source.length;
+
+            if (c <= count)
+            {
+                return source;
+            }
+            else
+            {
+                array<int> indexArray(count);
+                // -1로 초기화
+                for (int i = 0; i < indexArray.length; ++i)
+                {
+                    indexArray[i] = -1;
+                }
+
+                array<pk::point> destArray(count);
+                int n = 0;
+
+                while (true)
+                {
+                    int r = pk::rand(source.length);
+
+                    // 중복 체크 후 중복이 아니면 포인트 배정
+                    if (false == IsDuplicated(indexArray, r))
+                    {
+                        indexArray[n] = r;
+                        destArray[n] = source[r];
+                        n = n + 1;
+                    }
+
+                    // 모든 배열을 채울 경우 반복문 중단
+                    if (n >= count)
+                    {
+                        break;
+                    }
+                }
+
+                return destArray;
             }
         }
 
-        void DeleteBarbarianForce(int type)
+        // 지역배열 중복 체크
+        bool IsDuplicated(array<int> indexArray, int source)
         {
-            if (0 == type)
+            for (int i = 0; i < indexArray.length; ++i)
             {
-                pk::person@ moo = pk::get_person(무장_오환장수);
-
-                pk::message_box(pk::u8encode("약속한 기한이 지났으니 우린 이만 철수하겠소이다."), moo);
-
-                auto units = pk::get_unit_list(pk::get_force(세력_오환));
-
-                for (int i = units.count - 1; i >= 0; i--)
+                if (indexArray[i] == source)
                 {
-                    if (true == units[i].is_alive())
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void CreateBarbarianUnit(pk::force@ force, int type, pk::building@ building, int barbarianOrder, pk::point pos, int troops)
+        {
+            //int barbarianId;
+            int mooArrayIndex = -1;
+            int groundWeapon;
+            int waterWeapon;
+            if (우호_오환 == type)
+            {
+                //barbarianId = 무장_오환장수;
+                mooArrayIndex = 0;
+                groundWeapon = 병기_군마;
+                waterWeapon = 병기_주가;
+            }
+            else if (우호_강 == type)
+            {
+                //barbarianId = 무장_강장수;
+                mooArrayIndex = 1;
+                groundWeapon = 병기_군마;
+                waterWeapon = 병기_주가;
+            }
+            else if (우호_남만 == type)
+            {
+                //barbarianId = 무장_남만장수;
+                mooArrayIndex = 2;
+                if (pk::rand(100) > 49)
+                {
+                    groundWeapon = 병기_창;
+                }
+                else
+                {
+                    groundWeapon = 병기_극;
+                }
+                waterWeapon = 병기_투함;
+            }
+            else if (우호_산월 == type)
+            {
+                //barbarianId = 무장_산월장수;
+                mooArrayIndex = 3;
+                groundWeapon = 병기_극;
+                waterWeapon = 병기_투함;
+            }
+            auto district = pk::get_district_list(force);
+            pk::person@ bandit_person = GetValidBarbarianMoo(type);
+            pk::add_loyalty(bandit_person, 255);
+            pk::set_district(bandit_person, district[0], building, 0);
+            //pk::set_district(bandit_person, force.get_force_id());
+            //pk::set_force(pk::get_person(0), force, pk::get_person(1), 0);
+            pk::unit@ bandit_unit = pk::create_unit(building, bandit_person, null, null, troops, groundWeapon, waterWeapon, 0, (troops * 9) / 10, pos);
+            bandit_unit.energy = 100;
+            pk::set_order(bandit_unit, barbarianOrder, building.get_pos());
+        }
+
+        bool IsValidSummonPos(pk::point pos)
+        {
+            if (false == pk::is_valid_pos(pos))
+            {
+                return false;
+            }
+
+            pk::hex@ hex = pk::get_hex(pos);
+
+            if (true == hex.has_building)
+            {
+                return false;
+            }
+
+            if (true == hex.has_unit)
+            {
+                return false;
+            }
+
+            int terrain_id = hex.terrain;
+
+            if (false == pk::is_valid_terrain_id(terrain_id))
+            {
+                return false;
+            }
+
+            if (false == pk::is_enabled_terrain(terrain_id))
+            {
+                return false;
+            }
+
+            if (true == pk::is_water_terrain(terrain_id))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 이민족 원군요청 가능 데이터. (-3 : 금 부족, -2 : 요청 가능한 도시 없음, -1 : 기교부족, 0 : 요청 가능한 세력 없음, 오환 가능 +1, 강 가능 +2, 남만 가능 +4, 산월 가능 +8)
+        /// </summary>
+        /// <param name="force"></param>
+        /// <returns></returns>
+        int GetSupportData(pk::force@ force)
+        {
+            int value = 0;
+            bool isValidCity = true;
+            pk::list<pk::city@> cityList;
+            pk::list<pk::city@> validCityList;
+
+            if (3 <= GetRelationLevel(force, 우호_오환))
+            {
+                if (false == IsActiveForce(우호_오환))
+                {
+                    if (force.tp < 이민족_원군요청_기교 && true == force.is_player())
                     {
-                        pk::remove(units[i]);
+                        return -1;
+                    }
+                    else
+                    {
+                        cityList.clear();
+                        validCityList.clear();
+
+                        for (int i = 0; i < 오환_영향력.length; ++i)
+                        {
+                            auto cityArr = GetZhoudCityArray(오환_영향력[i]);
+
+                            for (int j = 0; j < cityArr.length; ++j)
+                            {
+                                cityList.add(pk::get_city(cityArr[j]));
+                            }
+                        }
+
+                        validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+                    }
+
+                    if (validCityList.count >= 1)
+                    {
+                        value += 1;
+                    }
+                    else
+                    {
+                        isValidCity = false;
                     }
                 }
             }
-            else if (1 == type)
+
+            if (3 <= GetRelationLevel(force, 우호_강))
             {
-                pk::person@ moo = pk::get_person(무장_강장수);
-
-                pk::message_box(pk::u8encode("약속한 기한이 지났으니 우린 이만 철수하겠소이다."), moo);
-
-                auto units = pk::get_unit_list(pk::get_force(세력_강));
-
-                for (int i = units.count - 1; i >= 0; i--)
+                if (false == IsActiveForce(우호_강))
                 {
-                    if (true == units[i].is_alive())
+                    if (force.tp < 이민족_원군요청_기교 && true == force.is_player())
                     {
-                        pk::remove(units[i]);
+                        return -1;
+                    }
+                    else
+                    {
+                        cityList.clear();
+                        validCityList.clear();
+
+                        for (int i = 0; i < 강_영향력.length; ++i)
+                        {
+                            auto cityArr = GetZhoudCityArray(강_영향력[i]);
+
+                            for (int j = 0; j < cityArr.length; ++j)
+                            {
+                                cityList.add(pk::get_city(cityArr[j]));
+                            }
+                        }
+
+                        validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+                    }
+
+                    if (validCityList.count >= 1)
+                    {
+                        value += 2;
+                    }
+                    else
+                    {
+                        isValidCity = false;
                     }
                 }
             }
-            else if (2 == type)
+
+            if (3 <= GetRelationLevel(force, 우호_남만))
             {
-                pk::person@ moo = pk::get_person(무장_남만장수);
-
-                pk::message_box(pk::u8encode("약속한 기한이 지났으니 우린 이만 철수하겠소이다."), moo);
-
-                auto units = pk::get_unit_list(pk::get_force(세력_남만));
-
-                for (int i = units.count - 1; i >= 0; i--)
+                if (false == IsActiveForce(우호_남만))
                 {
-                    if (true == units[i].is_alive())
+                    if (force.tp < 이민족_원군요청_기교 && true == force.is_player())
                     {
-                        pk::remove(units[i]);
+                        return -1;
+                    }
+                    else
+                    {
+                        cityList.clear();
+                        validCityList.clear();
+
+                        for (int i = 0; i < 남만_영향력.length; ++i)
+                        {
+                            auto cityArr = GetZhoudCityArray(남만_영향력[i]);
+
+                            for (int j = 0; j < cityArr.length; ++j)
+                            {
+                                cityList.add(pk::get_city(cityArr[j]));
+                            }
+                        }
+
+                        validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+                    }
+
+                    if (validCityList.count >= 1)
+                    {
+                        value += 4;
+                    }
+                    else
+                    {
+                        isValidCity = false;
                     }
                 }
             }
-            else if (3 == type)
+
+            if (3 <= GetRelationLevel(force, 우호_산월))
             {
-                pk::person@ moo = pk::get_person(무장_산월장수);
-
-                pk::message_box(pk::u8encode("약속한 기한이 지났으니 우린 이만 철수하겠소이다."), moo);
-
-                auto units = pk::get_unit_list(pk::get_force(세력_산월));
-
-                for (int i = units.count - 1; i >= 0; i--)
+                if (false == IsActiveForce(우호_산월))
                 {
-                    if (true == units[i].is_alive())
+                    if (force.tp < 이민족_원군요청_기교 && true == force.is_player())
                     {
-                        pk::remove(units[i]);
+                        return -1;
+                    }
+                    else
+                    {
+                        cityList.clear();
+                        validCityList.clear();
+
+                        for (int i = 0; i < 산월_영향력.length; ++i)
+                        {
+                            auto cityArr = GetZhoudCityArray(산월_영향력[i]);
+
+                            for (int j = 0; j < cityArr.length; ++j)
+                            {
+                                cityList.add(pk::get_city(cityArr[j]));
+                            }
+                        }
+
+                        validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+                    }
+
+                    if (validCityList.count >= 1)
+                    {
+                        value += 8;
+                    }
+                    else
+                    {
+                        isValidCity = false;
                     }
                 }
             }
+
+            if (0 == value && false == isValidCity)
+            {
+                return -2;
+            }
+
+            return value;
+        }
+
+        void ResetBarbarianUnits(int forceType, int removeType)
+        {
+            int forceId;
+            string name = "";
+            forceId = 교역대상_아이디[forceType];
+            pk::force@ barbarianForce = pk::get_force(forceId);
+
+            string s = "";
+
+            if (removeType == 이민족_철군_동맹)
+            {
+                s = "철군 명령이 떨어졌다. 이만 돌아가야겠군";
+            }
+            else if (removeType == 이민족_철군_기한)
+            {
+                s = "약속한 기한이 지났으니 우리는 물러나도록 하겠소.";
+                if (우호_오환 == forceType)
+                {
+                    name = pk::get_name(pk::get_person(무장_오환장수));
+                }
+                else if (우호_강 == forceType)
+                {
+                    name = pk::get_name(pk::get_person(무장_강장수));
+                }
+                else if (우호_남만 == forceType)
+                {
+                    name = pk::get_name(pk::get_person(무장_남만장수));
+                }
+                else if (우호_산월 == forceType)
+                {
+                    name = pk::get_name(pk::get_person(무장_산월장수));
+                }
+            }
+            else if (removeType == 이민족_철군_진상)
+            {
+                s = "흥. 성의를 봐서 한번 봐주도록 할까.";
+            }
+
+            pk::list<pk::unit@> list = pk::get_unit_list();
+            array<pk::unit@> unitArray = pk::list_to_array(list);
+
+            if (unitArray.length > 0)
+            {
+                bool isDone = false;
+                pk::point logPos;
+
+                for (int i = 0; i < unitArray.length; ++i)
+                {
+                    if (true == unitArray[i].is_alive() && null != unitArray[i])
+                    {
+                        pk::unit@ unit = unitArray[i];
+                        if (unit.leader >= 적장_시작 && unit.leader < 적장_끝)
+                        {
+                            // 적장의 이름이 이민족 무장 이름과 같은경우 체크
+                            string barbarianName = pk::get_name(pk::get_person(unit.leader));
+                            if (barbarianName == name)
+                            {
+                                if (false == isDone)
+                                {
+                                    logPos = unit.get_pos();
+                                    pk::say(pk::u8encode(s), pk::get_person(unit.leader), unit);
+                                    isDone = true;
+                                }
+                                pk::kill(unit);
+                            }
+                        }
+                    }
+                }
+
+                if (true == isDone)
+                {
+                    // 철군 기한이 지났을때 이민족 부대가 남아있을 경우 메시지 출력
+                    if (removeType == 이민족_철군_기한)
+                    {
+                        pk::message_box(pk::u8encode(pk::format("\x1b[2x{}군\x1b[0x이 철수했습니다.", 교역대상_이름[forceType])));
+                    }
+
+                    pk::history_log(logPos, barbarianForce.color, pk::u8encode(pk::format("\x1b[2x{}군\x1b[0x 퇴각", 교역대상_이름[forceType])));
+                }
+            }
+
+            // 이민족과의 동맹으로 인한 철군인 경우에만 본거지 철거 실시
+            if (이민족_철군_동맹 == removeType)
+            {
+                // 이 콜백은 도시 별로 호출되기 때문에 맵 상에 건물이 많을 수록 리스트로 접근하면 속도가 느려지므로 배열로 변환.
+                array<pk::building@> arr = pk::list_to_array(pk::get_building_list());
+
+                for (int j = 0; j < arr.length; j++)
+                {
+                    pk::building@ building = arr[j];
+
+                    if (building.facility == 시설_본거지1 || building.facility == 시설_본거지2)
+                    {
+                        if (building.get_force_id() == forceId && true == building.is_alive())
+                        {
+                            pk::kill(building);
+                        }
+                    }
+                }
+            }
+        }
+
+        pk::list<pk::city@> GetValidSupportCity(pk::force@ force, array<pk::city@> cityArray)
+        {
+            pk::list<pk::city@> forceCityList;
+            pk::list<pk::city@> validCityList;
+
+            for (int i = 0; i < cityArray.length; ++i)
+            {
+                pk::city@ city = cityArray[i];
+
+                if (city.get_force_id() == force.get_force_id())
+                {
+                    forceCityList.add(city);
+                    //validCityList.add(city);
+                }
+            }
+
+            for (int i = 0; i < cityArray.length; ++i)
+            {
+                pk::city@ city = cityArray[i];
+
+                // 자세력 소유 도시가 아닌 도시만 가능
+                if (city.get_force_id() != force.get_force_id())
+                {
+                    // 동맹중인 세력에 공격요청 불가
+                    if (false == force.ally[city.get_force_id()])
+                    {
+                        for (int j = 0; j < forceCityList.count; ++j)
+                        {
+                            if (true == pk::has_neighbor(city, forceCityList[j].get_id()))
+                            {
+                                validCityList.add(city);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return validCityList;
+        }
+
+        bool IsValidBandit()
+        {
+            for (int person_id = 적장_시작; person_id < 적장_끝; person_id++)
+            {
+                pk::person@ person = pk::get_person(person_id);
+                if (person.mibun == 신분_없음) return true;
+                if (person.mibun == 신분_사망) return true;
+            }
+
+            return false;
+        }
+
+        pk::list<pk::city@> GetValidSupportCityList(pk::force@ force, int type)
+        {
+            pk::list<pk::city@> cityList;
+            pk::list<pk::city@> validCityList;
+
+            if (type == 우호_오환)
+            {
+                for (int i = 0; i < 오환_영향력.length; ++i)
+                {
+                    auto cityArr = GetZhoudCityArray(오환_영향력[i]);
+
+                    for (int j = 0; j < cityArr.length; ++j)
+                    {
+                        cityList.add(pk::get_city(cityArr[j]));
+                    }
+                }
+
+                validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+            }
+
+            if (type == 우호_강)
+            {
+                for (int i = 0; i < 강_영향력.length; ++i)
+                {
+                    auto cityArr = GetZhoudCityArray(강_영향력[i]);
+
+                    for (int j = 0; j < cityArr.length; ++j)
+                    {
+                        cityList.add(pk::get_city(cityArr[j]));
+                    }
+                }
+
+                validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+            }
+
+            if (type == 우호_남만)
+            {
+                for (int i = 0; i < 남만_영향력.length; ++i)
+                {
+                    auto cityArr = GetZhoudCityArray(남만_영향력[i]);
+
+                    for (int j = 0; j < cityArr.length; ++j)
+                    {
+                        cityList.add(pk::get_city(cityArr[j]));
+                    }
+                }
+
+                validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+            }
+
+            if (type == 우호_산월)
+            {
+                for (int i = 0; i < 산월_영향력.length; ++i)
+                {
+                    auto cityArr = GetZhoudCityArray(산월_영향력[i]);
+
+                    for (int j = 0; j < cityArr.length; ++j)
+                    {
+                        cityList.add(pk::get_city(cityArr[j]));
+                    }
+                }
+
+                validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
+            }
+
+            return validCityList;
+        }
+
+        void ExecuteAISupport(pk::force@ force)
+        {
+            int year = pk::get_elapsed_years();
+            int percentage = AI_이민족지원_기본확률;
+            pk::person@ barbarianMoo;
+
+            // 1년 이내에는 AI가 지원요청 하지 않음
+            if (year < 1)
+            {
+                return;
+            }
+            else if (year < 3)
+            {
+                percentage += AI_이민족지원_추가확률;
+            }
+            else if (year < 5)
+            {
+                percentage += AI_이민족지원_추가확률;
+            }
+            else if (year < 7)
+            {
+                percentage += AI_이민족지원_추가확률;
+            }
+            else if (year < 9)
+            {
+                percentage += AI_이민족지원_추가확률;
+            }
+
+            pk::list<pk::city@> validCityList;
+            int data = GetSupportData(force);
+            int count = 0;
+
+            if (data <= 0)
+            {
+                return;
+            }
+
+            if (data % 2 == 1)
+            {
+                count = count + 1;
+            }
+            // 강
+            if ((data / 2) % 2 == 1)
+            {
+                count = count + 1;
+            }
+            // 남만
+            if ((data / 4) % 2 == 1)
+            {
+                count = count + 1;
+            }
+            // 산월
+            if ((data / 8) % 2 == 1)
+            {
+                count = count + 1;
+            }
+
+            if (count <= 0)
+            {
+                return;
+            }
+
+            array<int> barbarianArray(count);
+            count = 0;
+
+            if (data % 2 == 1)
+            {
+                barbarianArray[count] = 우호_오환;
+                count = count + 1;
+            }
+            // 강
+            if ((data / 2) % 2 == 1)
+            {
+                barbarianArray[count] = 우호_강;
+                count = count + 1;
+            }
+            // 남만
+            if ((data / 4) % 2 == 1)
+            {
+                barbarianArray[count] = 우호_남만;
+                count = count + 1;
+            }
+            // 산월
+            if ((data / 8) % 2 == 1)
+            {
+                barbarianArray[count] = 우호_산월;
+                count = count + 1;
+            }
+
+            int r = pk::rand(count);
+            int targetForceId = barbarianArray[r];
+            validCityList = GetValidSupportCityList(force, targetForceId);
+            if (validCityList.count <= 0)
+            {
+                return;
+            }
+            validCityList.shuffle();
+            pk::city@ city = validCityList[0];
+            bool isPlayer = false;
+            // 목표 도시가 유저 도시일 경우 유저 도시 숫자의 1.5배보다 도시 수가 적을경우 확률 두배
+            if (true == pk::get_force(city.get_force_id()).is_player())
+            {
+                int playerCityCount = pk::get_city_list(pk::get_force(city.get_force_id())).count;
+                int aiCityCount = pk::get_city_list(force).count;
+
+                if (playerCityCount * 3 > aiCityCount * 2)
+                {
+                    percentage = percentage * 2;
+                }
+
+                isPlayer = true;
+            }
+
+            if (true == pk::rand_bool(percentage))
+            {
+                if (targetForceId == 우호_오환)
+                {
+                    @barbarianMoo = pk::get_person(무장_오환두목);
+                }
+                else if (targetForceId == 우호_강)
+                {
+                    @barbarianMoo = pk::get_person(무장_강두목);
+                }
+                else if (targetForceId == 우호_남만)
+                {
+                    @barbarianMoo = pk::get_person(무장_남만두목);
+                }
+                else if (targetForceId == 우호_산월)
+                {
+                    @barbarianMoo = pk::get_person(무장_산월두목);
+                }
+
+                // 유저 도시에 등장할 경우 메시지 출력
+                if (true == isPlayer)
+                {
+                    if (true == pk::rand_bool(50))
+                    {
+                        pk::message_box(pk::u8encode(pk::format("출진의 북을 울려라. \x1b[1x{}\x1b[0x에 쥐새끼 한마리도 남기지 마라!", pk::u8decode(pk::get_name(city)))), barbarianMoo);
+                    }
+                    else
+                    {
+                        pk::message_box(pk::u8encode("개인적인 원한은 없지만 당신네들이 너무 거슬려서 말이지. 흐흐흐..."), barbarianMoo);
+                    }
+                }
+                SetBarbarianForceData(targetForceId, 이민족_지속기간);
+                SummonBarbarianForce(force, city, 부대임무_정복, targetForceId, GetBarbarianSupportUnitCount(), GetBarbarianSupportUnitTroops());
+            }
+
+            validCityList.clear();
+        }
+
+        int GetBarbarianSupportUnitCount()
+        {
+            int year = pk::get_elapsed_years();
+
+            if (year <= 0)
+            {
+                return 2;
+            }
+            else if (year <= 2)
+            {
+                return 3;
+            }
+            else if (year <= 4)
+            {
+                return 4;
+            }
+            else if (year <= 6)
+            {
+                return 5;
+            }
+            else if (year <= 8)
+            {
+                return 6;
+            }
+
+            return 7;
+        }
+
+        int GetBarbarianSupportUnitTroops()
+        {
+            int year = pk::get_elapsed_years();
+
+            if (year <= 1)
+            {
+                return 3000;
+            }
+            else if (year <= 3)
+            {
+                return 4000;
+            }
+            else if (year <= 5)
+            {
+                return 5000;
+            }
+            else if (year <= 7)
+            {
+                return 6000;
+            }
+            else if (year <= 9)
+            {
+                return 7000;
+            }
+
+            return 8000;
+        }
+
+        void InitBarbarianMooArray()
+        {
+            for (int i = 0; i < 4; ++i)
+            {
+                for (int j = 0; j < 10; ++j)
+                {
+                    pk::person@ bandit_person;
+
+                    if (i == 0)
+                    {
+                        @bandit_person = pk::create_bandit(pk::get_person(무장_오환장수));
+                    }
+                    else if (i == 1)
+                    {
+                        @bandit_person = pk::create_bandit(pk::get_person(무장_강장수));
+                    }
+                    else if (i == 2)
+                    {
+                        @bandit_person = pk::create_bandit(pk::get_person(무장_남만장수));
+                    }
+                    else if (i == 3)
+                    {
+                        @bandit_person = pk::create_bandit(pk::get_person(무장_산월장수));
+                    }
+                    bandit_person.mibun = 신분_없음;
+                    @barbarianMooArray[i][j] = bandit_person;
+                }
+            }
+        }
+
+        pk::person@ GetValidBarbarianMoo(int type)
+        {
+            int arrayIndex = -1;
+
+            if (우호_오환 == type)
+            {
+                arrayIndex = 0;
+            }
+            else if (우호_강 == type)
+            {
+                arrayIndex = 1;
+            }
+            else if (우호_남만 == type)
+            {
+                arrayIndex = 2;
+            }
+            else if (우호_산월 == type)
+            {
+                arrayIndex = 3;
+            }
+
+            for (int i = 0; i < 10; ++i)
+            {
+                pk::person@ moo = barbarianMooArray[arrayIndex][i];
+
+                if (moo.mibun == 신분_없음 || moo.mibun == 신분_사망)
+                {
+                    moo.mibun == 신분_일반;
+                    return moo;
+                }
+            }
+
+            return null;
         }
 
         // ================================================= 101 징병 치안 증감 =====================================================================
@@ -7731,6 +8659,215 @@
             }
             return RegionBuffHelpHandler();
         }
+
+        // ====================================================== 이민족 원군요청 ==========================================================================
+
+        void AddSupportMenu()
+        {
+            pk::menu_item item;
+            item.menu = 103;
+            item.pos = 9;
+            item.shortcut = "B";
+            item.init = pk::building_menu_item_init_t(SupportInit);
+            item.is_enabled = pk::menu_item_is_enabled_t(SupportEnabled);
+            item.get_text = pk::menu_item_get_text_t(GetSupportText);
+            item.get_desc = pk::menu_item_get_desc_t(GetSupportDescription);
+            item.handler = pk::menu_item_handler_t(SupportHandler);
+            pk::add_menu_item(item);
+        }
+
+        void SupportInit(pk::building@ building)
+        {
+            @tradeBuilding = @building;
+            tradeBuildingGold = pk::get_gold(building);
+            @tradeForce = pk::get_force(building.get_force_id());
+            @tradeKunshu = pk::get_person(tradeForce.kunshu);
+            @tradeCity = pk::building_to_city(tradeBuilding);
+            tradeBuildingGold = pk::get_gold(building);
+            tradeData = GetPossibleTrade(tradeForce, tradeBuilding, tradeStatus);
+        }
+
+        bool SupportEnabled()
+        {
+            int year = pk::get_elapsed_years();
+
+            int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
+
+            if (tradeBuildingGold < gold)
+            {
+                return false;
+            }
+
+            if (tradeForce.tp < 이민족_원군요청_기교)
+            {
+                return false;
+            }
+
+            if (GetSupportData(tradeForce) > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        string GetSupportText()
+        {
+            return  pk::u8encode("이민족 요청");
+        }
+
+        string GetSupportDescription()
+        {
+            int year = pk::get_elapsed_years();
+
+            int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
+
+            if (tradeBuildingGold < gold)
+            {
+                return pk::u8encode(pk::format("원군요청에 필요한 금이 부족합니다. (금 : {} 필요)", gold));
+            }
+
+            int data = GetSupportData(tradeForce);
+
+            if (data > 0)
+            {
+                return pk::u8encode(pk::format("이민족에게 지원군을 요청합니다. (기교P : {} , 금 : {} 소비)", 이민족_원군요청_기교, gold));
+            }
+            else
+            {
+                if (0 == data)
+                {
+                    return pk::u8encode("요청 가능한 이민족이 없습니다.");
+                }
+                else if (-1 == data)
+                {
+                    return pk::u8encode(pk::format("기교가 부족합니다. (기교 P : {} 필요)", 이민족_원군요청_기교));
+                }
+                else if (-2 == data)
+                {
+                    return pk::u8encode("요청 가능한 도시가 없습니다.");
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
+
+        bool SupportHandler()
+        {
+            int year = pk::get_elapsed_years();
+
+            int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
+
+            pk::person@ barbarianMoo;
+            int forceId = tradeForce.get_force_id();
+            //pk::list<pk::force@> force_sel = pk::force_selector(pk::u8encode("세력 선택"), pk::u8encode("교류의 대상을 선택합니다."), forceList, 1, 1);
+            pk::list<pk::force@> forceList;
+            pk::list<pk::city@> validCityList;
+
+            int targetForceId = -1;
+
+            int data = GetSupportData(tradeForce);
+
+            if (data <= 0)
+            {
+                return false;
+            }
+
+            if (data % 2 == 1)
+            {
+                forceList.add(pk::get_force(세력_오환));
+            }
+            // 강
+            if ((data / 2) % 2 == 1)
+            {
+                forceList.add(pk::get_force(세력_강));
+            }
+            // 남만
+            if ((data / 4) % 2 == 1)
+            {
+                forceList.add(pk::get_force(세력_남만));
+            }
+            // 산월
+            if ((data / 8) % 2 == 1)
+            {
+                forceList.add(pk::get_force(세력_산월));
+            }
+
+            if (forceList.count != 0)
+            {
+                pk::list<pk::force@> force_sel = pk::force_selector(pk::u8encode("세력 선택"), pk::u8encode("지원을 요청할 세력을 선택합니다."), forceList, 1, 1);
+
+                if (force_sel.count == 0)
+                {
+                    return false; // 미선택 시 취소 종료
+                }
+
+                switch (force_sel[0].get_id())
+                {
+                case 세력_오환:
+                    targetForceId = 우호_오환;
+                    @barbarianMoo = pk::get_person(무장_오환두목);
+                    break;
+
+                case 세력_강:
+                    targetForceId = 우호_강;
+                    @barbarianMoo = pk::get_person(무장_강두목);
+                    break;
+
+                case 세력_남만:
+                    targetForceId = 우호_남만;
+                    @barbarianMoo = pk::get_person(무장_남만두목);
+                    break;
+
+                case 세력_산월:
+                    targetForceId = 우호_산월;
+                    @barbarianMoo = pk::get_person(무장_산월두목);
+                    break;
+                }
+            }
+
+            validCityList = GetValidSupportCityList(tradeForce, targetForceId);
+
+            pk::list<pk::city@> city_sel = pk::city_selector2(pk::u8encode("도시 선택"), pk::u8encode("도움을 요청할 지역을 선택합니다."), validCityList, 1, 1);
+
+            if (city_sel[0].get_force_id() == forceId)
+            {
+                // 수비 요청 불가
+                //if (true == pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x에게 \x1b[1x{}\x1b[0x의 방어를 요청하시겠습니까?", 교역대상_이름[targetForceId], pk::u8decode(pk::get_name(city_sel[0]))))))
+                //{
+                //    SetBarbarianForceData(targetForceId, 이민족_지속기간);
+                //    pk::add_tp(tradeForce, -이민족_원군요청_기교, tradeBuilding.get_pos());
+                //    SummonBarbarianForce(city_sel[0], 부대임무_수복, targetForceId, GetBarbarianSupportUnitCount, GetBarbarianSupportUnitTroops());
+                //}
+            }
+            else
+            {
+                // 공격 요청
+                if (true == pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x에게 \x1b[1x{}\x1b[0x의 공격을 요청하시겠습니까?", 교역대상_이름[targetForceId], pk::u8decode(pk::get_name(city_sel[0]))))))
+                {
+                    SetBarbarianForceData(targetForceId, 이민족_지속기간);
+                    pk::add_tp(tradeForce, -이민족_원군요청_기교, tradeBuilding.get_pos());
+                    pk::add_gold(tradeBuilding, -gold, true);
+                    SummonBarbarianForce(tradeForce, city_sel[0], 부대임무_정복, targetForceId, GetBarbarianSupportUnitCount(), GetBarbarianSupportUnitTroops());
+                    pk::play_se(10);
+                    if (true == pk::rand_bool(50))
+                    {
+                        pk::message_box(pk::u8encode(pk::format("후후.. 걱정마시오. \x1b[1x{}\x1b[0x 따위는 단숨에 점령해주겠소.", pk::u8decode(pk::get_name(city_sel[0])))), barbarianMoo);
+                    }
+                    else
+                    {
+                        pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x공의 부탁이라면 거절할 수 없지. 바로 쳐들어가도록 하겠소.", pk::u8decode(pk::get_name(tradeKunshu)))), barbarianMoo);
+                    }
+                }
+            }
+
+            return true;
+        }
+
         // ===============================================================================================================================================
     }
         
