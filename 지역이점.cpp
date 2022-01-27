@@ -67,8 +67,20 @@
     const int 이민족_철군_진상 = 2;
     const int 이민족_철군_끝 = 3;
 
+    const int 대회_항상개최 = 0;
+    const int 대회_개최안함 = 1;
+    const int 대회_랜덤 = 2;
+
+    const int 대회_무술 = 0;
+    const int 대회_설전 = 1;
+    const int 대회_끝 = 2;
+
+    const int 홀수년도 = 0;
+    const int 짝수년도 = 1;
+    const int 매년 = 2;
     // ============================================== Customize ======================================================
-    // ===============================================================================================================
+
+    // ============================================== 지역 이점 =======================================================
 
     bool 플레이어_모든이점_적용 = false;                           // true시, 지역이점은 적용되지만, 교역 레벨은 그대로
     bool AI_모든이점_적용 = false;        
@@ -113,6 +125,7 @@
     const int 병주_지역이점_이동증가 = 4;
     
     const int 기주_지역이점_충성상승 = 2;
+    const int 기주_지역이점_최대누적충성 = 110;
     const int 기주_지역이점_녹봉할인 = 40;    // (%)
 
     const int 청주_지역이점_시설상승 = 10;    // (최대 체력 비율)
@@ -131,20 +144,132 @@
     const int 형북_지역이점_기교획득 = 100;
     const int 형북_지역이점_등용상승 = 20;            // (20일 경우 -> 기본확률 x 1.2)  기본확률이 0% 경우 효과없음
     
-    const int 이민족_지속기간 = 9;           // 1 = 10일 , (군량은 90일분으로 출전함)
+    // ==============================================================================================================================
+    
+    // =========================================  이민족 지원 요청 ===================================================================
+
+    const int 이민족_지속기간 = 2;           // 1 = 10일 , (군량은 90일분으로 출전함)
     const int 이민족_원군요청_기교 = 1000;
     const int 이민족_원군요청_기본금 = 2000; 
-    const int 이민족_원군요청_추가금 = 500;  // 1년마다 늘어나는 필요 금 
-    const int AI_이민족지원_기본확률 = 2;    // 요청이 가능한 경우 턴마다 지원요청을 실행할 확률
+    const int 이민족_원군요청_추가금 = 500;  // 1년마다 늘어나는 필요 금
+    const int AI_이민족지원_기본확률 = 2;    // (요청이 가능한 경우) 턴마다 지원요청을 실행할 확률
     const int AI_이민족지원_추가확률 = 2;    // 2년이 지날때마다 추가될 확률 (최대 4번 추가됨) 
+
+    // ===============================================================================================================================
+
+    // =========================================== 무술, 설전 대회 ====================================================================
+    
+    /* 무술대회 참가의 자격 요건은 무력 80 이상인 무장의 보유 유무 입니다. 
+       마찬가지로 설전대회의 참가 자격 요건은 지력 80 이상인 무장의 보유 유무입니다.
+       
+       한실의 역적들은 대회 선발과정에서 제외됩니다. 여기서 역적이라함은 황제를 보호중이지 않은 다른 황제 및 황건적을 지칭합니다.
+
+       대회는 황제가 보호중일 경우에만 개최되고, 황제를 보호중인 세력은 우선적으로 참가 자격을 얻습니다. (자격 요건을 충족하지 못한 경우에는 참가 불가)
+       자격 요건을 갖춘 세력이 20개 이상인 경우에는 16강부터 대회가 진행되고, 8~19 사이인 경우에는 8강부터 대회가 진행됩니다.
+       
+       황제가 보호중인 상태가 아니거나 세력이 7개 이하인 경우에는 한황제가 개최하는 대회가 열리지 않지만 
+       대신 공 이상의 작위를 가진 세력에 한해서 자체적으로 대회를 개최할 수 있게됩니다.
+       
+       황제를 참칭한 역적의 경우에는 한실의 대회가 개최되는 경우에도 자체적으로 대회를 개최할 수 있습니다.
+    */
+
+    const int 대회_개최여부 = 대회_항상개최;            // 한실 무술 설전대회 개최여부 ( 대회_항상개최, 대회_개최안함, 대회_랜덤)
+    const int 대회_랜덤확률 = 50;                      // 대회 개최가 랜덤일 경우 확률, 그 이외에는 사용안함 (0 ~ 100)
+    
+    const bool 자세력_대회_개최여부 = true;            // 세력 내에서 대회를 개최할 조건을 만족할 경우 대회개최 버튼을 활성화시킬 것인지 여부 (true : 가능, false : 불가능)
+    const int 대회_개최비용 = 5000;                   // 세력 내 대회 개최비용
+    const int 대회_개최기교 = 1000;                   // 세력 내 대회 개최기교
+
+    const int 대회_개최년도_무술 = 짝수년도;            // 대회 개최년도 설정 (홀수년도, 짝수년도, 매년 중 선택가능)
+    const int 대회_개최년도_설전 = 홀수년도;
+
+    const int 대회_개최시기_무술 = 4;                  // 대회를 개최하는 월 (해당 월 1일에 개최,  1 ~ 12 사이로 세팅할것)
+    const int 대회_개최시기_설전 = 4;
+
+    const int 무술대회_초기우승자 = /*무장_여포*/ -1;          // 시나리오 시작 시 세팅될 대회 최초 우승자 ( 없을 경우 -1, 그 외에는 무장_여포, 무장_관우 이런식으로 세팅)
+    const int 설전대회_초기우승자 = -1;
+    /* 대회 우승자에 한해서 전투 시 특수한 효과를 부여하는 것을 선택하는 항목입니다. 
+       
+       무술대회 우승자의 경우 부대 행동 종료 시 부대의 무력 차이에 비례해서 적의 기력을 감소시킵니다.
+       설전대회 우승자의 경우 부대 행동 종료 시 주위의 임의의 적 1부대에게 교란을 실행합니다.
+       설전대회 특전의 경우에는 시전자나 대상자의 특기와 무관하게 지력차이에 의해 성공률이 결정됩니다.
+       
+       대회 우승자는 다음 대회가 개최될때까지 해당 효과를 받고, 다른 우승자가 결정되거나 대회가 폐지되는 경우 해당 효과를 상실합니다.
+
+       세력내에서 개최한 대회의 우승자에게는 대회의 종류에 관계없이 주악의 효과를 받습니다.
+       세력내에서 개최한 대회의 효과는 매년 1월에 사라집니다.
+    */
+    const bool 우승자_특전여부 = true;
+
+    // 유저 세력의 대회 강제참가 여부. 개최국이 AI의 세력이면서 유저 8인 플레이라면 유저 세력중 한 세력은 참가하지 못할 수 있음.
+    const bool 플레이어_무술대회_참여여부 = false;     // 플레이어 세력이 무조건 무술대회에 참가하는가?(true : 무조건 참여, false : 랜덤참여)  
+    const bool 플레이어_설전대회_참여여부 = false;     // 플레이어 세력이 무조건 설전대회에 참가하는가?
+
+    const int 우승_상금 = 3000;             // 무술대회 우승 상금
+    const int 우승_기교 = 1500;             // 설전대회 우승 기교
+    const int 우승_공적 = 3000;             // 무술,설전 대회 우승 공적
+
+    const int 준우승_상금 = 1000;           // 무술대회 준우승 상금
+    const int 준우승_기교 = 500;           // 설전대회 준우승 기교
+    const int 준우승_공적 = 1000;           // 무술,설전 대회 준우승 공적
+
+    const int 자세력_우승_공적 = 1000;      // 자세력 대회 우승자 공적
+    const int 자세력_준우승_공적 = 500;     // 자세력 대회 준우승자 공적
+
+    const int 헌제_대회_경험치 = 40;         // 한황제가 개최하는 대회 참가자 경험치. 무술 = 통솔,무력   설전 = 지력, 정치
+    const int 자체_대회_경험치 = 20;         // 한 세력내에서 자체적으로 개최하는 대회 참가자 경험치.
+
+    // AI의 대회 출전 무장을 뽑기위해 무력에 더해줄 수치 입니다. 부가무력_무장 과 부가무력_수치의 순서가 일치해야 제대로 적용됩니다. 황충의 경우 별도로 계산합니다
+    array<int> 부가무력_무장 = { 무장_항적, 무장_여포, 무장_관우, 무장_장비, 무장_조운, 무장_마초, 무장_허저};
+    array<int> 부가무력_수치 = { 20, 10, 5, 5, 3, 3, 3};
+
+    // AI의 대회 출전 무장을 선출하는 방식에 더해줄 점수 입니다. 최종 계산은 무력 + 부가무력 + 보물 점수 중 가장 높은 숫자를 지닌 무장이 선택됩니다.
+    const int 긴무기_점수 = 5;
+    const int 검_점수 = 3;
+    const int 활_점수 = 3;
+    const int 암기_점수 = 2;
+
+    // AI의 설전 선별무장 성격 점수
+    const int 설전_대담 = 4;
+    const int 설전_소심 = 3;
+    const int 설전_저돌 = 1;
+    const int 설전_냉정 = 0;
+
+    // AI의 설전 선별무장 보유화술점수. 서적을 소유하고 있을 경우에는 모든 화술점수를 얻습니다. 
+    const int 설전_궤변 = 4;
+    const int 설전_대갈 = 5;
+    const int 설전_무시 = 1;
+    const int 설전_진정 = 2;
+    const int 설전_흥분 = 3;
+
+    // ========================================================== 대회 우승자 특전 =======================================================
+
+    const int 무술대회특전_최대사거리 = 1;
+    const int 무술대회특전_최소발동_무력차 = 10;
+    const int 무술대회특전_무력차_제수 = 3;       // 무력차에 나누어 줄 숫자입니다.
+
+    const int 무술대회특전_기력감소_최소값 = 1;
+    const int 무술대회특전_기력감소_최대값 = 10;
+
+    array<int> 무술대회특전_면역특기 =
+    {
+        //특기_침착, 특기_규율
+    };
+
+    const int 설전대회특전_최대사거리 = 2;
+    const int 설전대회특전_계략실행확률 = 100; // (0~100);
+
+    const int 자체대회특전_기력회복 = 5;
     // ==================================================================================================================================
     // ==================================================================================================================================
     class RegionBuff
     {
         array<int> forceRegionBuff(도시_끝);                           // 세력별 확인용
-        pk::point rb_checkPoint = pk::point(0, 0);                     // 지역이점 스크립트 적용 여부 체크
+        pk::point rb_checkPoint = pk::point(0, 0);                    // 지역이점 스크립트 적용 여부 체크
         array<array<pk::point>> dataPointArray(도시_끝);               // 세력별 data건물 위치 배열
         array<pk::point> barbarianDataArray(4);                       // 이민족 원군요청 데이터
+        array<pk::point> competitionDataArray(2);                     // 한황제 대회 우승자 데이터  0 : 무술대회, 1 : 설전대회
+        array<pk::point> singleCompetitionDataArray(도시_끝);         // 세력별 자세력 대회 우승자 데이터
         bool loadSuccess = false;
         array<array<pk::person@>> barbarianMooArray = 
         {
@@ -153,6 +278,12 @@
             {null, null, null, null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null, null, null, null}
         };                                                              // 이민족 무장 재활용 배열
+        pk::force@ hostForce;
+        pk::list<pk::force@> validPlayerCompetitonList;                // 플레이어 참가 가능 세력 리스트
+        pk::list<pk::force@> validAICompetitionList;                   // AI 참가 가능 세력 리스트
+        int validForceCount = -1;
+        pk::list<pk::person@> competitonParticipantList;               // 대회 참가무장
+
         RegionBuff()
         {
             pk::bind(102, pk::trigger102_t(Init));
@@ -161,6 +292,7 @@
             pk::bind(107, pk::trigger107_t(UpdateDayStart));
             pk::bind(108, pk::trigger108_t(UpdateMonthStart));
             pk::bind(109, pk::trigger109_t(UpdateSeasonStart));
+            pk::bind(110, pk::trigger110_t(UpdateYearStart));
             pk::bind(111, pk::trigger111_t(UpdateTurnStart));
             pk::bind(112, pk::trigger112_t(UpdateTurnEnd));
             pk::bind(171, pk::trigger171_t(UpdateUnitRemove));
@@ -190,6 +322,7 @@
             AddTradeMenu();                                           // 외국 교역 메뉴 추가
             AddrapprochementMenu();                                   // 이민족 교류 메뉴 추가
             AddSupportMenu();                                         // 이민족 지원요청 메뉴 추가
+            AddCompetitionMenu();                                     // 대회개최 메뉴 추가
         }
 
         // 게임 최초 실행시 지역이점 적용여부 확인작업
@@ -198,6 +331,11 @@
             ArrayInit();
             loadSuccess = true;
             BarbarianDataSetting();
+            CompetitionDataSetting();
+            if (true == 자세력_대회_개최여부)
+            {
+                SingleCompetitionDataSetting();                           // 기존 지역이점과 호환하기 위해 게임 시작할때 생성해줌
+            }
             InitBarbarianMooArray();
             pk::building@ building = pk::get_building(rb_checkPoint);
             // 지역이점 적용 여부 확인 후 시작
@@ -242,12 +380,20 @@
             ExecuteQingZhouPublicOrder();
             ExecuteJingBeiTech();
             UpdateBarbarianRelation();
+            CheckDuelCompetition();
+            CheckEloquenceCompetition();
         }
 
         // 새분기 적용될 것
         void UpdateSeasonStart()
         {
             ExecuteBarbarianSupport();
+        }
+
+        // 새해 적용될것
+        void UpdateYearStart()
+        {
+            ResetSingleCompetitionWinner();
         }
 
         // 턴 시작시 적용될 것
@@ -257,6 +403,7 @@
             ExecuteBarbarianSkill(force);
             ExecuteKushanLevelThree(force);
             ExecuteBingZhouEnergy(force);
+            UpdateAICompetition(force);
         }
 
         // 턴 종료시 적용될 것
@@ -294,6 +441,9 @@
         void UpdateUnitTurnEnd(pk::unit@ unit)
         {
             ExecuteParthianLevelThree(unit);
+            ExecuteDuelPrivillage(unit);
+            ExecuteEloquencePrivillage(unit);
+            ExecuteSingleCompetitionPrivilage(unit);
         }
 
         void Test()
@@ -357,10 +507,10 @@
             }
         }
 
-        // 안식국 3단계 효과
+        // 안식국 2단계 효과
         void ExecuteParthianLevelThree(pk::unit@ unit)
         {
-            if (false == pk::is_alive(unit))
+            if (false == pk::is_alive(unit) || 부대상태_통상 != unit.status)
             {
                 return;
             }
@@ -1017,8 +1167,6 @@
 
                 if (부대상태_통상 != arr[i].status )
                 {
-                    
-
                     if (true == pk::rand_bool(value))
                     {
                         arr[i].status = 부대상태_통상;
@@ -1122,7 +1270,7 @@
                     {
                         if (true == IsValidPerson(officers[i]))
                         {
-                            if (int(officers[i].loyalty) < 120)
+                            if (int(officers[i].loyalty) < 기주_지역이점_최대누적충성)
                             {
                                 pk::add_loyalty(officers[i], 기주_지역이점_충성상승);
                             }
@@ -1559,9 +1707,28 @@
 
             x = 180;
 
-            for (int j = 0; j < 4; ++j)
+            for (int i = 0; i < 4; ++i)
             {
-                barbarianDataArray[j] = pk::point(x + j, y);
+                barbarianDataArray[i] = pk::point(x + i, y);
+            }
+
+            x = 184;
+
+            for (int i = 0; i < 2; ++i)
+            {
+                competitionDataArray[i] = pk::point(x + i, y);
+            }
+
+            x = 180;
+            y = 198;
+            xc = 0;
+            yc = 0;
+
+            for (int i = 0; i < 도시_끝; ++i)
+            {
+                xc = i % 6;
+                yc = i / 6;
+                singleCompetitionDataArray[i] = pk::point(x + xc, y - yc);
             }
         }
 
@@ -1580,7 +1747,7 @@
                 {
                     pk::force@ force = pk::get_force(i);
 
-                    if (pk::get_force(i).is_alive())
+                    if (force.is_alive())
                     {
                         if (pk::is_normal_force(force))
                         {
@@ -1616,7 +1783,7 @@
             }
         }
 
-        // 세력과 이민족 우호 체크 후 동맹이 제대로 안되있을 경우 동맹 맺는 함수 (최초 한번 실행)
+        // 세력과 이민족 우호 체크 후 동맹이 제대로 안되있을 경우 동맹 맺는 함수 (사용안함)
         void InitBarbarianAlly()
         {
             auto forces = pk::get_force_list();
@@ -1688,6 +1855,52 @@
             }
         }
 
+        // 한황실의 대회 우승자 데이터 생성
+        void CompetitionDataSetting()
+        {
+            for (int j = 0; j < 2; ++j)
+            {
+                pk::point point = competitionDataArray[j];
+                pk::building@ buildingCheck = pk::get_building(point);
+
+                if (buildingCheck == null)
+                {
+                    pk::building@ building = pk::create_building(pk::get_facility(시설_석벽), point, -1);
+                    if (j == 0)
+                    {
+                        building.hp = 무술대회_초기우승자;
+                    }
+                    else if (j == 1)
+                    {
+                        building.hp = 설전대회_초기우승자;
+                    }
+                    building.completed = true;
+                }
+            }
+        }
+
+        // 세력별 자체대회 우승자 데이터 생성
+        void SingleCompetitionDataSetting()
+        {
+            for (int j = 0; j < 도시_끝; ++j)
+            {
+                pk::force@ force = pk::get_force(j);
+
+                if (true == force.is_alive())
+                {
+                    pk::point point = singleCompetitionDataArray[j];
+                    pk::building@ buildingCheck = pk::get_building(point);
+
+                    if (buildingCheck == null)
+                    {
+                        pk::building@ building = pk::create_building(pk::get_facility(시설_석벽), point, -1);
+                        building.hp = -1;
+                        building.completed = true;
+                    }
+                }
+            }
+        }
+
         // 각 세력의 dataBase를 구축하는 함수. 지역이점 패치 후 최초에 한번 실행하고 그 다음부터는 새로운 세력이 생겼을때만(거병) 실행될 예정
         void CreateData(int forceId)
         {
@@ -1703,6 +1916,19 @@
                     building.completed = true;
                 }
             }
+
+            if (true == 자세력_대회_개최여부)
+            {
+                pk::point point = singleCompetitionDataArray[forceId];
+                pk::building@ buildingCheck = pk::get_building(point);
+
+                if (buildingCheck == null)
+                {
+                    pk::building@ building = pk::create_building(pk::get_facility(시설_석벽), point, -1);
+                    building.hp = -1;
+                    building.completed = true;
+                }
+            }
         }
 
         // 각 세력의 db를 제거하는 함수. 기존의 세력이 멸망한것을 체크한 후에 실행할 예정
@@ -1711,6 +1937,17 @@
             for (int i = 0; i < 3; ++i)
             {
                 pk::point point = dataPointArray[forceId][i];
+                pk::building@ building = pk::get_building(point);
+
+                if (building != null)
+                {
+                    pk::kill(building, false);
+                }
+            }
+
+            if (true == 자세력_대회_개최여부)
+            {
+                pk::point point = singleCompetitionDataArray[forceId];
                 pk::building@ building = pk::get_building(point);
 
                 if (building != null)
@@ -2271,7 +2508,7 @@
             return currLevel;
         }
 
-        // 지역이점 현황 불러오기
+        // 지역이점 현황 불러오기, 대회 우승자 출력
         void PrintRegionBuffInfo()
         {
             pk::list<pk::force@> forces = pk::get_force_list();
@@ -2603,6 +2840,34 @@
                     {
                         pk::history_log(pk::get_person(force.kunshu).get_pos(), forces[i].color, pk::u8encode(s));
                     }
+
+                    if (GetSingleCompetitionWinnerId(force.get_force_id()) != -1)
+                    {
+                        pk::person@ p = pk::get_person(GetSingleCompetitionWinnerId(force.get_force_id()));
+
+                        if (p != null && true == p.is_alive())
+                        {
+                            pk::history_log(p.get_pos(), force.color, pk::u8encode(pk::format("세력대회 우승 : \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(p)))));
+                        }
+                    }
+                }
+            }
+
+            if (GetCompetitionWinnerId(대회_무술) != -1)
+            {
+                pk::person@ p = pk::get_person(GetCompetitionWinnerId(대회_무술));
+                if (p != null && true == p.is_alive())
+                {
+                    pk::history_log(p.get_pos(), pk::get_force(p.get_force_id()).color, pk::u8encode(pk::format("한실 무술대회 우승 : \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(p)))));
+                }
+            }
+
+            if (GetCompetitionWinnerId(대회_설전) != -1)
+            {
+                pk::person@ p = pk::get_person(GetCompetitionWinnerId(대회_설전));
+                if (p != null && true == p.is_alive())
+                {
+                    pk::history_log(p.get_pos(), pk::get_force(p.get_force_id()).color, pk::u8encode(pk::format("한실 설전대회 우승 : \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(p)))));
                 }
             }
         }
@@ -4119,8 +4384,8 @@
             }
             auto district = pk::get_district_list(force);
             pk::person@ bandit_person = GetValidBarbarianMoo(type);
-            pk::add_loyalty(bandit_person, 255);
             pk::set_district(bandit_person, district[0], building, 0);
+            pk::add_loyalty(bandit_person, 255);
             //pk::set_district(bandit_person, force.get_force_id());
             //pk::set_force(pk::get_person(0), force, pk::get_person(1), 0);
             pk::unit@ bandit_unit = pk::create_unit(building, bandit_person, null, null, troops, groundWeapon, waterWeapon, 0, (troops * 9) / 10, pos);
@@ -4242,7 +4507,7 @@
                         validCityList = GetValidSupportCity(force, pk::list_to_array(cityList));
                     }
 
-                    if (validCityList.count >= 1)
+                    if (validCityList.count  >= 1)
                     {
                         value += 2;
                     }
@@ -4699,7 +4964,7 @@
                     }
                     else
                     {
-                        pk::message_box(pk::u8encode("개인적인 원한은 없지만 당신네들이 너무 거슬려서 말이지. 흐흐흐..."), barbarianMoo);
+                        pk::message_box(pk::u8encode("개인적인 원한은 없네만 당신네들이 너무 거슬려서 말이지. 흐흐흐..."), barbarianMoo);
                     }
                 }
                 SetBarbarianForceData(targetForceId, 이민족_지속기간);
@@ -4828,6 +5093,1562 @@
             }
 
             return null;
+        }
+
+        void CheckDuelCompetition()
+        {
+            // 월체크
+            if (pk::get_month() != 대회_개최시기_무술)
+            {
+                return;
+            }
+
+            // 년도체크
+            int year = pk::get_year();
+
+            if (홀수년도 == 대회_개최년도_무술 && year % 2 == 0)
+            {
+                return;
+            }
+            else if (짝수년도 == 대회_개최년도_무술 && year % 2 == 1)
+            {
+                return;
+            }
+            else if (매년 == 대회_개최년도_무술)
+            {
+                // 통과
+            }
+
+            // 개최여부 파정
+            bool isRun = false;
+
+            if (대회_항상개최 == 대회_개최여부)
+            {
+                isRun = true;
+            }
+            else if (대회_개최안함 == 대회_개최여부)
+            {
+               
+            }
+            else if (대회_랜덤 == 대회_개최여부)
+            {
+                if (true == pk::rand_bool(대회_랜덤확률))
+                {
+                    isRun = true;
+                }
+            }
+
+            if (true == isRun)
+            {
+                ExecuteCompetition(대회_무술);
+            }
+        }
+
+        void CheckEloquenceCompetition()
+        {
+            // 월체크
+            if (pk::get_month() != 대회_개최시기_설전)
+            {
+                return;
+            }
+
+            // 년도체크
+            int year = pk::get_year();
+
+            if (홀수년도 == 대회_개최년도_설전 && year % 2 == 0)
+            {
+                return;
+            }
+            else if (짝수년도 == 대회_개최년도_설전 && year % 2 == 1)
+            {
+                return;
+            }
+            else if (매년 == 대회_개최년도_설전)
+            {
+                // 통과
+            }
+
+            // 개최여부 파정
+            bool isRun = false;
+
+            if (대회_항상개최 == 대회_개최여부)
+            {
+                isRun = true;
+            }
+            else if (대회_개최안함 == 대회_개최여부)
+            {
+
+            }
+            else if (대회_랜덤 == 대회_개최여부)
+            {
+                if (true == pk::rand_bool(대회_랜덤확률))
+                {
+                    isRun = true;
+                }
+            }
+
+            if (true == isRun)
+            {
+                ExecuteCompetition(대회_설전);
+            }
+        }
+
+        void ExecuteCompetition(int type)
+        {
+            //초기화
+            bool isProtecting = false;
+            @hostForce = null;
+            validAICompetitionList.clear();
+            validPlayerCompetitonList.clear();              
+            competitonParticipantList.clear();
+            validForceCount = 0;
+            SetCompetitionWinner(-1, type);
+
+            pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
+
+            // 황제가 죽었거나 없을 경우 패스
+            if (Emperor.mibun == 신분_사망 || null == Emperor)
+            {
+                return;
+            }
+
+            for (int i = 0; i < 도시_끝; ++i)
+            {
+                pk::force@ force = pk::get_force(i);
+
+                if (true == force.is_alive())
+                {
+                    // 황제 보유국 유무 체크
+                    if (true == pk::is_protecting_the_emperor(force))
+                    {
+                        // 황제는 보호받는 중임
+                        isProtecting = true;
+
+                        // 황제 보유국의 참가여부 체크
+                        if (true == IsExistQualification(force, type, true))
+                        {
+                            @hostForce = force;
+                            validForceCount++;
+                        }
+
+                        continue;
+                    }
+                    else
+                    {
+                        // 황제 옹립 안하면서 국호 있으면 패스
+                        if (force.kokugou != -1)
+                        {
+                            continue;
+                        }
+                    }
+
+                    // 자격요건 검사
+                    if (false == IsExistQualification(force, type, true))
+                    {
+                        continue;
+                    }
+
+                    validForceCount++;
+
+                    if (true == force.is_player())
+                    {
+                        validPlayerCompetitonList.add(force);
+                    }
+                    else
+                    {
+                        validAICompetitionList.add(force);
+                    }
+                }
+            }
+
+            // 황제를 보호중인 세력이 없을경우 패스
+            if (false == isProtecting)
+            {
+                return;
+            }
+            
+            // 자격요건을 충족하는 세력이 20개 이상이면 16강부터 시작
+            if (validForceCount >= 20)
+            {
+                validForceCount = 16;
+            }
+            // 8 ~ 19 사이면 8강 시작
+            else if (validForceCount >= 8)
+            {
+                validForceCount = 8;
+            }
+            // 7세력 이하면 미개최
+            else
+            {
+                return;
+            }
+
+            if (대회_무술 == type)
+            {
+                pk::scene(pk::scene_t(DuelCompetitonScene));
+            }
+
+            else if (대회_설전 == type)
+            {
+                pk::scene(pk::scene_t(EloquenceCompetitionScene));
+            }
+        }
+
+        // 무술대회 씬
+        void DuelCompetitonScene()
+        {
+            pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
+            array<pk::force@> forceArray = GetParticipatingForceArray(대회_무술);
+
+            string ment = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+            pk::person@ winner = null;
+            pk::person@ runnerUp = null;
+
+            pk::message_box(pk::u8encode("황제로부터 \x1b[2x무술대회\x1b[0x를 개최한다는 칙서가 내려왔습니다."));
+            pk::move_screen(Emperor.get_pos());
+            
+            pk::fade(0);
+            pk::sleep();
+            pk::background(1);
+            pk::fade(255);
+
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x무술대회\x1b[0x를 개최하도록 하겠소. 참가하는 세력은 \x1b[2x{}\x1b[0x,", pk::u8decode(pk::get_name(forceArray[0])))), Emperor);
+            
+            if (8 == validForceCount)
+            {
+                ment = ment + "의 세력이오";
+            }
+            else if(16 == validForceCount)
+            {
+                pk::message_box(pk::u8encode(ment), Emperor);
+                ment = pk::format("그리고 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[8])), pk::u8decode(pk::get_name(forceArray[9])), pk::u8decode(pk::get_name(forceArray[10])), pk::u8decode(pk::get_name(forceArray[11])), pk::u8decode(pk::get_name(forceArray[12])), pk::u8decode(pk::get_name(forceArray[13])), pk::u8decode(pk::get_name(forceArray[14])), pk::u8decode(pk::get_name(forceArray[15])));
+            }
+            pk::message_box(pk::u8encode(ment), Emperor);
+
+            // 참가무장 선발
+            for (int i = 0; i < forceArray.length; ++i)
+            {
+                auto list = GetCompetitionPersonList(forceArray[i], 대회_무술, false);
+                auto validList = GetSortedCompetitionPersonList(list, 무장능력_무력);
+                if (false == forceArray[i].is_player())
+                {
+                    competitonParticipantList.add(validList[0]);
+                }
+                else
+                {
+                    pk::message_box(pk::u8encode("무술대회에 참가할 무장을 선택해주십시오."));
+                    pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("무술 대회에 참가할 무장을 선택합니다.)"), validList, 1, 1);
+                    if (person_sel.count == 0)
+                    {
+                        pk::message_box(pk::u8encode("무장을 선택을 취소했습니다. 자동으로 무장이 선택됩니다."));
+                        competitonParticipantList.add(validList[0]);
+                    }
+                    else
+                    {
+                        competitonParticipantList.add(person_sel[0]);
+                    }
+                }
+            }
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(57);
+            pk::fade(255);
+
+            array<pk::person@> backUpArray = pk::list_to_array(competitonParticipantList);
+            RunDuelCompetition(competitonParticipantList, winner, runnerUp, false);
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(19);
+            pk::fade(255);
+
+            pk::message_box(pk::u8encode(pk::format("우승자는 \x1b[2x{}\x1b[0x인가. 그대야 말로 \x1b[1x천하무쌍\x1b[0x이란 말에 걸맞소. 앞으로도 더욱 단련에 힘쓰도록 하시오.", pk::u8decode(pk::get_name(winner)))), Emperor);
+            pk::message_box(pk::u8encode("이건 내가 그대에게 내리는 포상이오."), Emperor);
+            pk::message_box(pk::u8encode("영광이옵니다."), winner);
+            pk::building@ winnerBuilding = pk::get_building(winner.location);
+            pk::add_gold(winnerBuilding, 우승_상금, true);
+            pk::add_kouseki(winner, 우승_공적);
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x상금\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 우승_상금, 우승_공적)));
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x에게도 포상을 내리겠소.", pk::u8decode(pk::get_name(runnerUp)))), Emperor);
+            pk::message_box(pk::u8encode("영광이옵니다."), runnerUp);
+            pk::building@ runnerUpBuilding = pk::get_building(runnerUp.location);
+            pk::add_gold(runnerUpBuilding, 준우승_상금, true);
+            pk::add_kouseki(runnerUp, 준우승_공적);
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x상금\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 준우승_상금, 준우승_공적)));
+            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), Emperor);
+            pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 통솔과 무력 경험치가 상승했습니다."));
+            for (int i = 0; i < backUpArray.length; ++i)
+            {
+                pk::person@ p = backUpArray[i];
+                p.stat_exp[무장능력_통솔] = p.stat_exp[무장능력_통솔] + 헌제_대회_경험치;
+                p.stat_exp[무장능력_무력] = p.stat_exp[무장능력_무력] + 헌제_대회_경험치;
+            }
+            SetCompetitionWinner(winner.get_id(), 대회_무술);
+            pk::history_log(winner.get_pos(), pk::get_force(winner.get_force_id()).color, pk::u8encode(pk::format("\x1b[2x{}\x1b[0x, \x1b[1x무술대회\x1b[0x 우승", pk::u8decode(pk::get_name(winner)))));
+            // 퇴장 
+            pk::fade(0);
+            pk::sleep();
+            pk::background(-1);
+            pk::fade(255);
+        }
+
+        void RunDuelCompetition(pk::list<pk::person@> personList, pk::person@ &winner, pk::person@ &runnerUp, bool isSingleCompetition)
+        {
+            pk::person@ moo = pk::get_person(무장_병사);
+            int remain = personList.count;
+            int round = 1;
+
+            while (remain > 2)
+            {
+                pk::list<pk::person@> list;
+                int n = 1;
+
+                for (int i = 0; i < personList.count; ++i)
+                {
+                    pk::person@ p1 = personList[i];
+                    pk::person@ p2 = personList[i + 1];
+                    pk::message_box(pk::u8encode(pk::format("{}회전 {}경기에 참가할 무장은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님 입니다.", round, n, pk::u8decode(pk::get_name(p1)), pk::u8decode(pk::get_name(p2)))), moo);
+                    bool c1 = false;                            // 무장1 조종여부
+                    bool c2 = false;                            // 무장2 조종여부
+                    if (false == isSingleCompetition)
+                    {
+                        if (true == personList[i].is_player())
+                        {
+                            c1 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 경기를 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[i])))));
+                        }
+
+                        if (true == personList[i + 1].is_player())
+                        {
+                            c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 경기를 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[i + 1])))));
+                        }
+                    }
+                                                                                        // 1 조종, 2 조종, 관전선택여부
+                    pk::int_bool win = pk::duel(null, null, p1, null, null, p2, null, null, c1, c2, 0, true);
+                    list.add(personList[i + win.first]);
+                    pk::message_box(pk::u8encode(pk::format("{}경기 승자는 \x1b[2x{}\x1b[0x입니다.", n, pk::u8decode(pk::get_name(personList[i + win.first])))));
+
+                    i = i + 1;
+                    n = n + 1;
+                }
+
+                personList.clear();
+                personList = list;
+                remain = personList.count;
+                round++;
+            }
+
+            pk::message_box(pk::u8encode(pk::format("결승은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님의 경기입니다.", pk::u8decode(pk::get_name(personList[0])), pk::u8decode(pk::get_name(personList[1])))), moo);
+            
+            bool c1 = false;                            // 무장1 조종여부
+            bool c2 = false;                            // 무장2 조종여부
+            if (false == isSingleCompetition)
+            {
+                if (true == personList[0].is_player())
+                {
+                    c1 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 경기를 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[0])))));
+                }
+
+                if (true == personList[1].is_player())
+                {
+                    c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 경기를 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[1])))));
+                }
+            }
+                                                                                                        // 1 조종, 2 조종,   관전여부
+            pk::int_bool win = pk::duel(null, null, personList[0], null, null, personList[1], null, null, false, false, 0, true);
+
+            @winner = personList[win.first];
+            @runnerUp = personList[(win.first + 1) % 2];
+        }
+
+
+        // 설전대회 씬
+        void EloquenceCompetitionScene()
+        {
+            pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
+            array<pk::force@> forceArray = GetParticipatingForceArray(대회_설전);
+
+            string ment = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+            pk::person@ winner = null;
+            pk::person@ runnerUp = null;
+
+            pk::message_box(pk::u8encode("황제로부터 \x1b[2x설전대회\x1b[0x를 개최한다는 칙서가 내려왔습니다."));
+            pk::move_screen(Emperor.get_pos());
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(1);
+            pk::fade(255);
+
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x설전대회\x1b[0x를 개최하도록 하겠소. 참가하는 세력은 \x1b[2x{}\x1b[0x,", pk::u8decode(pk::get_name(forceArray[0])))), Emperor);
+
+            if (8 == validForceCount)
+            {
+                ment = ment + "의 세력이오";
+            }
+            else if (16 == validForceCount)
+            {
+                pk::message_box(pk::u8encode(ment), Emperor);
+                ment = pk::format("그리고 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[8])), pk::u8decode(pk::get_name(forceArray[9])), pk::u8decode(pk::get_name(forceArray[10])), pk::u8decode(pk::get_name(forceArray[11])), pk::u8decode(pk::get_name(forceArray[12])), pk::u8decode(pk::get_name(forceArray[13])), pk::u8decode(pk::get_name(forceArray[14])), pk::u8decode(pk::get_name(forceArray[15])));
+            }
+            pk::message_box(pk::u8encode(ment), Emperor);
+
+            // 참가무장 선발
+            for (int i = 0; i < forceArray.length; ++i)
+            {
+                auto list = GetCompetitionPersonList(forceArray[i], 대회_설전, false);
+                auto validList = GetSortedCompetitionPersonList(list, 무장능력_지력);
+                if (false == forceArray[i].is_player())
+                {
+                    competitonParticipantList.add(validList[0]);
+                }
+                else
+                {
+                    pk::message_box(pk::u8encode("설전대회에 참가할 무장을 선택해주십시오."));
+                    pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("설전 대회에 참가할 무장을 선택합니다.)"), validList, 1, 1);
+                    if (person_sel.count == 0)
+                    {
+                        pk::message_box(pk::u8encode("무장을 선택을 취소했습니다. 자동으로 무장이 선택됩니다."));
+                        competitonParticipantList.add(validList[0]);
+                    }
+                    else
+                    {
+                        competitonParticipantList.add(person_sel[0]);
+                    }
+                }
+            }
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(37);
+            pk::fade(255);
+
+            array<pk::person@> backUpArray = pk::list_to_array(competitonParticipantList);
+            RunEloquenceCompetition(competitonParticipantList, winner, runnerUp, false);
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(19);
+            pk::fade(255);
+
+            pk::message_box(pk::u8encode(pk::format("우승자는 \x1b[2x{}\x1b[0x인가. 그대야 말로 \x1b[1x천하기재\x1b[0x란 말에 걸맞군. 앞으로의 활약도 기대하겠소.", pk::u8decode(pk::get_name(winner)))), Emperor);
+            pk::message_box(pk::u8encode("이건 내가 그대에게 내리는 포상이오."), Emperor);
+            pk::message_box(pk::u8encode("영광이옵니다."), winner);
+            pk::add_tp(pk::get_force(winner.get_force_id()), 우승_기교, Emperor.get_pos());
+            pk::add_kouseki(winner, 우승_공적);
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x기교\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다.", 우승_기교, 우승_공적)));
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x에게도 포상을 내리겠소.", pk::u8decode(pk::get_name(runnerUp)))), Emperor);
+            pk::message_box(pk::u8encode("영광이옵니다."), runnerUp);
+            pk::add_tp(pk::get_force(runnerUp.get_force_id()), 준우승_기교, Emperor.get_pos());
+            pk::add_kouseki(runnerUp, 준우승_공적);
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x기교\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다.", 준우승_기교, 준우승_공적)));
+            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), Emperor);
+            pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 지력과 정치 경험치가 상승했습니다."));
+            for (int i = 0; i < backUpArray.length; ++i)
+            {
+                pk::person@ p = backUpArray[i];
+                p.stat_exp[무장능력_지력] = p.stat_exp[무장능력_지력] + 헌제_대회_경험치;
+                p.stat_exp[무장능력_정치] = p.stat_exp[무장능력_정치] + 헌제_대회_경험치;
+            }
+            SetCompetitionWinner(winner.get_id(), 대회_설전);
+            pk::history_log(winner.get_pos(), pk::get_force(winner.get_force_id()).color, pk::u8encode(pk::format("\x1b[2x{}\x1b[0x, \x1b[1x설전대회\x1b[0x 우승", pk::u8decode(pk::get_name(winner)))));
+
+            // 퇴장 
+            pk::fade(0);
+            pk::sleep();
+            pk::background(-1);
+            pk::fade(255);
+        }
+
+        void RunEloquenceCompetition(pk::list<pk::person@> personList, pk::person@& winner, pk::person@& runnerUp, bool isSingleCompetition)
+        {
+            pk::person@ moo = pk::get_person(무장_문관);
+            int remain = personList.count;
+            int round = 1;
+
+            while (remain > 2)
+            {
+                pk::list<pk::person@> list;
+                int n = 1;
+
+                for (int i = 0; i < personList.count; ++i)
+                {
+                    pk::person@ p1 = personList[i];
+                    pk::person@ p2 = personList[i + 1];
+                    pk::message_box(pk::u8encode(pk::format("{}회전 {}경기에 참가할 무장은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님 입니다.", round, n, pk::u8decode(pk::get_name(p1)), pk::u8decode(pk::get_name(p2)))), moo);
+                    bool c1 = false;                            // 무장1 조종여부
+                    bool c2 = false;                            // 무장2 조종여부
+
+                    if (false == isSingleCompetition)
+                    {
+                        if (true == personList[i].is_player())
+                        {
+                            c1 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 설전을 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[i])))));
+                        }
+
+                        if (true == personList[i + 1].is_player())
+                        {
+                            c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 설전을 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[i + 1])))));
+                        }
+                    }
+                                                       // 1 조종, 2 조종, 관전선택여부
+                    pk::int_int_bool win = pk::debate(p1, p2, c1, c2, false, true);
+                    list.add(personList[i + win.first]);
+                    pk::message_box(pk::u8encode(pk::format("{}경기 승자는 \x1b[2x{}\x1b[0x입니다.", n, pk::u8decode(pk::get_name(personList[i + win.first])))));
+
+                    i = i + 1;
+                    n = n + 1;
+                }
+
+                personList.clear();
+                personList = list;
+                remain = personList.count;
+                round++;
+            }
+
+            pk::message_box(pk::u8encode(pk::format("결승은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님의 경기입니다.", pk::u8decode(pk::get_name(personList[0])), pk::u8decode(pk::get_name(personList[1])))), moo);
+
+            bool c1 = false;                            // 무장1 조종여부
+            bool c2 = false;                            // 무장2 조종여부
+
+            if (false == isSingleCompetition)
+            {
+                if (true == personList[0].is_player())
+                {
+                    c1 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 설전을 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[0])))));
+                }
+
+                if (true == personList[1].is_player())
+                {
+                    c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 설전을 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[1])))));
+                }
+            }
+                                                                      // 1 조종, 2 조종,   관전여부
+            pk::int_int_bool win = pk::debate(personList[0], personList[1], c1, c2, false, true);
+
+            @winner = personList[win.first];
+            @runnerUp = personList[(win.first + 1) % 2];
+        }
+
+
+
+        // 추첨한 참가국 받아오기
+        array<pk::force@> GetParticipatingForceArray(int type)
+        {
+            array<pk::force@> forceArray(validForceCount);
+
+            int count = 0;
+
+            // 개최국(황제 보호세력)이 참가 요건에 해당되면 개최국 자격으로 참가
+            if (hostForce != null)
+            {
+                @forceArray[0] = hostForce;
+                count = 1;
+            }
+
+            pk::list<pk::force@> validList;
+
+            for (int i = 0; i < validPlayerCompetitonList.count; ++i)
+            {
+                pk::force@ force = validPlayerCompetitonList[i];
+                validList.add(force);
+            }
+
+            int validListCount = validList.count;
+
+            // 플레이어 세력이 무조건 참가하게되는 경우
+            if (대회_무술 == type && true == 플레이어_무술대회_참여여부)
+            {
+                validAICompetitionList.shuffle();
+
+                for (int i = 0; i < (validForceCount - count) - validListCount; ++i)
+                {
+                    pk::force@ force = validAICompetitionList[i];
+                    validList.add(force);
+                }
+            }
+            else if (대회_설전 == type && true == 플레이어_설전대회_참여여부)
+            {
+                validAICompetitionList.shuffle();
+
+                for (int i = 0; i < (validForceCount - count) - validListCount; ++i)
+                {
+                    pk::force@ force = validAICompetitionList[i];
+                    validList.add(force);
+                }
+            }
+            // 그렇지 않은 경우
+            else
+            {
+                for (int i = 0; i < validAICompetitionList.count; ++i)
+                {
+                    pk::force@ force = validAICompetitionList[i];
+                    validList.add(force);
+                }
+            }
+
+            validList.shuffle();
+
+            for (int i = 0; i < validForceCount - count; ++i)
+            {
+                @forceArray[i + count] = validList[i];
+            }
+
+            return forceArray;
+        }
+
+        // 참가자격
+        bool IsExistQualification(pk::force@ force, int competitionType, bool isWorld)
+        {
+            pk::list<pk::person@> personList;
+            if (true == isWorld)
+            {
+                personList = pk::get_person_list(force, pk::mibun_flags(신분_군주, 신분_도독, 신분_태수, 신분_일반));
+            }
+            else
+            {
+                personList = pk::get_person_list(force, pk::mibun_flags(신분_도독, 신분_태수, 신분_일반));
+            }
+            int count = 0;
+
+            for (int i = 0; i < personList.count; ++i)
+            {
+                pk::person@ person = personList[i];
+
+                if (대회_무술 == competitionType)
+                {
+                    if (true == person.is_alive())
+                    {
+                        if (person.stat[무장능력_무력] >= 80)
+                        {
+                            // 황제가 여는 대회면 바로 반환
+                            if (true == isWorld)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                count++;
+                            }
+                        }
+                    }
+                }
+                else if (대회_설전 == competitionType)
+                {
+                    if (true == person.is_alive())
+                    {
+                        if (person.stat[무장능력_지력] >= 80)
+                        {
+                            // 황제가 여는 대회면 바로 반환
+                            if (true == isWorld)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                count++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (count >= 8)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
+        pk::list<pk::person@> GetCompetitionPersonList(pk::force@ force, int competitionType, bool isSingleCompetition)
+        {
+            pk::list<pk::person@> list;
+            
+            if (false == isSingleCompetition)
+            {
+                list = pk::get_person_list(force, pk::mibun_flags(신분_군주, 신분_도독, 신분_태수, 신분_일반));
+            }
+            else
+            {
+                list = pk::get_person_list(force, pk::mibun_flags(신분_도독, 신분_태수, 신분_일반));
+            }
+
+            pk::list<pk::person@> validList;
+
+            for (int i = 0; i < list.count; ++i)
+            {
+                if (대회_무술 == competitionType)
+                {
+                    if (list[i].stat[무장능력_무력] >= 80)
+                    {
+                        validList.add(list[i]);
+                    }
+                }
+                else if (대회_설전 == competitionType)
+                {
+                    if (list[i].stat[무장능력_지력] >= 80)
+                    {
+                        validList.add(list[i]);
+                    }
+                }
+            }
+
+            return validList;
+        }
+
+        // 삽입정렬. AI의 참가무장 선별 및 무장선택 화면에 무장 정렬에 사용됨
+        pk::list<pk::person@> GetSortedCompetitionPersonList(pk::list<pk::person@> personList, int ability)
+        {
+            if (personList.count > 1)
+            {
+                for (int i = 1; i < personList.count; ++i)
+                {
+                    for (int j = i; j > 0; j--)
+                    {
+                        if (GetCompetitionValue(personList[j], ability) > GetCompetitionValue(personList[j - 1], ability))
+                        {
+                            pk::person@ temp = personList[j];
+                            @personList[j] = personList[j - 1];
+                            @personList[j - 1] = temp;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return personList;
+        }
+
+        int GetCompetitionValue(pk::person@ person, int ability)
+        {
+            int id = person.get_id();
+            int value = 0;
+       
+            if (무장능력_무력 == ability)
+            {
+                value = person.stat[ability];
+
+                if (id == 무장_여포 || id == 무장_관우 || id == 무장_장비 || id == 무장_조운 || id == 무장_마초 || id == 무장_허저)
+                {
+                    value = value + GetAddedForce(id);
+                }
+                // 황충의 부가무력은 시나리오 사실 여부, 나이에 따라 달라짐
+                else if (id == 무장_황충)
+                {
+                    if (true == pk::get_scenario().virtual)
+                    {
+                        value = value + 5;
+                    }
+                    else
+                    {
+                        int age = pk::get_age(person);
+
+                        if (age < 60)
+                        {
+                            value = value + 1;
+                        }
+                        else if (age < 65)
+                        {
+                            value = value + 2;
+                        }
+                        else if (age < 70)
+                        {
+                            value = value + 3;
+                        }
+                        else if (age < 80)
+                        {
+                            value = value + 4;
+                        }
+                        else if (age < 90)
+                        {
+                            value = value + 5;
+                        }
+                        else
+                        {
+                            value = value + 10;
+                        }
+                    }
+                }
+
+                value = value + GetAddedItemValue(id);
+            }
+            else if (무장능력_지력 == ability)
+            {
+                value = person.stat[ability];
+
+                // 성격 체크
+                int character = person.character;
+
+                if (성격_대담 == character)
+                {
+                    value = value + 설전_대담;
+                }
+                else if (성격_소심 == character)
+                {
+                    value = value + 설전_소심;
+                }
+                else if (성격_저돌 == character)
+                {
+                    value = value + 설전_저돌;
+                }
+                else if (성격_냉정 == character)
+                {
+                    value = value + 설전_냉정;
+                }
+
+                if (true == IsBook(id))
+                {
+                    value = value + 설전_궤변 + 설전_대갈 + 설전_진정 + 설전_무시 + 설전_흥분;
+                }
+                else
+                {
+                    // 궤변 체크
+                    if (true == person.wajutsu_kiben)
+                    {
+                        value = value + 설전_궤변;
+                    }
+                    // 대갈 체크
+                    if (true == person.wajutsu_daikatsu)
+                    {
+                        value = value + 설전_대갈;
+                    }
+                    // 진정 체크
+                    if (true == person.wajutsu_chinsei)
+                    {
+                        value = value + 설전_진정;
+                    }
+                    // 무시 체크
+                    if (true == person.wajutsu_mushi)
+                    {
+                        value = value + 설전_무시;
+                    }
+                    // 흥분 체크
+                    if (true == person.wajutsu_gyakujou)
+                    {
+                        value = value + 설전_흥분;
+                    }
+                }
+            }
+            else
+            {
+                return -1;
+            }
+
+            return value;
+        }
+
+        // 부가무력 받아오기
+        int GetAddedForce(int moo)
+        {
+            for (int i = 0; i < 부가무력_무장.length; ++i)
+            {
+                if (부가무력_무장[i] == moo)
+                {
+                    return 부가무력_수치[i];
+                }
+            }
+
+            return 0;
+        }
+
+        // 무기 점수 받아오기
+        int GetAddedItemValue(int moo)
+        {
+            int longWeapon = 0;
+            int swordWeapon = 0;
+            int bowWeapon = 0;
+            int secretWeapon = 0;
+
+            for (int i = 0; i < 보물_끝; ++i)
+            {
+                pk::item@ item = pk::get_item(i);
+                
+                if (item.owner == moo)
+                {
+                    switch (item.type)
+                    {
+                    case 보물종류_검 :
+                        swordWeapon = 검_점수;
+                        break;
+
+                    case 보물종류_긴무기:
+                        longWeapon = 긴무기_점수;
+                        break;
+
+                    case 보물종류_암기:
+                        secretWeapon = 암기_점수;
+                        break;
+
+                    case 보물종류_활:
+                        bowWeapon = 활_점수;
+                        break;
+                    }
+                }
+            }
+
+            return longWeapon + swordWeapon + bowWeapon + secretWeapon;
+        }
+
+        // 서적 보유 유무 받아오기
+        bool IsBook(int moo)
+        {
+            for (int i = 0; i < 보물_끝; ++i)
+            {
+                pk::item@ item = pk::get_item(i);
+
+                if (item.owner == moo)
+                {
+                    if (item.type == 보물종류_서책)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        void SetCompetitionWinner(int moo, int type)
+        {
+            pk::point point = competitionDataArray[type];
+            pk::building@ data = pk::get_building(point);
+
+            data.hp = moo;
+        }
+
+        int GetCompetitionWinnerId(int type)
+        {
+            pk::point point = competitionDataArray[type];
+            pk::building@ data = pk::get_building(point);
+
+            int id = data.hp;
+
+            pk::person@ p = pk::get_person(id);
+
+            if (null == p || false == p.is_alive())
+            {
+                return -1;
+            }
+            else
+            {
+                return id;
+            }
+        }
+
+        void SetSingleCompetitionWinner(int forceId, int moo)
+        {
+            pk::point point = singleCompetitionDataArray[forceId];
+            pk::building@ data = pk::get_building(point);
+
+            data.hp = moo + 10000;
+        }
+
+        int GetSingleCompetitionWinnerId(int forceId)
+        {
+            pk::point point = singleCompetitionDataArray[forceId];
+            pk::building@ data = pk::get_building(point);
+
+            int id = data.hp;
+            
+            if (id >= 10000 && id < 20000)
+            {
+                return  id - 10000;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        bool IsHoldCompetition(int forceId)
+        {
+            pk::point point = singleCompetitionDataArray[forceId];
+            pk::building@ data = pk::get_building(point);
+
+            int id = data.hp;
+
+            if (id >= 10000 && id < 20000)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        void ResetSingleCompetitionWinner()
+        {
+            auto forceArray = pk::list_to_array(pk::get_force_list());
+
+            for (int i = 0; i < forceArray.length; ++i)
+            {
+                pk::force@ force = forceArray[i];
+
+                if (true == IsValidForce(force))
+                {
+                    SetSingleCompetitionWinner(i, -1);
+                }
+            }
+        }
+
+        // 무술대회 우승자 특전
+        void ExecuteDuelPrivillage(pk::unit@ unit)
+        {
+            // 상태이상인 경우 패스
+            if (부대상태_통상 != unit.status)
+            {
+                return;
+            }
+
+            if (false == 우승자_특전여부)
+            {
+                return;
+            }
+
+            int winner = GetCompetitionWinnerId(대회_무술);
+
+            // 대회 우승자가 부대에 없으면 패스
+            if(unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
+            {
+                return;
+            }
+
+            bool success = false;
+
+            array<pk::point> arr = pk::range(unit.get_pos(), 1, 무술대회특전_최대사거리);
+
+            int actor = winner;
+
+            int sourPower = unit.attr.stat[부대능력_무력];
+
+            int lastDstPower = -1;
+            int lastLeaderId = -1;
+            pk::point lastPos;
+
+            for (int i = 0; i < arr.length; ++i)
+            {
+                pk::unit@ dst = pk::get_unit(arr[i]);
+                bool immune = false;
+
+                if (dst == null || !pk::is_enemy(unit, dst))
+                {
+                    continue;
+                }
+
+                int energy = 0;
+                int dstPower = dst.attr.stat[부대능력_무력];
+                pk::person@ dstLeader = pk::get_person(dst.leader);
+                pk::point pos = dst.get_pos();
+
+
+                for (int j = 0; j < 무술대회특전_면역특기.length; ++j)
+                {
+                    if (dst.has_skill(무술대회특전_면역특기[j]))
+                    {
+                        immune = true;
+                    }
+                }
+
+                if (immune == true)
+                {
+                    continue;
+                }
+
+                if (dstPower + 10 > sourPower)
+                {
+                    continue;
+                }
+                else
+                {
+                    if (lastLeaderId == -1 || lastDstPower < dstPower)
+                    {
+                        lastLeaderId = dst.leader;
+                        lastPos = pos;
+                    }
+                }
+
+                energy = sourPower - dstPower;
+                energy /= 무술대회특전_무력차_제수;
+
+                if (energy > 무술대회특전_기력감소_최대값)
+                {
+                    energy = 무술대회특전_기력감소_최대값;
+                }
+
+                if (energy < 무술대회특전_기력감소_최소값)
+                {
+                    energy = 무술대회특전_기력감소_최소값;
+                }
+
+                pk::play_se(41, pos);
+                pk::add_energy(dst, -energy, true);
+                success = true;
+            }
+
+
+            if (success == true)
+            {
+                bool gap = false;
+                if (sourPower > lastDstPower + 10)
+                {
+                    gap = true;
+                }
+                PrintVictimMessage(pk::get_unit(lastPos), pk::get_person(lastLeaderId), gap);
+                PrintPrivilageMessage(unit, actor);
+            }
+        }
+
+        void PrintPrivilageMessage(pk::unit@ unit, int actorId)
+        {
+            pk::person@ moo = pk:: get_person(actorId);
+
+            int r = pk::rand(2);
+
+            if (r == 0)
+            {
+                pk::say(pk::u8encode("내가 바로 천하무쌍이다!"), moo, unit);
+            }
+            else
+            {
+                if (actorId == 무장_장료)
+                {
+                    pk::say(pk::u8encode("장료가 왔다!"), moo, unit);
+                }
+                else if (actorId == 무장_감녕)
+                {
+                    pk::say(pk::u8encode("하하하! 화려하게 날뛰어 볼까!"), moo, unit);
+                }
+                else if (actorId == 무장_관우)
+                {
+                    pk::say(pk::u8encode("너희는 나를 막을 수 없으리라!"), moo, unit);
+                }
+                else
+                {
+                    pk::say(pk::u8encode("내가 바로 천하무쌍이다!"), moo, unit);
+                }
+            }
+        }
+
+        void PrintVictimMessage(pk::unit@ unit, pk::person@ moo, bool gap)
+        {
+            if (gap == true)
+            {
+                switch (pk::rand(3))
+                {
+                case 0: pk::say(pk::u8encode("크윽..."), moo, unit);
+                    break;
+
+                case 1: pk::say(pk::u8encode("이럴수가..."), moo, unit);
+                    break;
+
+                case 2: pk::say(pk::u8encode("어떻게든 해야한다..."), moo, unit);
+                    break;
+                }
+            }
+            else
+            {
+                switch (pk::rand(3))
+                {
+                case 0: pk::say(pk::u8encode("다들 정신차려라!"), moo, unit);
+                    break;
+
+                case 1: pk::say(pk::u8encode("당황하지마라!"), moo, unit);
+                    break;
+
+                case 2: pk::say(pk::u8encode("두고보자..."), moo, unit);
+                    break;
+                }
+            }
+        }
+
+        // 설전대회 우승자 특전
+        void ExecuteEloquencePrivillage(pk::unit@ unit)
+        {
+            if (false == 우승자_특전여부)
+            {
+                return;
+            }
+
+            int winner = GetCompetitionWinnerId(대회_설전);
+
+            // 대회 우승자가 부대에 없으면 패스
+            if (unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
+            {
+                return;
+            }
+
+            bool success = false;
+
+            array<pk::point> arr = pk::range(unit.get_pos(), 1, 설전대회특전_최대사거리);
+
+            int actor = winner;
+
+            int src_int = unit.attr.stat[부대능력_지력];
+
+            pk::list<pk::unit@> unitList;
+
+            for (int i = 0; i < arr.length; ++i)
+            {
+                pk::unit@ dst = pk::get_unit(arr[i]);
+
+                if (dst == null || !pk::is_enemy(unit, dst))
+                {
+                    continue;
+                }
+                else
+                {
+                    if (dst.status == 부대상태_통상)
+                    {
+                        unitList.add(dst);
+                    }
+                }
+            }
+
+            if (unitList.count == 0)
+            {
+                return;
+            }
+            
+            unitList.shuffle();
+
+            if (true == pk::rand_bool(설전대회특전_계략실행확률))
+            {
+                pk::unit@ dst = unitList[0];
+                int dst_int = dst.attr.stat[부대능력_지력];
+
+                int b = data_849b14(pk::get_person(dst.leader).character);
+                int c = dst.attr.stat[부대능력_방어] / 20;
+
+                int d = src_int * 3 / 10 - dst_int / 5;
+                d += b;
+                d += c;
+
+                int e = d + 70;
+
+                int f = 100;
+                f -= dst_int * 9 / 10;
+                f *= src_int * src_int * 100;
+                f /= dst_int * dst_int + src_int * src_int;
+                f /= 45;
+                f -= (100 - src_int) / 10;
+
+                f += b;
+                f += c;
+                if (src_int < dst_int) f -= (dst_int - src_int) / 3;
+                if (f < 1) f = 1;
+
+                int n = pk::max(1, pk::min(99, e, f));
+
+                // 계략성공
+                if (true == pk::rand_bool(n))
+                {
+                    // 시전부대 대사
+                    pk::say(pk::u8encode("잠시 내 말좀 들어보시오."), pk::get_person(actor), unit);
+                    // 대상 부대 상태이상
+                    pk::set_status(dst, null, 부대상태_혼란, 1, true);
+                }
+            }
+
+            
+        }
+
+        /** 성격에 따른 교란 상수 */
+        int data_849b14(int character)
+        {
+            switch (character)
+            {
+            case 성격_소심: return -2;
+            case 성격_냉정: return 0;
+            case 성격_대담: return 1;
+            case 성격_저돌: return 3;
+            }
+            return 0;
+        }
+
+        void ExecuteSingleCompetitionPrivilage(pk::unit@ unit)
+        {
+            int forceId = unit.get_force_id();
+
+            int moo = GetSingleCompetitionWinnerId(forceId);
+
+            if (-1 == moo)
+            {
+                return;
+            }
+
+            if (unit.member[0] != moo && unit.member[1] != moo && unit.member[2] != moo)
+            {
+                return;
+            }
+
+            pk::add_energy(unit, 자체대회특전_기력회복 ,true);
+        }
+
+        // 자세력 내 대회 계최가 가능한지 확인하는 데이터  // -1 : 황건, 012 : 개최가능,  3 : 한황실 대회 개최가능, 4 : 작위부족 , 5 : 이미 대회를 개최함,  6 : 기교 부족, 7 : 금 부족, 8 : 장수부족
+        int GetPossibleHoldSingleCompetition(pk::force@ force, pk::building@ building)
+        {
+            // 황건은 개최불가
+            if (국호_황건 == force.kokugou)
+            {
+                return -1;
+            }
+
+            int tp = force.tp;
+            uint gold;
+            if (true == force.is_player())
+            {
+                gold = pk::get_gold(building);
+            }
+
+            bool isRebel = false;
+
+            pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
+
+            // 반역자 검사
+            if (force.kokugou != -1 && false == pk::is_protecting_the_emperor(force))
+            {
+                isRebel = true;
+            }
+
+            // 반역자가 아닌경우
+            if (false == isRebel)
+            {
+                // 황제가 없는경우
+                if (null == Emperor)
+                {
+                    
+                }
+                else if (Emperor.mibun == 신분_사망)
+                {
+
+                }
+                // 황제가 있는경우
+                else
+                {
+                    // 반역자 아닌 세력갯수 확인
+                    auto forceList = pk::get_force_list();
+                    int count = 0;
+
+                    for (int i = 0; i < forceList.count; ++i)
+                    {
+                        if (true == IsValidForce(forceList[i]))
+                        {
+                            if (forceList[i].kokugou != -1 && false == pk::is_protecting_the_emperor(forceList[i]))
+                            {
+                                continue;
+                            }
+
+                            count++;
+                        }
+                    }
+
+                    if (count >= 8)
+                    {
+                        return 3;
+                    }
+                }
+
+                if (force.title >= 작위_대사마)
+                {
+                    return 4;
+                }
+            }
+
+            // 대회 개최 유무
+            if (true == IsHoldCompetition(force.get_force_id()))
+            {
+                return 5;
+            }
+
+            // 세력 기교 검사
+            if (tp < 대회_개최기교 && true == force.is_player())
+            {
+                return 6;
+            }
+
+            // 도시의 금 검사
+            if (gold < 대회_개최비용 && true == force.is_player())
+            {
+                return 7;
+            }
+
+            // 장수 자격요건 검사
+            bool duelCheck = IsExistQualification(force, 대회_무술, false);
+            bool EloquencyCheck = IsExistQualification(force, 대회_설전, false);
+
+            // 모두 개최가능
+            if (true == duelCheck && true == EloquencyCheck)
+            {
+                return 0;
+            }
+            // 무술대회만 가능
+            else if (true == duelCheck && false == EloquencyCheck)
+            {
+                return 1;
+            }
+            // 설전대회만 가능
+            else if (false == duelCheck && true == EloquencyCheck)
+            {
+                return 2;
+            }
+            // 장수 자격부족
+            else
+            {
+                return 8;
+            }
+        }
+
+        void UpdateAICompetition(pk::force@ force)
+        {
+            if (true == force.is_player() || false == IsValidForce(force))
+            {
+                return;
+            }
+                
+            int data = GetPossibleHoldSingleCompetition(force, null);
+
+            if (data == -1 || data > 2)
+            {
+                return;
+            }
+
+            if (0 == data )
+            {
+                if (true == pk::rand_bool(50))
+                {
+                    // AI 무술대회
+                    ExecuteAICompetition(force, 대회_무술);
+                }
+                else
+                {
+                    // AI 설전대회
+                    ExecuteAICompetition(force, 대회_설전);
+                }
+            }
+            else if (1 == data)
+            {
+                // AI 무술대회
+                ExecuteAICompetition(force, 대회_무술);
+            }
+            else if (2 == data)
+            {
+                // AI 설전대회
+                ExecuteAICompetition(force, 대회_설전);
+            }
+        }
+
+        void ExecuteAICompetition(pk::force@ force, int competitiontype)
+        {
+            string competitionName;
+            auto tempList = GetCompetitionPersonList(force, competitiontype, true);
+            int ability;
+            
+            if (대회_무술 == competitiontype)
+            {
+                ability = 무장능력_무력;
+                competitionName = "무술대회";
+            }
+            else if (대회_설전 == competitiontype)
+            {
+                ability = 무장능력_지력;
+                competitionName = "설전대회";
+            }
+
+            auto validList = GetSortedCompetitionPersonList(tempList, ability);
+            pk::list<pk::person@> personList;
+            
+            for (int i = 0; i < 8; ++i)
+            {
+                personList.add(validList[i]);
+            }
+
+            array<pk::person@> backUpArray = pk::list_to_array(personList);
+
+            int remain = personList.count;
+            int round = 1;
+
+            while (remain > 2)
+            {
+                pk::list<pk::person@> list;
+                int n = 1;
+
+                for (int i = 0; i < personList.count; ++i)
+                {
+                    pk::person@ p1 = personList[i];
+                    pk::person@ p2 = personList[i + 1];
+                    int first;
+                    if (대회_무술 == competitionType)
+                    {
+                        first = pk::duel(null, null, p1, null, null, p2, null, null, false, false, 0, false).first;
+                    }
+                    else if (대회_설전 == competitionType)
+                    {
+                        first = pk::debate(p1, p2, false, false, false, false).first;
+                    }
+                    list.add(personList[i + first]);
+
+                    i = i + 1;
+                    n = n + 1;
+                }
+
+                personList.clear();
+                personList = list;
+                remain = personList.count;
+                round++;
+            }
+
+            int first;
+
+            if (대회_무술 == competitionType)
+            {
+                first = pk::duel(null, null, personList[0], null, null, personList[1], null, null, false, false, 0, false).first;
+            }
+            else if (대회_설전 == competitionType)
+            {
+                first = pk::debate(personList[0], personList[1], false, false, false, false).first;
+            }
+
+            pk::person@ winner = personList[first];
+            pk::person@ runnerUp = personList[(first + 1) % 2];
+
+            string forceName;
+
+            if (force.kokugou == -1)
+            {
+                forceName = pk::u8decode(pk::get_name(pk::get_person(force.kunshu)));
+            }
+            else
+            {
+                forceName = pk::u8decode(pk::get_kokugou(force.kokugou).get_name());
+            }
+            
+            if (대회_무술 == competitionType)
+            {
+                for (int i = 0; i < backUpArray.length; ++i)
+                {
+                    pk::person@ p = backUpArray[i];
+                    p.stat_exp[무장능력_통솔] = p.stat_exp[무장능력_통솔] + 자체_대회_경험치;
+                    p.stat_exp[무장능력_무력] = p.stat_exp[무장능력_무력] + 자체_대회_경험치;
+                }
+            }
+            else if (대회_설전 == competitionType)
+            {
+                for (int i = 0; i < backUpArray.length; ++i)
+                {
+                    pk::person@ p = backUpArray[i];
+                    p.stat_exp[무장능력_지력] = p.stat_exp[무장능력_지력] + 자체_대회_경험치;
+                    p.stat_exp[무장능력_정치] = p.stat_exp[무장능력_정치] + 자체_대회_경험치;
+                }
+            }
+
+            SetSingleCompetitionWinner(force.get_force_id(), winner.get_id());
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x{}군\x1b[0x에서 열린 \x1b[1x{}\x1b[0x의 우승자는 \x1b[2x{}\x1b[0x입니다.", forceName, competitionName, pk::u8decode(pk::get_name(winner)))));
+            pk::history_log(winner.get_pos(), force.color, pk::u8encode(pk::format("\x1b[1x{}군\x1b[0x의 \x1b[2x{}\x1b[0x, 세력 내 \x1b[1x{}\x1b[0x 우승", forceName, pk::u8decode(pk::get_name(winner)), competitionName)));
         }
         // ================================================= 101 징병 치안 증감 =====================================================================
 
@@ -7952,6 +9773,7 @@
         bool SupportEnabled()
         {
             int year = pk::get_elapsed_years();
+            year = pk::min(year, 10);
 
             int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
 
@@ -7983,6 +9805,7 @@
         string GetSupportDescription()
         {
             int year = pk::get_elapsed_years();
+            year = pk::min(year, 10);
 
             int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
 
@@ -8128,6 +9951,262 @@
             }
 
             return true;
+        }
+
+        // ============================================================ 자세력 내 대회개최 ================================================================
+        pk::list<pk::person@> singleCompetitionPersonList;
+        int competitionType;
+
+        void AddCompetitionMenu()
+        {
+            pk::menu_item item;
+            item.menu = 105;
+            item.pos = 9;
+            item.shortcut = "C";
+            item.init = pk::building_menu_item_init_t(CompetitionInit);
+            item.is_enabled = pk::menu_item_is_enabled_t(CompetitionEnabled);
+            item.get_text = pk::menu_item_get_text_t(GetCompetitionText);
+            item.get_desc = pk::menu_item_get_desc_t(GetCompetitionDescription);
+            item.handler = pk::menu_item_handler_t(CompetitionHandler);
+            pk::add_menu_item(item);
+        }
+
+        void CompetitionInit(pk::building@ building)
+        {
+            @tradeBuilding = @building;
+            @tradeForce = pk::get_force(building.get_force_id());
+            tradeBuildingGold = pk::get_gold(building);
+            tradeData = GetPossibleHoldSingleCompetition(tradeForce, tradeBuilding);
+        }
+
+        bool CompetitionEnabled()
+        {
+            if (tradeData > 2 || -1 == tradeData)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        string GetCompetitionText()
+        {
+            return  pk::u8encode("대회");
+        }
+
+        string GetCompetitionDescription()
+        {
+            // 012 : 개최가능,  3 : 한황실 대회 개최가능, 4 : 작위부족 , 5 : 이미 대회를 개최함,  6 : 기교 부족, 7 : 금 부족, 8 : 장수부족
+            switch (tradeData)
+            {
+            case -1:
+                return pk::u8encode("황건 세력은 대회 개최가 불가능합니다.");
+                break;
+
+            case 0:
+            case 1:
+            case 2:
+                return pk::u8encode(pk::format("자세력 무장들이 겨루는 대회를 개최합니다. (기교P : {}, 금 : {} 소비 )", 대회_개최기교, 대회_개최비용));
+                break;
+
+            case 3:
+                return pk::u8encode("아직 황제를 따르는 제후들이 많이 남아있습니다.");
+                break;
+            case 4:
+                return pk::u8encode("대회를 개최하려면 공 이상의 작위가 필요합니다.");
+                break;
+            case 5:
+                return pk::u8encode("이번 해에 이미 대회를 개최했습니다.");
+                break;
+            case 6:
+                return pk::u8encode(pk::format("기교가 부족합니다. (기교P : {} 필요 )", 대회_개최기교));
+                break;
+            case 7:
+                return pk::u8encode(pk::format("도시의 금이 부족합니다. (금 : {} 필요 )", 대회_개최비용));
+                break;
+            case 8:
+                return pk::u8encode("대회에 참가할 수 있는 무장이 부족합니다.");
+                break;
+            }
+
+            return "";
+        }
+
+        bool CompetitionHandler()
+        {
+            int n;
+            int c;
+            if (tradeData == 0)
+            {
+                n = 3;
+            }
+            else
+            {
+                n = 2;
+            }
+
+            array<string> CompetitionList(n);
+            array<int> cArray(n - 1);
+            if (tradeData == 0)
+            {
+                CompetitionList[0] = pk::u8encode("무술대회");
+                CompetitionList[1] = pk::u8encode("설전대회");
+                cArray[0] = 대회_무술;
+                cArray[1] = 대회_설전;
+            }
+            else if (tradeData == 1)
+            {
+                CompetitionList[0] = pk::u8encode("무술대회");
+                cArray[0] = 대회_무술;
+            }
+            else if (tradeData == 2)
+            {
+                CompetitionList[0] = pk::u8encode("설전대회");
+                cArray[0] = 대회_설전;
+            }
+            else
+            {
+                return false;
+            }
+
+            CompetitionList[n - 1] = pk::u8encode("취소");
+
+            c = pk::choose(pk::u8encode("개최할 대회를 선택하십시오."), CompetitionList);
+
+            if (c == n - 1)
+            {
+                return false;
+            }
+
+            competitionType = cArray[c];
+            int ability; 
+
+            if (대회_무술 == competitionType)
+            {
+                ability = 무장능력_무력;
+            }
+            else if (대회_설전 == competitionType)
+            {
+                ability = 무장능력_지력;
+            }
+            else
+            {
+                return false;
+            }
+
+            auto list = GetCompetitionPersonList(tradeForce, competitionType, true);
+
+            auto validList = GetSortedCompetitionPersonList(list, ability);
+
+            singleCompetitionPersonList.clear();
+            pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("장수 선택"), pk::u8encode("대회에 참가할 무장을 선택합니다.(8인 선택)"), validList, 8, 8);
+
+            if (person_sel.count < 8)
+            {
+                return CompetitionHandler();
+            }
+
+            singleCompetitionPersonList = person_sel;
+
+            pk::scene(pk::scene_t(SingleCompetitionScene));
+
+            return true;
+        }
+
+        void SingleCompetitionScene()
+        {
+            @eventKunshu = pk::get_person(tradeForce.kunshu);
+            pk::person@ winner = null;
+            pk::person@ runnerUp = null;
+
+            pk::move_screen(eventKunshu.get_pos());
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(1);
+            pk::fade(255);
+            string a;
+            string ment = "를 개최하도록 하겠소. 훌륭한 실력을 보여주길 기대하겠소.";
+
+            if (대회_무술 == competitionType)
+            {
+                a = "\x1b[2x무술대회\x1b[0x";
+            }
+            else if (대회_설전 == competitionType)
+            {
+                a = "\x1b[2x설전대회\x1b[0x";
+            }
+            else
+            {
+                return;
+            }
+            
+            pk::message_box(pk::u8encode(a + ment), eventKunshu);
+            
+            array<pk::person@> backUpArray = pk::list_to_array(singleCompetitionPersonList);
+            singleCompetitionPersonList.shuffle();
+
+            if (대회_무술 == competitionType)
+            {
+                pk::fade(0);
+                pk::sleep();
+                pk::background(57);
+                pk::fade(255);
+
+                RunDuelCompetition(singleCompetitionPersonList, winner, runnerUp, true);
+            }
+            else if (대회_설전 == competitionType)
+            {
+                pk::fade(0);
+                pk::sleep();
+                pk::background(37);
+                pk::fade(255);
+
+                RunEloquenceCompetition(singleCompetitionPersonList, winner, runnerUp, true);
+            }
+
+            pk::fade(0);
+            pk::sleep();
+            pk::background(19);
+            pk::fade(255);
+
+            pk::message_box(pk::u8encode(pk::format("우승자는 \x1b[2x{}\x1b[0x인가. 앞으로도 나를 위해 더욱 힘써주시오.", pk::u8decode(pk::get_name(winner)))), eventKunshu);
+            pk::message_box(pk::u8encode("이건 내가 그대에게 내리는 포상이오."), eventKunshu);
+            pk::message_box(pk::u8encode("영광이옵니다."), winner);
+            pk::add_kouseki(winner, 자세력_우승_공적);
+            pk::message_box(pk::u8encode(pk::format("공적이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 자세력_우승_공적)));
+            pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x에게도 포상을 내리겠소.", pk::u8decode(pk::get_name(runnerUp)))), eventKunshu);
+            pk::message_box(pk::u8encode("영광이옵니다."), runnerUp);
+            pk::add_kouseki(runnerUp, 자세력_준우승_공적);
+            pk::message_box(pk::u8encode(pk::format("공적이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 자세력_준우승_공적)));
+            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), eventKunshu);
+
+            if (대회_무술 == competitionType)
+            {
+                pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 통솔과 무력 경험치가 상승했습니다."));
+                for (int i = 0; i < backUpArray.length; ++i)
+                {
+                    pk::person@ p = backUpArray[i];
+                    p.stat_exp[무장능력_통솔] = p.stat_exp[무장능력_통솔] + 자체_대회_경험치;
+                    p.stat_exp[무장능력_무력] = p.stat_exp[무장능력_무력] + 자체_대회_경험치;
+                }
+            }
+            else if (대회_설전 == competitionType)
+            {
+                pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 지력과 정치 경험치가 상승했습니다."));
+                for (int i = 0; i < backUpArray.length; ++i)
+                {
+                    pk::person@ p = backUpArray[i];
+                    p.stat_exp[무장능력_지력] = p.stat_exp[무장능력_지력] + 자체_대회_경험치;
+                    p.stat_exp[무장능력_정치] = p.stat_exp[무장능력_정치] + 자체_대회_경험치;
+                }
+            }
+            SetSingleCompetitionWinner(tradeForce.get_force_id(), winner.get_id());
+            // 퇴장 
+            pk::fade(0);
+            pk::sleep();
+            pk::background(-1);
+            pk::fade(255);
         }
 
         // ================================================================================================================================================

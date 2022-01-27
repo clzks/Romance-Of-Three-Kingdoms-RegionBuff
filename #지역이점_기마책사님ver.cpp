@@ -113,6 +113,7 @@
     const int 병주_지역이점_이동증가 = 4;
     
     const int 기주_지역이점_충성상승 = 2;
+    const int 기주_지역이점_최대누적충성 = 110;
     const int 기주_지역이점_녹봉할인 = 40;    // (%)
 
     const int 청주_지역이점_시설상승 = 10;    // (최대 체력 비율)
@@ -356,10 +357,10 @@
             }
         }
 
-        // 안식국 3단계 효과
+        // 안식국 2단계 효과
         void ExecuteParthianLevelThree(pk::unit@ unit)
         {
-            if (false == pk::is_alive(unit))
+            if (false == pk::is_alive(unit) || 부대상태_통상 != unit.status)
             {
                 return;
             }
@@ -1121,7 +1122,7 @@
                     {
                         if (true == IsValidPerson(officers[i]))
                         {
-                            if (int(officers[i].loyalty) < 120)
+                            if (int(officers[i].loyalty) < 기주_지역이점_최대누적충성)
                             {
                                 pk::add_loyalty(officers[i], 기주_지역이점_충성상승);
                             }
@@ -8721,7 +8722,7 @@
         string GetSupportDescription()
         {
             int year = pk::get_elapsed_years();
-
+            year = pk::min(year, 10);
             int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
 
             if (tradeBuildingGold < gold)
@@ -8759,6 +8760,7 @@
         bool SupportHandler()
         {
             int year = pk::get_elapsed_years();
+            year = pk::min(year, 10);
 
             int gold = 이민족_원군요청_기본금 + year * 이민족_원군요청_추가금;
 
