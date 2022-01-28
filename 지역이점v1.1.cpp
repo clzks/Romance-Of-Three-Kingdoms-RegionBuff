@@ -180,11 +180,11 @@
     const int 대회_개최비용 = 5000;                   // 세력 내 대회 개최비용
     const int 대회_개최기교 = 1000;                   // 세력 내 대회 개최기교
 
-    const int 대회_개최년도_무술 = 짝수년도;            // 대회 개최년도 설정 (홀수년도, 짝수년도, 매년 중 선택가능)
-    const int 대회_개최년도_설전 = 홀수년도;
+    const int 대회_개최년도_무술 = 홀수년도;            // 대회 개최년도 설정 (홀수년도, 짝수년도, 매년 중 선택가능)
+    const int 대회_개최년도_설전 = 짝수년도;
 
-    const int 대회_개최시기_무술 = 4;                  // 대회를 개최하는 월 (해당 월 1일에 개최,  1 ~ 12 사이로 세팅할것)
-    const int 대회_개최시기_설전 = 4;
+    const int 대회_개최시기_무술 = 7;                  // 대회를 개최하는 월 (해당 월 1일에 개최,  1 ~ 12 사이로 세팅할것)
+    const int 대회_개최시기_설전 = 7;
 
     const int 무술대회_초기우승자 = /*무장_여포*/ -1;          // 시나리오 시작 시 세팅될 대회 최초 우승자 ( 없을 경우 -1, 그 외에는 무장_여포, 무장_관우 이런식으로 세팅)
     const int 설전대회_초기우승자 = -1;
@@ -230,8 +230,8 @@
     const int 암기_점수 = 2;
 
     // AI의 설전 선별무장 성격 점수
-    const int 설전_대담 = 4;
-    const int 설전_소심 = 3;
+    const int 설전_대담 = 6;
+    const int 설전_소심 = 4;
     const int 설전_저돌 = 1;
     const int 설전_냉정 = 0;
 
@@ -1503,7 +1503,11 @@
                 return;
             }
 
-            n = (n * (100 + 형북_지역이점_등용상승)) / 100;
+            // 등용확률이 0%가 아니면 20% 상승
+            if (n != 0)
+            {
+                n = n + 형북_지역이점_등용상승;
+            }
         }
 
         // 형북 지역이점. 매달 기교 상승
@@ -1523,7 +1527,7 @@
                     }
 
                     pk::point pos = pk::get_city(도시_양양).get_pos();
-                    pk::add_tp(force, 형북_지역이점_기교획득, pos);
+                    pk::add_tp(force, 형북_지역이점_기교획득 * 2, pos);
                 }
             }
         }
@@ -2845,7 +2849,7 @@
                     {
                         pk::person@ p = pk::get_person(GetSingleCompetitionWinnerId(force.get_force_id()));
 
-                        if (p != null && true == p.is_alive())
+                        if (p != null && true == p.is_alive() && force.get_force_id() == p.get_force_id())
                         {
                             pk::history_log(p.get_pos(), force.color, pk::u8encode(pk::format("세력대회 우승 : \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(p)))));
                         }
@@ -5362,7 +5366,7 @@
             pk::sleep();
             pk::background(19);
             pk::fade(255);
-
+            pk::play_se(10);
             pk::message_box(pk::u8encode(pk::format("우승자는 \x1b[2x{}\x1b[0x인가. 그대야 말로 \x1b[1x천하무쌍\x1b[0x이란 말에 걸맞소. 앞으로도 더욱 단련에 힘쓰도록 하시오.", pk::u8decode(pk::get_name(winner)))), Emperor);
             pk::message_box(pk::u8encode("이건 내가 그대에게 내리는 포상이오."), Emperor);
             pk::message_box(pk::u8encode("영광이옵니다."), winner);
@@ -5377,6 +5381,7 @@
             pk::add_kouseki(runnerUp, 준우승_공적);
             pk::message_box(pk::u8encode(pk::format("\x1b[2x상금\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 준우승_상금, 준우승_공적)));
             pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), Emperor);
+            pk::play_se(6);
             pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 통솔과 무력 경험치가 상승했습니다."));
             for (int i = 0; i < backUpArray.length; ++i)
             {
@@ -5426,6 +5431,7 @@
                                                                                         // 1 조종, 2 조종, 관전선택여부
                     pk::int_bool win = pk::duel(null, null, p1, null, null, p2, null, null, c1, c2, 0, true);
                     list.add(personList[i + win.first]);
+                    pk::play_se(6);
                     pk::message_box(pk::u8encode(pk::format("{}경기 승자는 \x1b[2x{}\x1b[0x입니다.", n, pk::u8decode(pk::get_name(personList[i + win.first])))));
 
                     i = i + 1;
@@ -5455,7 +5461,7 @@
                 }
             }
                                                                                                         // 1 조종, 2 조종,   관전여부
-            pk::int_bool win = pk::duel(null, null, personList[0], null, null, personList[1], null, null, false, false, 0, true);
+            pk::int_bool win = pk::duel(null, null, personList[0], null, null, personList[1], null, null, c1, c2, 0, true);
 
             @winner = personList[win.first];
             @runnerUp = personList[(win.first + 1) % 2];
@@ -5530,19 +5536,20 @@
             pk::sleep();
             pk::background(19);
             pk::fade(255);
-
+            pk::play_se(10);
             pk::message_box(pk::u8encode(pk::format("우승자는 \x1b[2x{}\x1b[0x인가. 그대야 말로 \x1b[1x천하기재\x1b[0x란 말에 걸맞군. 앞으로의 활약도 기대하겠소.", pk::u8decode(pk::get_name(winner)))), Emperor);
             pk::message_box(pk::u8encode("이건 내가 그대에게 내리는 포상이오."), Emperor);
             pk::message_box(pk::u8encode("영광이옵니다."), winner);
-            pk::add_tp(pk::get_force(winner.get_force_id()), 우승_기교, Emperor.get_pos());
+            pk::add_tp(pk::get_force(winner.get_force_id()), 우승_기교 * 2, Emperor.get_pos());
             pk::add_kouseki(winner, 우승_공적);
             pk::message_box(pk::u8encode(pk::format("\x1b[2x기교\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다.", 우승_기교, 우승_공적)));
             pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x에게도 포상을 내리겠소.", pk::u8decode(pk::get_name(runnerUp)))), Emperor);
             pk::message_box(pk::u8encode("영광이옵니다."), runnerUp);
-            pk::add_tp(pk::get_force(runnerUp.get_force_id()), 준우승_기교, Emperor.get_pos());
+            pk::add_tp(pk::get_force(runnerUp.get_force_id()), 준우승_기교 * 2, Emperor.get_pos());
             pk::add_kouseki(runnerUp, 준우승_공적);
             pk::message_box(pk::u8encode(pk::format("\x1b[2x기교\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다.", 준우승_기교, 준우승_공적)));
             pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), Emperor);
+            pk::play_se(6);
             pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 지력과 정치 경험치가 상승했습니다."));
             for (int i = 0; i < backUpArray.length; ++i)
             {
@@ -5594,6 +5601,7 @@
                                                        // 1 조종, 2 조종, 관전선택여부
                     pk::int_int_bool win = pk::debate(p1, p2, c1, c2, false, true);
                     list.add(personList[i + win.first]);
+                    pk::play_se(6);
                     pk::message_box(pk::u8encode(pk::format("{}경기 승자는 \x1b[2x{}\x1b[0x입니다.", n, pk::u8decode(pk::get_name(personList[i + win.first])))));
 
                     i = i + 1;
@@ -6112,6 +6120,12 @@
 
             int winner = GetCompetitionWinnerId(대회_무술);
 
+            if (-1 == winner)
+            {
+                return;
+            }
+
+
             // 대회 우승자가 부대에 없으면 패스
             if(unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
             {
@@ -6274,7 +6288,18 @@
                 return;
             }
 
+            // 상태이상인 경우 패스
+            if (부대상태_통상 != unit.status)
+            {
+                return;
+            }
+
             int winner = GetCompetitionWinnerId(대회_설전);
+
+            if (-1 == winner)
+            {
+                return;
+            }
 
             // 대회 우승자가 부대에 없으면 패스
             if (unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
@@ -10169,7 +10194,7 @@
             pk::sleep();
             pk::background(19);
             pk::fade(255);
-
+            pk::play_se(10);
             pk::message_box(pk::u8encode(pk::format("우승자는 \x1b[2x{}\x1b[0x인가. 앞으로도 나를 위해 더욱 힘써주시오.", pk::u8decode(pk::get_name(winner)))), eventKunshu);
             pk::message_box(pk::u8encode("이건 내가 그대에게 내리는 포상이오."), eventKunshu);
             pk::message_box(pk::u8encode("영광이옵니다."), winner);
@@ -10180,7 +10205,7 @@
             pk::add_kouseki(runnerUp, 자세력_준우승_공적);
             pk::message_box(pk::u8encode(pk::format("공적이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 자세력_준우승_공적)));
             pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), eventKunshu);
-
+            pk::play_se(6);
             if (대회_무술 == competitionType)
             {
                 pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 통솔과 무력 경험치가 상승했습니다."));
