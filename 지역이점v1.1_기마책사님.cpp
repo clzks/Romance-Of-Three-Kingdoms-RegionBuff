@@ -6121,13 +6121,13 @@
         // 무술대회 우승자 특전
         void ExecuteDuelPrivillage(pk::unit@ unit)
         {
-            // 상태이상인 경우 패스
-            if (부대상태_통상 != unit.status)
+            if (false == 우승자_특전여부)
             {
                 return;
             }
 
-            if (false == 우승자_특전여부)
+            // 상태이상인 경우 패스
+            if (부대상태_통상 != unit.status)
             {
                 return;
             }
@@ -6138,7 +6138,6 @@
             {
                 return;
             }
-
 
             // 대회 우승자가 부대에 없으면 패스
             if(unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
@@ -6315,12 +6314,6 @@
                 return;
             }
 
-            // 대회 우승자가 부대에 없으면 패스
-            if (unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
-            {
-                return;
-            }
-
             bool success = false;
 
             array<pk::point> arr = pk::range(unit.get_pos(), 1, 설전대회특전_최대사거리);
@@ -6412,10 +6405,10 @@
         void ExecuteSingleCompetitionPrivilage(pk::unit@ unit)
         {
             int forceId = unit.get_force_id();
-            
+
             pk::force@ force = pk::get_force(forceId);
 
-            if(false == IsValidForce(force))
+            if (false == IsValidForce(force))
             {
                 return;
             }
@@ -6698,6 +6691,8 @@
         }
         // ================================================= 101 징병 치안 증감 =====================================================================
 
+        bool 유저_도시수_패널티_징병 = true;   // 유저세력에 대해서 도시수에 비례하여 치안감소 패널티 (도시당 1% 증가)
+
         int func101(pk::city@ city, const pk::detail::arrayptr<pk::person@>& in actors, int troops)
         {
             int n = 100;
@@ -6705,12 +6700,20 @@
             {
                 pk::person@ actor = actors[i];
                 if (pk::is_alive(actor))
-                {
                     n = n + actor.stat[int(pk::core["징병.능력"])];
-                }
             }
 
             int value = -troops / n;
+
+            /*
+            // 군주가 [유비]인 경우에 1/2 감소
+                if (pk::get_kunshu_id(actors[0]) == 무장_유비)
+                    value /= 2;
+
+            // 군주가 [유우]인 경우에 1/2 감소
+                if (pk::get_kunshu_id(actors[0]) == 무장_유우)
+                    value /= 2;
+            */
 
             int forceId = actors[0].get_force_id();
             pk::force@ force = pk::get_force(forceId);
@@ -6727,12 +6730,22 @@
                 value = value * (100 - buff) / 100;
             }
 
+            // 유저_도시수_패널티 ('19.5.4)
+            if (유저_도시수_패널티_징병 && city.is_player() && !pk::is_campaign())
+            {
+                //pk::force@ force = pk::get_force(city.get_force_id());
+                float force_city_count = float(pk::get_city_list(force).count);
+                value = int(value / (1.f - (force_city_count * 0.01f)));
+            }
+
             return value;
         }
 
         // ==================================================== 징병 치안 증감 끝 ===================================================================
 
         // ================================================= 102 병기생산량 =========================================================================
+
+        bool 유저_도시수_패널티_병기 = true;   // 유저세력에 대해서 도시수에 비례하여 생산량 디버프 (도시당 1% 감소)
 
         int func102(pk::city@ city, const pk::detail::arrayptr<pk::person@>& in actors, int weapon_id)
         {
@@ -6749,7 +6762,7 @@
             else if (weapon_id == 병기_군마)
                 skill_id = int(pk::core["병기생산.마구간특기"]);
 
-            for (int i = 0; i < actors.length; i++)
+            for (int i = 0; i < int(actors.length); i++)
             {
                 pk::person@ actor = actors[i];
                 if (pk::is_alive(actor))
@@ -6768,7 +6781,6 @@
             if (has_skill)
                 n = n * 2;
 
-            // 연주 지역이점
             pk::force@ force = pk::get_force(city.get_force_id());
 
             if (weapon_id <= 병기_노)
@@ -6776,11 +6788,20 @@
                 ExecuteYanZhou(force, n);
             }
 
-            n = n * func_5c7040(city, weapon_id);
+            n = int(n * func_5c7040(city, weapon_id));
 
             // 컴퓨터일 경우 특급 난이도에서 2배
-            if (pk::get_scenario().difficulty == 난이도_특급 and !city.is_player())
+            if (pk::get_scenario().difficulty == 난이도_특급 && !city.is_player())
                 n = n * 2;
+
+
+            // 유저_도시수_패널티 ('19.5.4)
+            if (유저_도시수_패널티_병기 && city.is_player() && !pk::is_campaign())
+            {
+                //pk::force@ force = pk::get_force(city.get_force_id());
+                float force_city_count = float(pk::get_city_list(force).count);
+                n = int(n * (1.f - (force_city_count * 0.01f)));
+            }
 
             return n;
         }
@@ -6834,7 +6855,7 @@
         // =================================================== 병기생산량 끝 ========================================================================
 
         // ================================================= 158 월별 본거지 발생 확률 ===============================================================
-        
+
         int func158(pk::city@ city)
         {
             // 게임 시작 후 6개월까지 발생하지 않음.
@@ -6843,7 +6864,7 @@
 
             // 중복 발생 금지
             int city_id = city.get_id();
-            
+
             // 유주 오환 체크
             if (city_id == 도시_북평 || city_id == 도시_계 || city_id == 도시_양평)
             {
@@ -6922,7 +6943,7 @@
                 bool isAlien = false;
                 auto forces = pk::get_force_list();
                 array<pk::force@> arr = pk::list_to_array(forces);
-                
+
 
                 for (int i = 0; i < arr.length; ++i)
                 {
@@ -6961,28 +6982,73 @@
         // ==========================================================================================================================================
 
         // ================================================= 163 부대 능력치 =========================================================================
+
+        bool 무력통솔력_수식변경 = true;   // true: 부장능력 포함하는 신규 수식 적용, false: 기존 방식 적용
+
+        bool  공격력_수식변경 = true;   // true: 공격력 (무력+통솔 비율합산), false: 기존 방식 적용 (공격력 = 무력만 반영)
+        float 공격력_통솔비율 = 0.20f;  // 공격력에 합산할 통솔력 비율 (0.0f~1.0f)
+
+        bool  방어력_수식변경 = true;   // true: 방어력 (통솔+무력 비율합산), false: 기존 방식 적용 (방어력 = 통솔만 반영)
+        float 방어력_무력비율 = 0.20f;  // 방어력에 합산할 통솔력 비율 (0.0f~1.0f)
+
+        bool 이동력_병력설정 = true;   // 병력수에 따라 이동력 증감
+        bool 이동력_적성설정 = true;   // 적성에 따라 이동력 증감
+        bool 이동력_통솔설정 = true;   // 통솔력에 따라 이동력 증감
+        bool 이동력_기력설정 = true;   // 기력에 따라 이동력 증감
+        bool 이동력_계절설정 = true;   // 계절에 따라 이동력 증감
+        bool 이동력_영토설정 = true;   // 자국/타국 여부에 따라 이동력 증감
+
+        bool 이동력_최대제한 = true;   // true: 이동력 max=40, false: 이동력 max 제한없음
+
+        bool 세력효과설정 = true;   // 세력별 군령 효과 적용
+
         void func163(pk::unit_attr& attr, const pk::detail::arrayptr<pk::person@>& in member, int weapon_id, uint troops, int type, int status, bool navy, bool shoubyou)
         {
             pk::person@ leader = member[0];
+
 
             if (!pk::is_alive(leader))
                 return;
 
             pk::force@ force = pk::get_force(leader.get_force_id());
 
+            // 주장이 소속된 부대 또는 건물 반환 ('18.10.10)
+            int unit_energy = 0;
+            pk::building@ building = pk::hex_object_to_building(pk::get_hex_object(leader.location));
+            pk::unit@ unit;
+            if (!pk::is_alive(building))    // 주장이 건물에 소속되어 있지 않으면 부대 기력값 사용
+            {
+                @unit = pk::get_unit(pk::get_unit_id(leader));
+                unit_energy = unit.energy;
+            }
+            else                            // 주장이 건물 소속되어 출진 부대 편성 중이면 거점 기력값 사용
+            {
+                unit_energy = pk::get_energy(building);
+            }
+
+
+
             if (!pk::is_alive(force))
                 return;
             if (!pk::is_valid_equipment_id(weapon_id) or !pk::is_valid_unit_type(type) or !pk::is_valid_unit_status(status))
                 return;
 
+
+
+            // 부장이 없다면	
+            if ((member[1] is null) and (member[2] is null))
+            {
+                for (int i = 0; i < 무장능력_끝; i++)	// 주장 능력치 그대로 사용
+                    attr.stat[i] = pk::min(255, (shoubyou ? leader.stat[i] : leader.max_stat[i]));
+            }
             // 부장이 있다면
-            if (member[1] !is null or member[2] !is null)
+            else
             {
                 // 혐오 관계가 있다면 보정하지 않음
                 if (func_4960d0(leader, member[1]) or func_4960d0(leader, member[2]) or func_4960d0(member[1], member[2]))
                 {
                     for (int i = 0; i < 무장능력_끝; i++)
-                        attr.stat[i] = shoubyou ? leader.stat[i] : leader.max_stat[i];
+                        attr.stat[i] = pk::min(255, (shoubyou ? leader.stat[i] : leader.max_stat[i]));
                 }
                 // 혐오 관계가 없다면 보정
                 else
@@ -6990,15 +7056,31 @@
                     for (int i = 0; i < 무장능력_끝; i++)
                     {
                         int a = 0, b = 0;
-                        int leader_stat = shoubyou ? leader.stat[i] : leader.max_stat[i];
+                        int leader_stat = pk::min(255, (shoubyou ? leader.stat[i] : leader.max_stat[i]));
 
                         // 통솔, 무력은 무장 관계에 따라 보정
                         if (i <= 무장능력_무력)
                         {
-                            if (member[1] !is null)
-                                a = func_495ff0(leader, leader_stat, member[1], shoubyou ? member[1].stat[i] : member[1].max_stat[i]);
-                            if (member[2] !is null)
-                                b = func_495ff0(leader, leader_stat, member[2], shoubyou ? member[2].stat[i] : member[2].max_stat[i]);
+                            if (무력통솔력_수식변경)
+                            {
+                                // 신규 보정 수식 : 주장 + 부장1보조 + 부장2보조   ('18.10.9)
+                                if (member[1] !is null)     // 신규 함수 : 부장1 보조량
+                                    a = func_sub_stat(leader, leader_stat, member[1], (shoubyou ? member[1].stat[i] : member[1].max_stat[i]));
+                                if (member[2] !is null)     // 신규 함수 : 부장2 보조량
+                                    b = func_sub_stat(leader, leader_stat, member[2], (shoubyou ? member[2].stat[i] : member[2].max_stat[i]));
+
+                                attr.stat[i] = pk::min(255, (leader_stat + a + b));   // 255 이하로 합산
+                            }
+                            else
+                            {
+                                // 기존 보정 방법 : MAX[(주장&부장1),(주장&부장2)]
+                                if (member[1] !is null)
+                                    a = func_495ff0(leader, leader_stat, member[1], shoubyou ? member[1].stat[i] : member[1].max_stat[i]);
+                                if (member[2] !is null)
+                                    b = func_495ff0(leader, leader_stat, member[2], shoubyou ? member[2].stat[i] : member[2].max_stat[i]);
+                                attr.stat[i] = pk::min(255, pk::max(a, b));   // 최대값
+                            }
+
                         }
                         // 지력, 정치, 매력은 최대값
                         else
@@ -7007,19 +7089,14 @@
                                 a = pk::max(leader_stat, shoubyou ? member[1].stat[i] : member[1].max_stat[i]);
                             if (member[2] !is null)
                                 b = pk::max(leader_stat, shoubyou ? member[2].stat[i] : member[2].max_stat[i]);
+
+                            attr.stat[i] = pk::min(255, pk::max(a, b));   // 최대값
                         }
 
-                        attr.stat[i] = pk::max(a, b);
                     }
                 }
             }
-            // 부장이 없다면
-            else
-            {
-                // 주장 능력치 그대로 사용
-                for (int i = 0; i < 무장능력_끝; i++)
-                    attr.stat[i] = shoubyou ? leader.stat[i] : leader.max_stat[i];
-            }
+
 
             // 적성은 최대값
             for (int i = 0; i < 병종_끝; i++)
@@ -7043,6 +7120,11 @@
             int def = equipment.stat[병기능력_방어];
             int mov = equipment.stat[병기능력_이동];
 
+
+            int defskill_불굴 = 특기_불굴;
+            int defskill_금강 = 특기_금강;
+            int defskill_철벽 = 특기_철벽;
+
             if (weapon_id == 병기_검 or (weapon_id == 병기_주가 and type == 부대종류_수송))
                 apt = 0.6f;
 
@@ -7058,7 +7140,9 @@
             if (weapon_id <= 병기_군마)
             {
                 int tech_id = -1;
+
                 int relation_level = 0;
+
 
                 if (weapon_id <= 병기_노)
                 {
@@ -7066,21 +7150,21 @@
                     if (pk::get_hex(leader.get_pos()).terrain == 지형_숲)
                     {
                         relation_level = GetRelationLevel(force, 우호_남만);
-                    
+
                         if (relation_level == 3)
                         {
                             atk = atk + 남만_3단계_숲강화;
                         }
                     }
-                    
+
                     relation_level = GetRelationLevel(force, 우호_천축국);
-                    
+
                     // 천축 3단계 적용
                     if (relation_level == 3)
                     {
                         bool isJingNan = IsEnableZhou(force, 형남);
                         pk::city@ city = pk::get_city(pk::get_city_id(leader.get_pos()));
-                    
+
                         if (city != null)
                         {
                             if (pk::get_distance(leader.get_pos(), city.get_pos()) <= 3)
@@ -7106,7 +7190,7 @@
                     // 대진국 지역이점
                     relation_level = GetRelationLevel(force, 우호_대진국);
                     bool isSili = IsEnableZhou(force, 사예);
-                    
+
                     if (relation_level == 3)
                     {
                         if (true == isSili)
@@ -7118,7 +7202,7 @@
                             def = def + 대진_3단계_창병방어 / 2;
                         }
                     }
-                    else if(relation_level > 0)
+                    else if (relation_level > 0)
                     {
                         if (true == isSili)
                         {
@@ -7208,7 +7292,7 @@
                             isEnemyGround = true;
                         }
                     }
-                    
+
                     if (true == isEnemyGround)
                     {
                         ExecuteBingZhouMove(force, mov);
@@ -7235,11 +7319,111 @@
                 }
             }
 
-            attr.stat[부대능력_공격] = pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_무력] * atk * apt * 0.01f) * str * sts));
+            // ------------------------------- //
+            // 공격/방어력 추가 효과 적용 시 작성할 위치 //
+            // ------------------------------- //
 
-            attr.stat[부대능력_방어] = pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_통솔] * def * apt * 0.01f) * ldr * sts));
 
-            attr.stat[부대능력_건설] = pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_정치] * 2.f / 3 + 50) * ldr * sts));
+            /* 버프 적용 안함
+            // 방어 특기자의 방어력 버프 : 종류별로 중첩 가능
+            if (pk::has_skill(member, defskill_불굴))
+                def = def + 10;
+            if (pk::has_skill(member, defskill_금강))
+                def = def + 10;
+            if (pk::has_skill(member, defskill_철벽))
+                def = def + 15;
+            */
+
+
+            /*
+                [원본] 부대 능력을 결정하는 요소들 < 공격(무력), 방어(통솔), 건설(정치) >
+                attr.stat[부대능력_공격] = pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_무력] * atk * apt * 0.01f) * str * sts));
+                attr.stat[부대능력_방어] = pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_통솔] * def * apt * 0.01f) * ldr * sts));
+                attr.stat[부대능력_건설] = pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_정치] * 2.f / 3 + 50) * ldr * sts));
+            */
+            float atk_stat_ratio = 0.0f;
+            float def_stat_ratio = 0.0f;
+
+            if (공격력_수식변경)
+                atk_stat_ratio = pk::min(1.0f, pk::max(0.0f, 공격력_통솔비율));
+            else
+                atk_stat_ratio = 0.0f;
+
+            if (방어력_수식변경)
+                def_stat_ratio = pk::min(1.0f, pk::max(0.0f, 방어력_무력비율));
+            else
+                def_stat_ratio = 0.0f;
+
+
+            // 부대 공격력 = (주)무력, (부)통솔이 함께 관여 (합산)
+            attr.stat[부대능력_공격] = int(pk::min(255.f, pk::max(1.f, (((1.f - atk_stat_ratio) * attr.stat[부대능력_무력] + atk_stat_ratio * attr.stat[부대능력_통솔]) / 1.0f * atk * apt * 0.01f) * str * sts)));
+            // 부대 방어력 = (주)통솔, (부)무력이 함께 관여 (합산)
+            attr.stat[부대능력_방어] = int(pk::min(255.f, pk::max(1.f, (((1.f - def_stat_ratio) * attr.stat[부대능력_통솔] + def_stat_ratio * attr.stat[부대능력_무력]) / 1.0f * def * apt * 0.01f) * ldr * sts)));
+
+            // 부대 지력 = 지력
+            attr.stat[부대능력_지력] = int(pk::min(255.f, (attr.stat[부대능력_지력]) / 1.f));
+            // 부대 건설 (원본과 동일)
+            attr.stat[부대능력_건설] = int(pk::min(255.f, pk::max(1.f, (attr.stat[부대능력_정치] * 2.f / 3.f + 50) * ldr * sts)));
+
+
+            //--------------------------------------------------------------------------------
+            // 부대 조건에 따른 이동력 가변 효과
+
+            // 부대별 기력, 통솔력, 적성, 병력수 효과 이동력 계산용 변수 추가 ('18.10.7)
+            float mov_var = mov;
+
+            // 병력수에 따른 이동력 보정 : 기본 이동력 +1, 3000명 증가 시마다 이동력 감소 ('18.10.9)
+            if (이동력_병력설정)
+            {
+                if (type == 부대종류_수송)
+                    mov_var = mov_var + 1 - pk::min(5, (troops / 6000));    // 수송부대 이동력 감소 리미터 ('18.11.24)
+                else
+                    mov_var = mov_var + 1 - pk::min(10, (troops / 3000));    // 전투부대 이동력 감소 리미터
+            }
+
+            // 병과 적성에 따른 이동력 보정 S급=+10%, C급=-20%('18.10.8)
+            if (이동력_적성설정)
+            {
+                if (type == 부대종류_전투)    // 전투부대에 한하여 적성 고려 추가 ('18.11.26)
+                    mov_var = mov_var * (1.f + 0.1f * pk::min(2, (attr.tekisei[pk::equipment_id_to_heishu(weapon_id)] - 적성_A)));
+            }
+
+            // 부대별 통솔력에 따른 이동력 변동 85% ~ 105% 변동 : 통솔력 75일 때 ±0% ('18.10.7)
+            if (이동력_통솔설정)
+                mov_var = mov_var * (0.85f + 0.20f * (attr.stat[부대능력_통솔] / 100.f));
+
+            // 부대별 기력에 따른 이동력 80% ~ 110% 변동 : 기력 80일 때 100% ('18.10.10)
+            if (이동력_기력설정)
+                mov_var = mov_var * (0.80f + 0.30f * (unit_energy / 120.f));
+
+            // 계절에 따른 이동력 증감 효과 ('18.10.9)
+            if (이동력_계절설정)
+            {
+                switch (pk::get_season())            // pk::get_season()= 0:봄, 1:여름, 2:가을, 3:겨울
+                {
+                case 계절_여름: mov_var -= 2; break;    // 여름에 이동력 -2
+                case 계절_겨울: mov_var -= 4; break;    // 겨율에 이동력 -4
+                }
+            }
+
+            // 부대의 좌표 영토에 따른 이동력 효과 : 아군영토에서 이동력 상승, 적군영토에서 이동력 감소 ('18.12.27)
+            if (이동력_영토설정 and pk::is_alive(unit))
+            {
+                pk::building@ area_building = pk::get_building(pk::get_building_id(unit.pos));
+                if (pk::is_alive(area_building))
+                {
+                    if (unit.get_force_id() == area_building.get_force_id())
+                        mov_var = mov_var * 1.1f;   // 아군영토에서 이동력 10%증가 
+                    else if (pk::is_enemy(unit, area_building))
+                        mov_var = mov_var * 0.9f;   // 적군영토에서 이동력 10% 감소 
+                }
+            }
+
+            // 부대별 최종 가변 이동력
+            mov = int(mov_var);
+
+            //--------------------------------------------------------------------------------
+            // 기존 스크립트 수정 : 기교 및 세력/장수별 특징 반영
 
             if (type == 부대종류_전투)
             {
@@ -7249,28 +7433,45 @@
                     if (pk::has_tech(force, 기교_정예창병))
                         mov = mov + 6;
                     break;
+
                 case 병기_극:
                     if (pk::has_tech(force, 기교_정예극병))
                         mov = mov + 6;
                     break;
+
                 case 병기_노:
                     if (pk::has_tech(force, 기교_정예노병))
                         mov = mov + 6;
                     break;
+
                 case 병기_군마:
-                    if (pk::has_tech(force, 기교_정예기병))
-                        mov = mov + 2;
                     if (pk::has_tech(force, 기교_양마산출))
+                        mov = mov + 2;
+                    if (pk::has_tech(force, 기교_정예기병))   // 정예기병 이동력 하향 ('18.10.5)
                         mov = mov + 4;
                     break;
+
                 case 병기_충차:
+                    if (pk::has_tech(force, 기교_차축강화))   // 차축강화 이동력 상향 ('18.10.5)
+                        mov = mov + 4;
+                    break;
+
                 case 병기_정란:
+                    if (pk::has_tech(force, 기교_차축강화))    // 차축강화 이동력 상향 ('18.10.5)
+                        mov = mov + 4;
+                    break;
+
                 case 병기_투석:
+                    if (pk::has_tech(force, 기교_차축강화))    // 차축강화 이동력 상향 ('18.10.5)
+                        mov = mov + 4;
+                    break;
+
                 case 병기_목수:
                     if (pk::has_tech(force, 기교_차축강화))
                         mov = mov + 4;
                     break;
                 }
+
 
                 if (weapon_id <= 병기_노)
                 {
@@ -7282,14 +7483,43 @@
                         mov = mov + int(pk::core::skill_constant(member, 특기_강행)); // 5
                     else if (pk::has_skill(member, 특기_행군))
                         mov = mov + int(pk::core::skill_constant(member, 특기_행군)); // 3
+
+                    // 세력별 육상 이동력 보정 ('18.10.1) - 기병 세력 양마산출 효과 +2
+                    if (세력효과설정 and pk::has_tech(force, 기교_양마산출))
+                    {
+                        if (pk::get_kunshu_id(force) == 무장_공손찬)
+                            mov = mov + 2;
+                        else if (pk::get_kunshu_id(force) == 무장_마등)
+                            mov = mov + 2;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_마초)))
+                            mov = mov + 2;
+                        else if (pk::get_kunshu_id(force) == 무장_동탁)
+                            mov = mov + 2;
+                        else if (pk::get_kunshu_id(force) == 무장_여포)
+                            mov = mov + 2;
+                    }
                 }
+                else if (weapon_id <= 병기_목수)
+                {
+                    // 세력별 육상 이동력 보정 ('18.10.1) - 조조 또는 유엽의 세력인 육상 차축강화 효과 +4
+                    if (세력효과설정 and pk::has_tech(force, 기교_차축강화))
+                    {
+                        if (pk::get_kunshu_id(force) == 무장_조조)
+                            mov = mov + 2;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_유엽)))
+                            mov = mov + 2;
+                    }
+                }
+
             }
-            else
+            else if (type == 부대종류_수송)   // 수송부대
             {
                 if (pk::has_tech(force, 기교_목우유마))
                     mov = mov + 3;
+
                 mov = mov + 5;
                 mov = mov + int(pk::core::skill_constant(member, 특기_운반)); // 5
+
                 // 귀상국 지역이점
                 int relation_level = GetRelationLevel(force, 우호_귀상국);
                 bool isYiZhou = IsEnableZhou(force, 익주);
@@ -7304,16 +7534,79 @@
                         mov = mov + 귀상_1단계_수송이동 / 2;
                     }
                 }
+
+                if (세력효과설정 and pk::has_tech(force, 기교_목우유마))
+                {
+                    if (weapon_id == 병기_주가) //수상에 있을 경우
+                    {
+                        // 세력별 운송력 보정 ('18.10.4) - 동오 군주 또는 주유/노숙의 세력인 경우 목우유마 수상 효과 +4
+                        if (pk::get_kunshu_id(force) == 무장_손견)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == 무장_손책)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == 무장_손권)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_주유)))
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_노숙)))
+                            mov = mov + 4;
+                    }
+
+                    else    //육상에 있을 경우
+                    {
+                        // 세력별 운송력 보정 ('18.10.4) - 촉한 군주 또는 제갈량/황월영의 세력인 경우 목우유마 육상 효과 +3
+                        if (pk::get_kunshu_id(force) == 무장_유비)
+                            mov = mov + 3;
+                        else if (pk::get_kunshu_id(force) == 무장_유선)
+                            mov = mov + 3;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_제갈량)))
+                            mov = mov + 3;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_황월영)))
+                            mov = mov + 3;
+                    }
+                }
             }
 
-            if (navy)
+            if (navy)   //수상 부대인 경우
+            {
                 mov = mov + int(pk::core::skill_constant(member, 특기_조타)); // 4
 
-            attr.stat[부대능력_이동] = mov;
+                if (세력효과설정)
+                {
+                    mov += 4; // 부대조건의 수상이동력 반영에 따른 저하로 기본 이동력 보정
+                    // 세력별 수상 이동력 보정 ('18.10.1) - 동오/형주 세력 수상전투부대 이동강화 - 차축강화 기교개발 시 적용됨
+                    if (pk::has_tech(force, 기교_차축강화) and (type != 부대종류_수송)) //수송병과가 아님
+                    {
+                        if (pk::get_kunshu_id(force) == 무장_손견)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == 무장_손책)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == 무장_손권)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_주유)))
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_여몽)))
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_육손)))
+                            mov = mov + 4;
+
+                        else if (pk::get_kunshu_id(force) == 무장_유표)
+                            mov = mov + 4;
+                        else if (pk::get_kunshu_id(force) == pk::get_kunshu_id(pk::get_person(무장_채모)))
+                            mov = mov + 4;
+                    }
+                }
+            }
+
+            // '20.8.29, 이동력 최대값 제한 설정 추가
+            if (이동력_최대제한)
+                mov = pk::min(40, mov);
+
+            attr.stat[부대능력_이동] = pk::max(1, mov);   // '20.8.29, 이동력 최소값 제한 추가 (0 이하로 될 경우 게임 튕길 수 있음)
         }
 
         /**
-            관계에 따른 능력 보정
+            관계에 따른 능력 보정  -- 기존 수식 : 주장과 부장1, 주장과 부장2 의 각 보정 결과 중 최대값
         */
         int func_495ff0(pk::person@ leader, int leader_stat, pk::person@ deputy, int deputy_stat)
         {
@@ -7347,77 +7640,261 @@
                 return pk::is_dislike(a, b.get_id()) or pk::is_dislike(b, a.get_id());
             return false;
         }
+
+        // --------------------------------------------------------------------------------------
+        //**  관계에 따른 능력 보정  -- 신규 수식 : 각 부장의 능력 보조량만 계산 후 주장+부장1+부장2 최종 합산 **/
+        int func_sub_stat(pk::person@ leader, int leader_stat, pk::person@ deputy, int deputy_stat)
+        {
+
+            int leader_id = leader.get_id();
+            int deputy_id = deputy.get_id();
+
+            int stat_add = 0;
+
+            // 혐오 관계 무장인 경우 : 보조 없음
+            if (pk::is_dislike(leader, deputy_id) or pk::is_dislike(deputy, leader_id))
+                stat_add = 0;
+            // 의형제 또는 부부 관계인 경우 : 부장 능력의 25% 보조
+            else if (pk::is_gikyoudai(leader, deputy_id) or pk::is_fuufu(leader, deputy_id))
+                stat_add = int(pk::max(0.25f * deputy_stat, 1.f * (deputy_stat - leader_stat)));
+            // 혈연 관계인 경우 : 부장 능력의 20% 보조
+            else if (pk::is_ketsuen(leader, deputy_id))
+                stat_add = int(0.2f * deputy_stat);
+            // 주장/부장이 친애 무장인 경우 : 부장 능력의 15% 보조
+            else if (pk::is_like(leader, deputy_id) or pk::is_like(deputy, leader_id))
+                stat_add = int(0.15f * deputy_stat);
+            // 기타 관계 : 부장 능력의 10% 보조
+            else
+                stat_add = int(0.1f * deputy_stat);
+
+            return stat_add;
+        }
         // ================================================== 부대 능력치 끝 ==========================================================================
 
         // ================================================== 168 거점 점령 후 처리 ====================================================================
-        
+
+    /*
+    @원본 : 168 거점 점령 후처리.cpp (PK2.1 기본 제공 파일)
+    @수정 : masterpiecek
+
+    - 유저설정 기본값은 PK2.1 원본과 동일한 상태입니다.
+
+    [ 거점 점령 후처리 대상 및 모드 설명 ]
+
+    1. 일반세력 공격부대가 점령한 거점의 후처리 : 거점의 자원 (금, 병량, 병력, 병기)
+     - 모드 1 : 흡수비율 매력반영 - 거점 공격부대 주장의 매력이 반영된 자원 흡수비율을 설정
+     - 모드 2 : 흡수비율 직접설정 - 거점의 전체 자원 중 흡수할 고정비율을 직접 설정
+      * 거점을 점령한 공격부대가 플레이어 세력인지 컴퓨터 세력인지에 따라 각각 설정 가능
+      * 에볼루션킷 기존 설정 : 모드 2
+      * PK2.1 기존 설정 : 모드 1
+
+    2. 일반세력 공격부대가 점령한 도시의 후처리 : 도시의 내정시설
+     * 모드별로 일정비율 또는 일정수의 내정시설을 무작위로 파괴하고 나머지를 공격부대 세력이 흡수하는 형태
+     - 모드 1 : 흡수개수 매력반영 - 거점 공격부대 주장의 매력이 높을수록 파괴되지 않고 흡수하는 내정시설 수 증가
+     - 모드 2 : 파괴비율 직접설정 - 전체 내정시설 중 설정한 파괴비율의 개수만큼 파괴
+     - 모드 3 : 파괴확률 개별적용 - 설정한 파괴확률을 각 내정시설별로 판단하여 충족 시 파괴
+      * 거점을 점령한 공격부대가 플레이어 세력인지 컴퓨터 세력인지에 따라 각각 설정 가능
+      * 에볼루션킷 기존 설정 : 모드 1
+      * PK2.1 기존 설정 : 모드 1
+
+    3. 일반세력 공격부대가 점령한 도시의 후처리 : 도시구역 내 군사시설 (공격부대 세력의 군사시설은 제외)
+     1) 도시세력 군사시설 : 점령한 도시 세력의 군사시설
+     2) 제3세력 군사시설 : 공격부대 세력도 점령한 도시 세력도 아닌 제3세력의 군사시설 처리
+      * 모드별로 일정 확률로 군사시설을 공격부대 세력으로 흡수하거나 파괴하고 나머지 군사시설은 기존의 세력으로 잔류시키는 형태
+      - 모드 1 : 처리확률 거리반영 - 도시로부터의 거리에 따라 시설의 흡수 및 파괴 확률 차등 적용
+      - 모드 2 : 처리비율 직접설정 - 전체 군사시설 중 설정한 흡수비율의 개수만큼 흡수, 파괴비율의 개수만큼 파괴
+      - 모드 3 : 처리확률 개별적용 - 설정한 흡수확률, 파괴확률을 각 군사시설별로 판단하여 충족 시 흡수 및 파괴
+       * 거점을 점령한 공격부대가 플레이어 세력인지 컴퓨터 세력인지에 따라 각각 설정 가능
+       * 에볼루션킷 기존 설정 : 모드 1 (단, 도시세력 군사시설만 적용)
+       * PK2.1 기존 설정 : 모드 2 (단, 도시세력 군사시설만 적용)
+
+    4. 적장세력 공격부대가 점령한 도시의 후처리 : 내정시설, 군사시설(도시세력 및 제3세력 군사시설)
+     * 에볼루션킷 기존 설정 : 내정시설 전부 파괴, 도시세력 군사시설 전부 파괴, 제3세력 군사시설 그대로 잔류
+     * PK2.1 기존 설정 : 내정시설 전부 파괴, 도시세력 군사시설 전부 파괴, 제3세력 군사시설 그대로 잔류
+
+    5. 도시구역 내 기타시설의 후처리 : 함정 및 장벽 등
+     * 에볼루션킷 기존 설정 : 기타시설은 그대로 잔류
+     * PK2.1 기존 설정 : 기타시설은 그대로 잔류
+    */
+
+    /// ============================================== < 유저 설정 > ==============================================
+
+        /// [ 거점 점령 후처리 : 거점자원 ]
+
+        /// 자원흡수비율 모드
+        // 모드 1 : 흡수비율 매력반영 (PK2.1 원본과 동일모드)
+        // 모드 2 : 흡수비율 직접설정 (에볼루션킷 원본과 동일모드)
+        array<int>
+            자원흡수비율_모드 = {/*플레이어*/1, /*컴퓨터*/1 },
+
+            /// 모드 1 : 흡수비율 매력반영
+            // 기본값 설명 : 매력이 80인 경우 80의 10%가 8이므로 전체 거점자원의 8%를 흡수 (흡수비율 최소 5%, 최대 100%)
+            자원흡수비율_매력반영비율 = {/*플레이어*/10, /*컴퓨터*/10 },
+            자원흡수비율_최대흡수비율 = {/*플레이어*/100, /*컴퓨터*/100 },
+            자원흡수비율_최소흡수비율 = {/*플레이어*/5, /*컴퓨터*/5 },
+
+            /// 모드 2 : 흡수비율 직접설정
+            // 기본값 설명 : 거점의 모든 자원에 대하여 자원별로 70%를 흡수
+            자원흡수비율_금 = {/*플레이어*/70, /*컴퓨터*/70 },
+            자원흡수비율_병량 = {/*플레이어*/70, /*컴퓨터*/70 },
+            자원흡수비율_병력 = {/*플레이어*/70, /*컴퓨터*/70 },
+            자원흡수비율_병기 = {/*플레이어*/70, /*컴퓨터*/70 },
+
+            /// -----------------------------------------------------------------------------------------------------------
+
+            /// [ 도시 점령 후처리 : 도시의 내정시설 ]
+
+            /// 내정시설 처리모드
+            // 모드 1 : 흡수개수 매력반영 (PK.1, 에볼루션킷 원본과 동일모드)
+            // 모드 2 : 파괴비율 직접설정
+            // 모드 3 : 파괴확률 개별적용
+            내정시설_처리모드 = {/*플레이어*/1, /*컴퓨터*/1 },
+
+            /// 모드 1 : 흡수개수 매력반영
+            // 기본값 설명 : 매력이 70인 경우 70의 5%가 3.5인데 반올림하여 4개의 시설을 파괴하지 않고 흡수 (최소 0개, 최대 15개 흡수 가능)
+            내정시설_흡수개수_매력반영비율 = {/*플레이어*/5, /*컴퓨터*/5 },
+            내정시설_흡수개수_최소 = {/*플레이어*/0, /*컴퓨터*/0 },
+            내정시설_흡수개수_최대 = {/*플레이어*/15, /*컴퓨터*/15 },
+
+            /// 모드 2 : 파괴비율 직접설정
+            // 기본값 설명 : 전체 내정시설 수가 8개인 경우 8개의 60%가 4.8인데 반올림하여 5개를 파괴
+            내정시설_파괴비율 = {/*플레이어*/60, /*컴퓨터*/60 },
+
+            /// 모드 3 : 파괴확률 개별적용
+            // 기본값 설명 : 각각의 내정시설별로 60%의 확률을 적용하여 확률을 충족하는 시설을 파괴
+            내정시설별_파괴확률 = {/*플레이어*/60, /*컴퓨터*/60 },
+
+            /// -----------------------------------------------------------------------------------------------------------
+
+            /// [ 도시 점령 후처리 : 도시구역 내 군사시설 ]
+
+            /// 군사시설 처리모드
+            // 모드 1 : 처리확률 거리반영 (에볼루션킷 원본과 동일모드 - 단, 도시세력 군사시설만 적용)
+            // 모드 2 : 처리비율 직접설정 (PK2.1 원본과 동일모드 - 단, 도시세력 군사시설만 적용)
+            // 모드 3 : 처리확률 개별적용
+            도시세력_군사시설_처리모드 = {/*플레이어*/2, /*컴퓨터*/2 },
+            제3세력_군사시설_처리모드 = {/*플레이어*/2, /*컴퓨터*/2 };
+
+        /// 모드 1 : 처리확률 거리반영
+        /* 기본값 설명 : 점령된 도시세력의 군사시설은 도시로부터 거리가 4이하인 경우 75%의 확률로 공격부대 세력으로 흡수하고 5%의 확률로 파괴,
+                         거리가 4초과 8이하인 경우 50%의 확률로 공격부대 세력으로 흡수하고 30%의 확률로 파괴,
+                         거리가 8초과인 경우 30%의 확률로 공격부대 세력으로 흡수하고 50%의 확률로 파괴
+                         (공격부대 세력도 도시세력도 아닌 제3세력 군사시설도 동일하게 설정된 상태)
+                         (흡수되거나 파괴되지 않은 시설은 기존의 세력으로 잔류) */
+        array<array<int>>
+            도시세력_군사시설_기준거리 = { /*플레이어*/{4, 8}, /*컴퓨터*/{4, 8} },
+            도시세력_군사시설_거리별_흡수확률 = { /*플레이어*/{75, 50, 30}, /*컴퓨터*/{75, 50, 30} },
+            도시세력_군사시설_거리별_파괴확률 = { /*플레이어*/{5, 30, 50}, /*컴퓨터*/{5, 30, 50} },
+            제3세력_군사시설_기준거리 = { /*플레이어*/{4, 8}, /*컴퓨터*/{4, 8} },
+            제3세력_군사시설_거리별_흡수확률 = { /*플레이어*/{75, 50, 30}, /*컴퓨터*/{75, 50, 30} },
+            제3세력_군사시설_거리별_파괴확률 = { /*플레이어*/{5, 30, 50}, /*컴퓨터*/{5, 30, 50} };
+
+        /// 모드 2 : 처리비율 직접설정
+        /* 기본값 설명 : 점령된 도시세력의 군사시설은 흡수(0%)하지 않고 모두 파괴(100%),
+                         공격부대 세력도 도시세력도 아닌 제3세력 군사시설은 흡수(0%) 및 파괴(0%)하지 않고 모두 기존의 세력으로 잔류
+                         (비율에 따른 흡수 및 파괴할 시설의 개수는 반올림하여 결정) */
+        array<int>
+            도시세력_군사시설_흡수비율 = {/*플레이어*/0, /*컴퓨터*/0 },
+            도시세력_군사시설_파괴비율 = {/*플레이어*/100, /*컴퓨터*/100 },
+            제3세력_군사시설_흡수비율 = {/*플레이어*/0, /*컴퓨터*/0 },
+            제3세력_군사시설_파괴비율 = {/*플레이어*/0, /*컴퓨터*/0 },
+
+            /// 모드 3 : 처리확률 개별적용
+            /* 기본값 설명 : 점령된 도시세력의 군사시설은 각 군사시설별로 20%의 확률로 흡수하고 80%의 확률로 파괴,
+                             공격부대 세력도 도시세력도 아닌 제3세력 군사시설은 흡수 및 파괴하지 않고 모두 기존의 세력으로 잔류 */
+            도시세력_군사시설별_흡수확률 = {/*플레이어*/20, /*컴퓨터*/20 },
+            도시세력_군사시설별_파괴확률 = {/*플레이어*/80, /*컴퓨터*/80 },
+            제3세력_군사시설별_흡수확률 = {/*플레이어*/0, /*컴퓨터*/0 },
+            제3세력_군사시설별_파괴확률 = {/*플레이어*/0, /*컴퓨터*/0 };
+
+        /// -----------------------------------------------------------------------------------------------------------
+
+        /// [ 기타 설정 ]
+
+        /// 적장세력이 도시점령 시 내정시설 및 군사시설(도시세력의 군사시설, 제3세력의 군사시설) 처리 설정
+        // 내정시설이 파괴되지 않도록 한 경우 내정시설은 세력없음으로 잔류하며 이후 점령한 세력으로 다시 흡수됨
+        bool 적장세력_도시점령시_내정시설_파괴 = true;
+        bool 적장세력_도시점령시_군사시설_파괴_도시세력 = true;
+        bool 적장세력_도시점령시_군사시설_파괴_제3세력 = false;
+
+        /// 점령된 도시의 함정, 장벽 파괴여부 설정
+        bool 도시점령시_기타시설_파괴_함정 = false;
+        bool 도시점령시_기타시설_파괴_장벽 = false;
+
+        /// ===========================================================================================================
+
+        bool 디버깅 = false;
+
+        /// ===========================================================================================================
+
+        // facility_index : 0(도시세력), 1(제3세력)
+        array<array<array<int>>> 군사시설_기준거리 = { 도시세력_군사시설_기준거리, 제3세력_군사시설_기준거리 };
+        array<array<array<int>>> 군사시설_거리별_흡수확률 = { 도시세력_군사시설_거리별_흡수확률, 제3세력_군사시설_거리별_흡수확률 };
+        array<array<array<int>>> 군사시설_거리별_파괴확률 = { 도시세력_군사시설_거리별_파괴확률, 제3세력_군사시설_거리별_파괴확률 };
+        array<array<int>> 군사시설_처리모드 = { 도시세력_군사시설_처리모드, 제3세력_군사시설_처리모드 };
+        array<array<int>> 군사시설_흡수비율 = { 도시세력_군사시설_흡수비율, 제3세력_군사시설_흡수비율 };
+        array<array<int>> 군사시설_파괴비율 = { 도시세력_군사시설_파괴비율, 제3세력_군사시설_파괴비율 };
+        array<array<int>> 군사시설별_흡수확률 = { 도시세력_군사시설별_흡수확률, 제3세력_군사시설별_흡수확률 };
+        array<array<int>> 군사시설별_파괴확률 = { 도시세력_군사시설별_파괴확률, 제3세력_군사시설별_파괴확률 };
+
+        /// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        /**
+        @param base     : 점령한 거점
+        @param attacker : 공격 부대
+        */
         void func168(pk::building@ base, pk::unit@ attacker)
         {
-            pk::person@ leader;
+            if (!pk::is_alive(base)) return;
+            if (!pk::is_alive(attacker)) return;
 
-            if (pk::is_alive(attacker))
-                @leader = pk::get_person(attacker.leader);
-
-            pk::force@ force = pk::get_force(leader.get_force_id());
+            pk::person@ attacker_leader = pk::get_person(attacker.leader);
+            pk::force@ attacker_force = pk::get_force(attacker.get_force_id());
+            pk::force@ base_force = pk::get_force(base.get_force_id());
             pk::person@ moo = pk::get_person(무장_문관);
+            int charisma = (pk::is_alive(attacker_leader)) ? attacker_leader.stat[무장능력_매력] : 20;
 
-            int n = 5;
-            int charisma = 20;
+            int value = 0;
 
-            bool has_buff = false;
-            int relation_level = GetRelationLevel(force, 우호_천축국);
-            
+            int relation_level = GetRelationLevel(attacker_force, 우호_천축국);
+
             if (relation_level >= 1)
             {
-                has_buff = true;
+                value = 천축_1단계_추가보존;
+
+                if (value < 0)
+                {
+                    value = 0;
+                }
             }
-            int value = 천축_1단계_추가보존;
-            
-            if (false == IsEnableZhou(force, 형남))
+
+            if (false == IsEnableZhou(attacker_force, 형남))
             {
                 value = value / 2;
             }
 
-            if (pk::is_alive(leader))
-            {
-                charisma = leader.stat[무장능력_매력];
-                n = pk::max(charisma / 10, 5);
-            }
-
-            // 천축국 지역이점이 있으면 금, 군량등의 소실 경감
-            if (true == has_buff)
-            {
-                n = n * (100 + value) / 100;
-            }
-
-            pk::set_gold(base, pk::get_gold(base) * n / 100);
-            pk::set_food(base, pk::get_food(base) * n / 100);
-            pk::set_troops(base, pk::get_troops(base) * n / 100);
-            for (int i = 0; i < 병기_끝; i++)
-                pk::set_weapon_amount(base, i, pk::get_weapon_amount(base, i) * n / 100);
+            func_디버깅(attacker, attacker_force, attacker_leader, base, base_force);
+            func_점령거점_후처리_거점자원(base, attacker, charisma, value);
 
             pk::city@ city = pk::building_to_city(base);
+            if (!pk::is_alive(city)) return;
 
-            // 도시가 아닌경우 여기서 종료
-            if (!pk::is_alive(city))
-                return;
-            
             int city_id = city.get_id();
             int city_force_id = city.get_force_id();
-            pk::list<pk::building@> city_devs;
-            pk::list<pk::building@> buildings = pk::get_building_list();
-
-            pk::force@ baseForce = pk::get_force(city.get_force_id());
             int zhou = GetZhouId(city_id);
-            
-            bool isAttackerGet = IsRegionBuffChange(force, city_id, false);             // 공격자가 지역이점 획득
-            bool isDefenderLose = IsRegionBuffChange(baseForce, city_id, true);            // 피격자가 지역이점 상실
-            
-            // 지역이점 변동여부 체크
-            
-            if (true == IsValidForce(force))
+
+            pk::list<pk::building@> 내정시설_처리후보_목록;
+            pk::list<pk::building@> 도시세력_군사시설_처리후보_목록;
+            pk::list<pk::building@> 제3세력_군사시설_처리후보_목록;
+
+            bool isAttackerGet = IsRegionBuffChange(attacker_force, city_id, false);             // 공격자가 지역이점 획득
+            bool isDefenderLose = IsRegionBuffChange(base_force, city_id, true);            // 피격자가 지역이점 상실
+
+             // 지역이점 변동여부 체크
+
+            if (true == IsValidForce(attacker_force))
             {
-                if (true == force.is_player())
+                if (true == attacker_force.is_player())
                 {
                     // 플레이어가 공격자인 경우
                     if (true == isAttackerGet)
@@ -7429,9 +7906,9 @@
                 }
             }
 
-            if (true == IsValidForce(baseForce))
+            if (true == IsValidForce(base_force))
             {
-                if (true == baseForce.is_player())
+                if (true == base_force.is_player())
                 {
                     // 플레이어가 피격자인 경우
                     if (true == isDefenderLose)
@@ -7444,140 +7921,403 @@
             }
 
             // 피격 세력이 멸망당하지 않고 지역이점을 상실했을 경우
-            if (true == isDefenderLose && pk::get_city_count(baseForce) > 1)
+            if (true == isDefenderLose && pk::get_city_count(base_force) > 1)
             {
                 string forceName;
 
-                if (baseForce.kokugou != -1)
+                if (base_force.kokugou != -1)
                 {
-                    forceName = pk::get_kokugou(baseForce.kokugou).get_name() + pk::u8encode("군");
+                    forceName = pk::get_kokugou(base_force.kokugou).get_name() + pk::u8encode("군");
                 }
                 else
                 {
-                    forceName = pk::get_name(pk::get_person(baseForce.kunshu)) + pk::u8encode("군");
+                    forceName = pk::get_name(pk::get_person(base_force.kunshu)) + pk::u8encode("군");
                 }
 
-                pk::history_log(base.get_pos(), baseForce.color, pk::u8encode(pk::format("\x1b[1x{}\x1b[0x이 \x1b[1x{}\x1b[0x의 지역이점 상실", pk::u8decode(forceName), 주_이름[zhou])));
+                pk::history_log(base.get_pos(), base_force.color, pk::u8encode(pk::format("\x1b[1x{}\x1b[0x이 \x1b[1x{}\x1b[0x의 지역이점 상실", pk::u8decode(forceName), 주_이름[zhou])));
             }
-            
+
             // 공격세력이 지역이점을 획득했을 경우
             if (true == isAttackerGet)
             {
                 string forceName;
 
-                if (force.kokugou != -1)
+                if (attacker_force.kokugou != -1)
                 {
-                    forceName = pk::get_kokugou(force.kokugou).get_name() + pk::u8encode("군");
+                    forceName = pk::get_kokugou(attacker_force.kokugou).get_name() + pk::u8encode("군");
                 }
                 else
                 {
-                    forceName = pk::get_name(pk::get_person(force.kunshu)) + pk::u8encode("군");
+                    forceName = pk::get_name(pk::get_person(attacker_force.kunshu)) + pk::u8encode("군");
                 }
 
-                pk::history_log(base.get_pos(), force.color, pk::u8encode(pk::format("\x1b[1x{}\x1b[0x이 \x1b[1x{}\x1b[0x의 지역이점 획득", pk::u8decode(forceName), 주_이름[zhou])));
+                pk::history_log(base.get_pos(), attacker_force.color, pk::u8encode(pk::format("\x1b[1x{}\x1b[0x이 \x1b[1x{}\x1b[0x의 지역이점 획득", pk::u8decode(forceName), 주_이름[zhou])));
             }
 
-            for (int i = 0; i < buildings.size; i++)
+            for (int building_id = 0; building_id < 건물_끝; building_id++)
             {
-                pk::building@ building = buildings[i];
-                if (pk::is_alive(building) and pk::get_city_id(building.get_pos()) == city_id)
-                {
-                    switch (pk::get_facility_type(building))
-                    {
-                    case 시설종류_내정시설:
-                        if (building.completed)
-                        {
-                            // 건설 완료된 내정시설은 동작대가 아니라면 무작위로 파괴.
-                            if (building.facility != 시설_동작대)
-                                city_devs.push_back(building);
-                        }
-                        else
-                        {
-                            // 건설중인 동작대가 파괴된 경우 동작 보물도 사라짐.
-                            if (building.facility == 시설_동작대)
-                            {
-                                pk::item@ item = pk::get_item(보물_동작);
-                                if (pk::is_alive(item))
-                                    pk::kill(item);
-                            }
-                            // 건설중인 내정시설은 모두 파괴.
-                            else
-                            {
-                                pk::kill(building, false);
-                            }
-                        }
-                        break;
+                pk::building@ building = pk::get_building(building_id);
+                if (!pk::is_alive(building)) continue;
+                if (!is_target_facility(city, attacker, building)) continue;
 
-                    case 시설종류_군사시설:
-                        // 구역 내 도시를 점령하고 있던 세력과 같은 세력의 군사시설은 모두 파괴
-                        if (pk::is_valid_force_id(city_force_id) and city_force_id == building.get_force_id())
-                            pk::kill(building, false);
-                        break;
+                if (pk::is_normal_force(attacker.get_force_id()))
+                {
+                    if (pk::get_facility_type(building) == 시설종류_내정시설)
+                    {
+                        내정시설_처리후보_목록.add(building);
+                    }
+                    else if (pk::get_facility_type(building) == 시설종류_군사시설)
+                    {
+                        if (building.get_force_id() == city.get_force_id()) 도시세력_군사시설_처리후보_목록.add(building);
+                        else                                                제3세력_군사시설_처리후보_목록.add(building);
                     }
                 }
+
+                func_점령도시_후처리_적장세력_도시점령시(city, attacker, building);
+                func_점령도시_후처리_기타시설(building);
             }
 
-            n = city_devs.size;
-            if (pk::is_valid_normal_force_id(attacker.get_force_id()))
-                n = n - pk::min(charisma / 20, n);
-
-            // 천축국 지역이점이 있으면 파괴되는 시설 감소
-            if (true == has_buff)
-            {
-                n = (n * 100) / (100 + value);
-            }
-
-            city_devs.shuffle();
-            for (int i = 0; i < n; i++)
-                pk::kill(city_devs[i], false);
+            func_점령도시_후처리_내정시설(city, attacker, charisma, 내정시설_처리후보_목록, value);
+            func_점령도시_후처리_군사시설(city, attacker, charisma, 도시세력_군사시설_처리후보_목록, /*도시세력*/0, value);
+            func_점령도시_후처리_군사시설(city, attacker, charisma, 제3세력_군사시설_처리후보_목록, /*제3세력*/1, value);
         }
-    
-        
+
+        ///	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                /// 초기설정 : 일반세력 공격부대가 일반세력의 거점을 점령한 경우 기본적으로 거점의 자원(금, 병량, 병력, 병기)을 모두 흡수함 (설정 가능)
+                // 일반세력 공격부대가 빈거점을 점령하는 경우는 해당사항 없음
+                // 적장세력 공격부대가 일반세력의 거점을 점령하는 경우는 거점의 모든 자원이 손실됨
+        void func_점령거점_후처리_거점자원(pk::building@ base, pk::unit@ attacker, int charisma, int regionBuff)
+        {
+            int gold_ratio = 0, food_ratio = 0, troops_ratio = 0, wpn_amount_ratio = 0;
+
+            if (자원흡수비율_모드[get_index(attacker)] == /*흡수비율 매력반영*/1)
+            {
+                int charisma_ratio = 자원흡수비율_매력반영비율[get_index(attacker)];
+                int min_ratio = 자원흡수비율_최소흡수비율[get_index(attacker)];
+                int max_ratio = 자원흡수비율_최대흡수비율[get_index(attacker)];
+                int resource_ratio = pk::min(max_ratio, pk::max((charisma * charisma_ratio / 100), min_ratio));
+                gold_ratio = food_ratio = troops_ratio = wpn_amount_ratio = resource_ratio;
+            }
+            else if (자원흡수비율_모드[get_index(attacker)] == /*흡수비율 직접설정*/2)
+            {
+                gold_ratio = 자원흡수비율_금[get_index(attacker)];
+                food_ratio = 자원흡수비율_병량[get_index(attacker)];
+                troops_ratio = 자원흡수비율_병력[get_index(attacker)];
+                wpn_amount_ratio = 자원흡수비율_병기[get_index(attacker)];
+            }
+
+            gold_ratio = pk::min(gold_ratio * (100 + regionBuff) / 100, 100);
+            food_ratio = pk::min(food_ratio * (100 + regionBuff) / 100, 100);
+            troops_ratio = pk::min(troops_ratio * (100 + regionBuff) / 100, 100);
+            wpn_amount_ratio = pk::min(wpn_amount_ratio * (100 + regionBuff) / 100, 100);
+
+            pk::set_gold(base, (pk::get_gold(base) * gold_ratio / 100));
+            pk::set_food(base, (pk::get_food(base) * food_ratio / 100));
+            pk::set_troops(base, (pk::get_troops(base) * troops_ratio / 100));
+            for (int i = 0; i < 병기_끝; i++)
+                pk::set_weapon_amount(base, i, (pk::get_weapon_amount(base, i) * wpn_amount_ratio / 100));
+        }
+
+        /// 초기설정 : 기본적으로 내정시설은 도시를 점령한 공격부대의 세력으로 흡수됨 (파괴 가능, 타세력 흡수 설정 불가)
+        // 건설 중이던 미완성 내정시설은 168 함수가 호출될 시점에 이미 파괴된 후임 (설정 불가)
+        // 동작대 관련 : 파괴된 미완성 내정시설이 동작대인 경우 보물 동작은 자동 파괴됨, 완성된 동작대는 자동 흡수함
+        // 세력의 최후도시를 점령하여 해당 세력을 멸망시키고 포획한 세력 군주를 처단한 경우 168 함수가 호출될 시점에 이미 모든 내정시설이 파괴된 후임 (설정 불가)
+        // 적장세력 공격부대가 일반세력 도시를 점령한 경우 도시의 내정시설은 기본적으로 세력 없음으로 잔류 (파괴 가능)
+        void func_점령도시_후처리_내정시설(pk::city@ city, pk::unit@ attacker, int charisma, pk::list<pk::building@> facility_list, int regionBuff)
+        {
+            if (!pk::is_normal_force(attacker.get_force_id())) return;
+
+            int destroy_count = int(facility_list.count);
+            if (destroy_count == 0) return;
+
+            if (내정시설_처리모드[get_index(attacker)] == /*흡수개수 매력반영*/1)
+            {
+                int min_count = 내정시설_흡수개수_최소[get_index(attacker)];
+                int max_count = 내정시설_흡수개수_최대[get_index(attacker)];
+                int charisma_count = get_round_value(charisma * pk::min(내정시설_흡수개수_매력반영비율[get_index(attacker)], 100) / 100.f);
+                destroy_count = destroy_count - pk::max(min_count, pk::min(charisma_count, max_count));
+            }
+            else if (내정시설_처리모드[get_index(attacker)] == /*파괴비율 직접설정*/2)
+            {
+                destroy_count = get_round_value(destroy_count * pk::min(내정시설_파괴비율[get_index(attacker)], 100) / 100.f);
+            }
+
+            destroy_count = (destroy_count * 100) / (100 + regionBuff);
+
+            facility_list.shuffle();
+            array<pk::building@> building_arr = pk::list_to_array(facility_list);
+            for (int i = 0; i < destroy_count; i++)
+            {
+                pk::building@ building = building_arr[i];
+                if (내정시설_처리모드[get_index(attacker)] == /*파괴확률 개별적용*/3)
+                {
+                    if (!pk::rand_bool(내정시설별_파괴확률[get_index(attacker)])) continue;
+                }
+                pk::kill(building, false);
+            }
+        }
+
+        /// 초기설정 : 기본적으로 군사시설은 기존의 세력으로 잔류 (미완성 시설 포함, 본거지 포함, 파괴 가능, 타세력 흡수 설정 가능)
+        // 세력의 최후도시를 점령하여 멸망시킨 경우 도시구역 내 해당 세력의 모든 군사시설이 파괴됨 (타세력 흡수 설정 가능)
+        // 세력의 최후도시를 점령하여 해당 세력을 멸망시키고 포획한 세력 군주를 처단한 경우 168 함수가 호출될 시점에 이미 그 세력의 모든 군사시설이 파괴된 후임 (설정 불가)
+        // 적장세력 공격부대가 도시를 점령 시 본거지는 기본적으로 파괴됨 (적장세력을 포함한 타세력 흡수 설정 불가, 세력 없음으로 잔류 가능)
+        void func_점령도시_후처리_군사시설(pk::city@ city, pk::unit@ attacker, int charisma, pk::list<pk::building@> facility_list, int facility_index, int regionBuff)
+        {
+            if (!pk::is_normal_force(attacker.get_force_id())) return;
+
+            if (int(facility_list.count) == 0) return;
+
+            int absorb_count = 0, destroy_count = 0;
+
+            if (군사시설_처리모드[facility_index][get_index(attacker)] == /*처리비율 직접설정*/2)
+            {
+                absorb_count = get_round_value(int(facility_list.count) * pk::min(군사시설_흡수비율[facility_index][get_index(attacker)], 100) / 100.f);
+                destroy_count = get_round_value(int(facility_list.count) * pk::min(군사시설_파괴비율[facility_index][get_index(attacker)], 100) / 100.f);
+            }
+
+            absorb_count = absorb_count * (100 + regionBuff) / 100;
+
+            facility_list.shuffle();
+            array<pk::building@> building_arr = pk::list_to_array(facility_list);
+            for (int i = 0; i < int(building_arr.length); i++)
+            {
+                pk::building@ building = building_arr[i];
+                if (군사시설_처리모드[facility_index][get_index(attacker)] == /*처리확률 거리반영*/1)
+                {
+                    int distance = pk::get_distance(city.get_pos(), building.pos);
+                    int distance1 = 군사시설_기준거리[facility_index][get_index(attacker)][/*기준거리1*/0];
+                    int distance2 = 군사시설_기준거리[facility_index][get_index(attacker)][/*기준거리2*/1];
+                    int absorb_chance1 = 군사시설_거리별_흡수확률[facility_index][get_index(attacker)][/*기준거리1이하*/0];
+                    int absorb_chance2 = 군사시설_거리별_흡수확률[facility_index][get_index(attacker)][/*기준거리1초과2이하*/1];
+                    int absorb_chance3 = 군사시설_거리별_흡수확률[facility_index][get_index(attacker)][/*기준거리2초과*/2];
+                    int destroy_chance1 = 군사시설_거리별_파괴확률[facility_index][get_index(attacker)][/*기준거리1이하*/0];
+                    int destroy_chance2 = 군사시설_거리별_파괴확률[facility_index][get_index(attacker)][/*기준거리1초과2이하*/1];
+                    int destroy_chance3 = 군사시설_거리별_파괴확률[facility_index][get_index(attacker)][/*기준거리2초과*/2];
+                    int absorb_chance = distance <= distance2 ? (distance <= distance1 ? absorb_chance1 : absorb_chance2) : absorb_chance3;
+                    int destroy_chance = distance <= distance2 ? (distance <= distance1 ? destroy_chance1 : destroy_chance2) : destroy_chance3;
+                    if (pk::rand_bool(absorb_chance))  absorb_building(attacker, building);
+                    else if (pk::rand_bool(destroy_chance))	pk::kill(building, false);
+                }
+                else if (군사시설_처리모드[facility_index][get_index(attacker)] == /*처리비율 직접설정*/2)
+                {
+                    if (i < absorb_count)                 absorb_building(attacker, building);
+                    else if (i < absorb_count + destroy_count) pk::kill(building, false);
+                }
+                else if (군사시설_처리모드[facility_index][get_index(attacker)] == /*처리확률 개별적용*/3)
+                {
+                    if (pk::rand_bool(군사시설별_흡수확률[facility_index][get_index(attacker)])) absorb_building(attacker, building);
+                    else if (pk::rand_bool(군사시설별_파괴확률[facility_index][get_index(attacker)])) pk::kill(building, false);
+                }
+            }
+        }
+
+        void func_점령도시_후처리_적장세력_도시점령시(pk::city@ city, pk::unit@ attacker, pk::building@ building)
+        {
+            if (pk::is_normal_force(attacker.get_force_id())) return;
+
+            if (pk::get_facility_type(building) == 시설종류_내정시설)
+            {
+                if (적장세력_도시점령시_내정시설_파괴) pk::kill(building, false);
+            }
+            else if (pk::get_facility_type(building) == 시설종류_군사시설)
+            {
+                if (building.get_force_id() == city.get_force_id())
+                {
+                    if (적장세력_도시점령시_군사시설_파괴_도시세력) pk::kill(building, false);
+                }
+                else
+                {
+                    if (적장세력_도시점령시_군사시설_파괴_제3세력) pk::kill(building, false);
+                }
+            }
+        }
+
+        /// 초기설정 : 기본적으로 함정 및 장애물은 모두 잔류 (미완성 시설 포함, 파괴 가능, 타세력 흡수 설정 불가)
+        void func_점령도시_후처리_기타시설(pk::building@ building)
+        {
+            if (pk::get_facility_type(building) == 시설종류_함정)
+            {
+                if (도시점령시_기타시설_파괴_함정) pk::kill(building, false);
+            }
+            else if (building.facility == 시설_토루 or building.facility == 시설_석벽)
+            {
+                if (도시점령시_기타시설_파괴_장벽) pk::kill(building, false);
+            }
+        }
+
+        ///	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        array<int> 도시점령_후처리_제외시설 =
+        {
+            시설_도시, 시설_관문, 시설_항구,			// 고정시설
+            시설_본거지1, 시설_본거지2,					// 군사시설
+            시설_산악, 시설_장성, 시설_유적, 시설_묘,	// 장애물
+            시설_낙석, 시설_제방, 시설_얕은여,			// 함정
+            시설_동작대									// 내정시설
+        };
+
+        bool is_target_facility(pk::city@ city, pk::unit@ attacker, pk::building@ building)
+        {
+            if (pk::get_city_id(building.pos) != city.get_id()) return false;
+            if (building.get_force_id() == attacker.get_force_id()) return false;
+            if (도시점령_후처리_제외시설.find(building.facility) >= 0) return false;
+
+            return true;
+        }
+
+        int get_index(pk::unit@ unit) { return (unit.is_player() ? /*플레이어*/0 : /*컴퓨터*/1); }
+
+        /// round 연산자를 직접 사용하는 것은 불가능한 것으로 보임
+        // 소수를 반올림한 정수값 반환용 함수
+        int get_round_value(float float_value)
+        {
+            return (float_value - int(float_value) < (float_value >= 0 ? 0.5f : -0.5f)) ? int(float_value) : int(float_value) + 1;
+        }
+
+        void absorb_building(pk::unit@ unit, pk::building@ building)
+        {
+            pk::set_district(building, pk::get_district(unit.get_district_id()), /*점령*/0);
+        }
+
+        void func_디버깅(pk::unit@ attacker, pk::force@ attacker_force, pk::person@ attacker_leader, pk::building@ base, pk::force@ base_force)
+        {
+            if (!디버깅) return;
+
+            string attacker_force_name = (pk::is_alive(attacker_force)) ? "\x1b[1x" + pk::decode(pk::get_name(attacker_force)) + "\x1b[0x" : "없음";
+            string attacker_name = "\x1b[1x" + pk::decode(pk::get_name(attacker)) + "\x1b[0x";
+            string attacker_leader_name = (pk::is_alive(attacker_leader)) ? "\x1b[1x" + pk::decode(pk::get_name(attacker_leader)) + "\x1b[0x" : "없음";
+            string base_force_name = (pk::is_alive(base_force)) ? "\x1b[1x" + pk::decode(pk::get_name(base_force)) + "\x1b[0x" : "없음";
+            string base_name = "\x1b[1x" + pk::decode(pk::get_name(base)) + "\x1b[0x";
+
+            string title = "'168 함수 실행\n(168 거점 점령 후처리.cpp 파일)";
+            string attacker_info = "공격 부대 :\n세력(" + attacker_force_name + "), 부대(" + attacker_name + "), 주장(" + attacker_leader_name + ")";
+            string base_info = "점령한 거점 :\n세력(" + base_force_name + "), 거점(" + base_name + ")";
+
+            pk::message_box(pk::encode(title));
+            pk::message_box(pk::encode(attacker_info));
+            pk::message_box(pk::encode(base_info));
+        }
+
+
         // ===========================================================================================================================================
 
         // =============================================== 205 계략 소비 기력 =========================================================================
+
+        bool 특기백출_반감적용 = true;   // true = 반감,   false = 무조건 1소비
+        bool 계략소비_특기우대 = true;   // 보유 특기에 따라 계략별 우대 적용
+        bool 계략소비_병력효과 = true;   // 부대 병력에 따라 소비기력이 가변
+
+        int 특기정묘_기력감소량 = 3;
+        int 특기비책_기력감소량 = 5;
+
         int func205(pk::unit@ src, int strategy_id)
         {
+            /* 원본 기력 소모량 (백출)
+            if (src.has_skill(특기_백출))
+                return 1;
+            */
+
             pk::force@ force = pk::get_force(src.get_force_id());
 
-            int energy = 0;
-
+            // 특기 소비 기력
+            int n = 0;
             switch (strategy_id)
             {
-            case 계략_화계: energy = 10;
+            case 계략_화계:
+                n = 10;
                 break;
-            case 계략_소화: energy = 10;
+            case 계략_소화:
+                n = 10;
                 break;
-            case 계략_위보: energy = 15;
+            case 계략_위보:
+                n = 15;
                 break;
-            case 계략_교란: energy = 15;
+            case 계략_교란:
+                n = 15;
                 break;
-            case 계략_진정: energy = 10;
+            case 계략_진정:
+                n = 10;
                 break;
-            case 계략_복병: energy = 10;
+            case 계략_복병:
+                n = 10;
                 break;
-            case 계략_동토: energy = 20;
+            case 계략_동토:
+                n = 15; // 원본 기력 소모량 (20)
                 break;
-            case 계략_요술: energy = 50;
+            case 계략_요술:
+                n = 30; // 원본 기력 소모량 (50) 
                 break;
-            case 계략_낙뢰: energy = 50;
+            case 계략_낙뢰:
+                n = 40; // 원본 기력 소모량 (50) 
                 break;
             }
+
+            //---------------------------------------------------------------------------------------
+            //기력 소모량 감소 효과 ('18.10.4)
 
             if (src.has_skill(특기_백출))
             {
-                energy = (energy + 1) / 2;
+                if (!특기백출_반감적용)
+                    return 1;
+                else
+                    n /= 2; // 기력 소모량 절반 감소
             }
 
             // 회남 지역이점. 계략소비 경감
-            ExecuteHuaiNan(force, energy);
+            ExecuteHuaiNan(force, n);
 
-            return energy;
+            if (계략소비_특기우대)
+            {
+                if (src.has_skill(특기_정묘))
+                    n = n - 특기정묘_기력감소량; // 기력 소모량 감소 (-3)
+
+                if (src.has_skill(특기_비책))
+                    n = n - 특기비책_기력감소량; // 기력 소모량 감소 (-5)
+
+                if ((src.has_skill(특기_화공) or src.has_skill(특기_화신)) and ((strategy_id == 계략_화계) or (strategy_id == 계략_소화)))
+                    n /= 2; // 화계 특기자 화계 기력 소모량 절반 감소
+
+                if ((src.has_skill(특기_매복)) and (strategy_id == 계략_복병))
+                    n /= 2; // 매복 특기자 복병 기력 소모량 절반 감소
+
+                if ((src.has_skill(특기_언독)) and (strategy_id == 계략_위보))
+                    n /= 2; // 언독 특기자 위보 기력 소모량 절반 감소
+
+                if ((src.has_skill(특기_궤계)) and (strategy_id == 계략_동토))
+                    n /= 2; // 궤계 특기자 동토 기력 소모량 절반 감소
+
+                if ((src.has_skill(특기_기략)) and (strategy_id == 계략_교란))
+                    n /= 2; // 기략 특기자 교란 기력 소모량 절반 감소
+
+                if ((src.has_skill(특기_규율) or src.has_skill(특기_침착) or src.has_skill(특기_명경)) and (strategy_id == 계략_진정))
+                    n /= 2; // 규율,침착,명경 특기자 진정 기력 소모량 절반 감소
+            }
+
+            //---------------------------------------------------------------------------------------
+            //병력수에 따른 기력 소모량 차등 - 소부대 기력 소모 증가, 대부대 기력 소모 감소 ('18.10.11)
+            if (계략소비_병력효과)
+            {
+                if (src.troops <= 2000)
+                    n = int(n * pk::min(10.f, 2000.f / pk::max(1, src.troops)));         // 최대 10배 소모
+                else if (src.troops >= 10000)
+                    n = int(n * pk::max(0.5f, (2 - src.troops / 10000.f)));    // 최소 50% 소모
+            }
+
+            return n;
         }
         // ================================================== 계략 소비 기력 끝 ========================================================================
 
 
         // ================================================ 211 건물의 공격 데미지 =====================================================================
+
+        // 유저 설정 (true = on, false = off)
+        bool 사기효과설정 = true;   // 기력에 비례하여 데미지 증감 보정 효과
+        bool 기력증감설정 = true;   // 교전 시 데미지에 따라 공격부대 기력증가, 피격부대 기력감소
+        bool 거점능력합산 = true;   // true: 거점 내 무장들의 능력치 합산 기능 적용, false: 기존처럼 태수 능력만 적용
+
+        float 대미지조절 = 0.8f;   // 전체적인 대미지량을 비율로 조절
+
         void func211(pk::damage_info& info, pk::building@ attacker, pk::hex_object@ target)
         {
             pk::force@ force = pk::get_force(attacker.get_force_id());
@@ -7596,9 +8336,9 @@
             case 시설_관문:
             case 시설_항구:
                 func_5af0e0(troops_atk, atk, def, troops, attacker);
-                info.troops_damage = func_5aee60(atk, troops, troops_atk, 0, target_unit.attr.stat[부대능력_방어], func_5aee10(target_unit)) * 0.8f;
+                info.troops_damage = int(func_5aee60(atk, troops, troops_atk, 0, target_unit.attr.stat[부대능력_방어], func_5aee10(target_unit)) * 0.8f);
                 if (pk::equipment_id_to_heishu(target_unit.weapon) == 병종_병기)
-                    info.troops_damage *= 0.8f;
+                    info.troops_damage = int(info.troops_damage * 0.8f);
                 break;
 
             case 시설_진:
@@ -7609,19 +8349,19 @@
             case 시설_투석대:
                 info.troops_damage = func_5af370(attacker, target_unit);
                 if (pk::equipment_id_to_heishu(target_unit.weapon) == 병종_병기 and attacker.facility != 시설_투석대)
-                    info.troops_damage *= 0.8f;
+                    info.troops_damage = int(info.troops_damage * 0.8f);
                 break;
 
             default:
                 // 시설.자동공격 대미지
                 info.troops_damage = func_5af370(attacker, target_unit);
                 if (pk::equipment_id_to_heishu(target_unit.weapon) == 병종_병기)
-                    info.troops_damage *= 0.8f;
+                    info.troops_damage = int(info.troops_damage * 0.8f);
                 break;
             }
 
             if (attacker.is_player())
-                info.troops_damage *= float(pk::core["대미지패널티"][pk::get_scenario().difficulty]);
+                info.troops_damage = int(info.troops_damage * float(pk::core["대미지패널티"][pk::get_scenario().difficulty]));
 
             // 방어강화 기교 연구 시 성, 관문, 항구, 진, 요새, 성채의 공격력 2배
             if (attacker.has_tech(기교_방어강화) and attacker.facility >= 시설_도시 and attacker.facility <= 시설_성채)
@@ -7633,8 +8373,35 @@
                 ExecuteXuZhouDamage(force, info);
             }
 
+            if (!pk::is_campaign())
+            {
+                // 건물→부대 시 상호 기력 조건 반영됨 ('18.10.7)
+                if (사기효과설정)
+                {
+                    // 공격부대 기력에 따라 피격대상 피해 85% ~ 115% 적용 : 부대 사기 효과 ('18.10.7)
+                    info.troops_damage = int(info.troops_damage * (0.85f + 0.30f * (attacker.energy / 120.f)));
+                    // 피격대상 기력에 따라 피격대상 피해 85% ~ 115% 적용 : 부대 사기 효과 ('18.10.7)
+                    info.troops_damage = int(info.troops_damage * (0.85f + 0.30f * ((120 - target_unit.energy) / 120.f)));
+                }
+
+                // 전체적인 기본 대미지량 오류 수정 ('18.12.15)
+                info.troops_damage = int(info.troops_damage * 대미지조절);
+
+                // 병력 피해량에 따라 피격대상 기력감소, 공격측 기력상승 효과 발생 ('18.10.7) 
+                if (기력증감설정)
+                {
+                    int energy_heal = int(info.troops_damage / 200);
+                    //pk::add_energy(attacker, +energy_heal, true );   // 밸런스 테스트 필요
+
+                    if (info.troops_damage >= 300)
+                        info.energy_damage = int((info.troops_damage - 300) / 100);
+                }
+            }
+
             info.src_pos = attacker.get_pos();
             info.dst_pos = target.get_pos();
+
+
         }
 
         /**
@@ -7648,7 +8415,7 @@
             return unit.troops;
         }
 
-        /***/
+        /** 부대/거점 병력 피해 계산 **/
         float func_5aee60(int src_atk, int src_troops, int tactics_atk, int buffed, int dst_def, int dst_troops)
         {
             float n = 0;
@@ -7662,6 +8429,7 @@
             b = pk::max(dst_def, 40);
             b = b * b;
 
+            //n = pk::sqrt(tactics_atk * 64);
             n = sqrt(tactics_atk * 64);
             n = n + pk::max((src_troops - dst_troops) / 2000, 0);
             n = n + pk::max((a - b) / 300, 0);
@@ -7686,22 +8454,45 @@
             return n;
         }
 
-        /***/
+        /** 태수와 무장들에 의한 방어거점 전투능력 **/
         void func_5af0e0(int& out src_atk, int& out dst_atk, int& out dst_def, int& out dst_troops, pk::building@ building)
         {
             src_atk = 10;
             pk::person@ taishu = pk::get_person(pk::get_taishu_id(building));
             if (pk::is_alive(taishu))
             {
+                //태수 능력 반영 (기본)
                 dst_atk = pk::max(taishu.stat[무장능력_무력] - 25, 40);
                 dst_def = pk::max(taishu.stat[무장능력_통솔] - 25, 40);
                 dst_troops = pk::min(pk::get_troops(building), pk::get_command(taishu));
+
+                //도시 내 "신분_일반" 인 무장 능력 반영 (각 무장의 무력, 통솔, 지휘 부분 합산) ('18.10.7)
+                if (거점능력합산)
+                {
+                    float ilban_help = 5;    // 태수 외 무장 능력 치 합산 보조율 : 무장별 5%
+                    auto ilban_list = pk::list_to_array(pk::get_person_list(building, pk::mibun_flags(신분_일반)));
+                    if (0 < int(ilban_list.length))
+                    {
+                        for (int i = 0; i < int(ilban_list.length); i++)
+                        {
+                            pk::person@ ilban = ilban_list[i];
+                            //출진 또는 부재중 상태가 아닌 장수이며, 태수와 혐오 관계가 아닌 장수만 능력 치 합산
+                            if (!pk::is_unitize(ilban) and !pk::is_absent(ilban) and !pk::is_dislike(taishu, ilban.get_id()) and !pk::is_dislike(ilban, taishu.get_id()))
+                            {
+                                dst_atk += int((pk::max(ilban.stat[무장능력_무력] - 25, 20)) * (ilban_help / 100.f));
+                                dst_def += int((pk::max(ilban.stat[무장능력_통솔] - 25, 20)) * (ilban_help / 100.f));
+                                dst_troops += int((pk::min(pk::get_troops(building), pk::get_command(ilban))) * (ilban_help / 100.f));
+                            }
+                        }
+                    }
+                }
             }
             else
             {
                 dst_atk = 30;
                 dst_def = 30;
-                dst_troops = pk::min(pk::get_troops(building), 7000);
+                //dst_troops = pk::min(pk::get_troops(building), 7000);
+                dst_troops = pk::min(pk::get_troops(building), 5000);  // 지휘병력 상한치 하향
                 if (dst_troops != 0)
                     dst_troops = pk::max(dst_troops, 500);
             }
@@ -7717,6 +8508,18 @@
 
             switch (attacker.facility)
             {
+            case 시설_도시:     // 개방형 거점 : 약한 수준으로 적용 ('18.10.14)
+                atk = 200;
+                bonus = 200;
+                break;
+            case 시설_관문:     // 폐쇄형 거점 : 강한 수준으로 적용 ('18.10.14)
+                atk = 400;
+                bonus = 400;
+                break;
+            case 시설_항구:     // 개방형 거점 : 약한 수준으로 적용 ('18.10.14)
+                atk = 200;
+                bonus = 200;
+                break;
             case 시설_진:
                 atk = 400;
                 bonus = 300;
@@ -7742,7 +8545,7 @@
                 bonus = 600;
                 break;
             default:
-                // 시설.자동공격 대미지
+                // 기타시설.자동공격 대미지
                 atk = 300;
                 bonus = 300;
                 break;
@@ -7751,7 +8554,7 @@
             float max_hp = pk::max(pk::get_max_hp(attacker), 1);
             float hp = pk::max(attacker.hp, max_hp / 2);
 
-            return hp / max_hp * (152 - int(target.attr.stat[부대능력_방어])) * atk / 132 + pk::rand(bonus);
+            return int(hp / max_hp * (152 - int(target.attr.stat[부대능력_방어])) * atk / 132 + pk::rand(bonus));
         }
         // ================================================ 건물의 공격 데미지 끝 ======================================================================
 
@@ -8171,7 +8974,7 @@
                             n += 오환_3단계_포박상승;
                         }
                     }
-                   
+
                     // 강 지역이점. 피격자가 기병부대
                     if (target_unit != null)
                     {
@@ -8309,8 +9112,6 @@
                 }
             }
         }
-
-
         // ===========================================================================================================================================
 
         // 교역, 이민족 우호에 사용되는 변수
