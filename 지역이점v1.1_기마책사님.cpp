@@ -4730,7 +4730,7 @@
                 if (city.get_force_id() != force.get_force_id())
                 {
                     // 동맹중인 세력에 공격요청 불가
-                    if (false == force.ally[city.get_force_id()])
+                    if (true == pk::is_enemy(force, city))
                     {
                         for (int j = 0; j < forceCityList.count; ++j)
                         {
@@ -6121,13 +6121,13 @@
         // 무술대회 우승자 특전
         void ExecuteDuelPrivillage(pk::unit@ unit)
         {
-            if (false == 우승자_특전여부)
+            // 상태이상인 경우 패스
+            if (부대상태_통상 != unit.status)
             {
                 return;
             }
 
-            // 상태이상인 경우 패스
-            if (부대상태_통상 != unit.status)
+            if (false == 우승자_특전여부)
             {
                 return;
             }
@@ -6139,8 +6139,9 @@
                 return;
             }
 
+
             // 대회 우승자가 부대에 없으면 패스
-            if(unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
+            if (unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
             {
                 return;
             }
@@ -6310,6 +6311,12 @@
             int winner = GetCompetitionWinnerId(대회_설전);
 
             if (-1 == winner)
+            {
+                return;
+            }
+
+            // 대회 우승자가 부대에 없으면 패스
+            if (unit.member[0] != winner && unit.member[1] != winner && unit.member[2] != winner)
             {
                 return;
             }
@@ -10765,6 +10772,11 @@
             validCityList = GetValidSupportCityList(tradeForce, targetForceId);
 
             pk::list<pk::city@> city_sel = pk::city_selector2(pk::u8encode("도시 선택"), pk::u8encode("도움을 요청할 지역을 선택합니다."), validCityList, 1, 1);
+
+            if (city_sel.count <= 0)
+            {
+                return false;
+            }
 
             if (city_sel[0].get_force_id() == forceId)
             {

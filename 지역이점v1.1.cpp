@@ -181,7 +181,7 @@
     const int 대회_개최기교 = 1000;                   // 세력 내 대회 개최기교
 
     const int 대회_개최년도_무술 = 짝수년도;            // 대회 개최년도 설정 (홀수년도, 짝수년도, 매년 중 선택가능)
-    const int 대회_개최년도_설전 = 홀수년도;
+    const int 대회_개최년도_설전 = 짝수년도;
 
     const int 대회_개최시기_무술 = 4;                  // 대회를 개최하는 월 (해당 월 1일에 개최,  1 ~ 12 사이로 세팅할것)
     const int 대회_개최시기_설전 = 4;
@@ -4730,7 +4730,7 @@
                 if (city.get_force_id() != force.get_force_id())
                 {
                     // 동맹중인 세력에 공격요청 불가
-                    if (false == force.ally[city.get_force_id()])
+                    if (true == pk::is_enemy(force, city))
                     {
                         for (int j = 0; j < forceCityList.count; ++j)
                         {
@@ -9964,6 +9964,11 @@
             validCityList = GetValidSupportCityList(tradeForce, targetForceId);
 
             pk::list<pk::city@> city_sel = pk::city_selector2(pk::u8encode("도시 선택"), pk::u8encode("도움을 요청할 지역을 선택합니다."), validCityList, 1, 1);
+
+            if (city_sel.count <= 0)
+            {
+                return false;
+            }
 
             if (city_sel[0].get_force_id() == forceId)
             {
