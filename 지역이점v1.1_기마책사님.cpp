@@ -1504,7 +1504,7 @@
             }
 
             // 등용확률이 0%가 아니면 20% 상승
-            if (n != 0)
+            if (n > 0)
             {
                 n = n + 형북_지역이점_등용상승;
             }
@@ -8768,7 +8768,7 @@
 
             // 목표 무장이 재야이거나 멸망한 세력의 포로인 경우
             if (target.mibun == 신분_재야 or (target.mibun == 신분_포로 and !pk::is_valid_force_id(target.get_force_id())))
-                loyalty = pk::get_scenario().difficulty == 난이도_초급 ? 50 : 60;
+                loyalty = pk::get_scenario().difficulty == 난이도_초급 ? 60 : 70;
 
             if (pk::is_valid_person_id(target_kunshu_id))
                 aishou = pk::get_aishou_distance(target, target_kunshu_id);
