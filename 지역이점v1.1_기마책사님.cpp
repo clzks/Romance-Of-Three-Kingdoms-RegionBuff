@@ -75,6 +75,10 @@
     const int 대회_설전 = 1;
     const int 대회_끝 = 2;
 
+    const int 대회_8강이상 = 0;
+    const int 대회_4강 = 1;
+    const int 대회_자세력 = 2;
+
     const int 홀수년도 = 0;
     const int 짝수년도 = 1;
     const int 매년 = 2;
@@ -180,11 +184,16 @@
     const int 대회_개최비용 = 5000;                   // 세력 내 대회 개최비용
     const int 대회_개최기교 = 1000;                   // 세력 내 대회 개최기교
 
-    const int 대회_개최년도_무술 = 짝수년도;            // 대회 개최년도 설정 (홀수년도, 짝수년도, 매년 중 선택가능)
-    const int 대회_개최년도_설전 = 홀수년도;
+    const int 대회_개최년도_무술 = 홀수년도;            // 대회 개최년도 설정 (홀수년도, 짝수년도, 매년 중 선택가능)
+    const int 대회_개최년도_설전 = 짝수년도;
+
+    const bool 대회_4세력개최여부 = true;              // 4세력의 8강대회도 열릴것인지 여부
 
     const int 대회_개최시기_무술 = 4;                  // 대회를 개최하는 월 (해당 월 1일에 개최,  1 ~ 12 사이로 세팅할것)
     const int 대회_개최시기_설전 = 4;
+
+    const int 대회_무력제한 = 80;                      // 무술대회 참가자격이 주어지는 최소 무력수치
+    const int 대회_지력제한 = 80;                      // 설전대회 참가자격이 주어지는 최소 지력수치
 
     const int 무술대회_초기우승자 = /*무장_여포*/ -1;          // 시나리오 시작 시 세팅될 대회 최초 우승자 ( 없을 경우 -1, 그 외에는 무장_여포, 무장_관우 이런식으로 세팅)
     const int 설전대회_초기우승자 = -1;
@@ -5203,7 +5212,7 @@
             bool isProtecting = false;
             @hostForce = null;
             validAICompetitionList.clear();
-            validPlayerCompetitonList.clear();              
+            validPlayerCompetitonList.clear();
             competitonParticipantList.clear();
             validForceCount = 0;
             SetCompetitionWinner(-1, type);
@@ -5233,7 +5242,7 @@
                         isProtecting = true;
 
                         // 황제 보유국의 참가여부 체크
-                        if (true == IsExistQualification(force, type, true))
+                        if (true == IsExistQualification(force, type, 대회_8강이상))
                         {
                             @hostForce = force;
                             validForceCount++;
@@ -5251,7 +5260,7 @@
                     }
 
                     // 자격요건 검사
-                    if (false == IsExistQualification(force, type, true))
+                    if (false == IsExistQualification(force, type, 대회_8강이상))
                     {
                         continue;
                     }
@@ -5274,7 +5283,7 @@
             {
                 return;
             }
-            
+
             // 자격요건을 충족하는 세력이 20개 이상이면 16강부터 시작
             if (validForceCount >= 20)
             {
@@ -5285,10 +5294,28 @@
             {
                 validForceCount = 8;
             }
-            // 7세력 이하면 미개최
+            // 7세력 이하인 경우
             else
             {
-                return;
+                if (true == 대회_4세력개최여부)
+                {
+                    InspectFourCountryCompetition(type);
+                    // 4세력 이상이면 4세력 대회 개최
+                    if (validForceCount >= 4)
+                    {
+                        validForceCount = 4;
+                    }
+                    // 그 이하면 패스
+                    else
+                    {
+                        return;
+                    }
+                }
+                // 4세력 개최여부가 불가면 패스
+                else
+                {
+                    return;
+                }
             }
 
             if (대회_무술 == type)
@@ -5302,36 +5329,123 @@
             }
         }
 
+        void InspectFourCountryCompetition(int type)
+        {
+            //bool isProtecting = false;
+            @hostForce = null;
+            validAICompetitionList.clear();
+            validPlayerCompetitonList.clear();
+            competitonParticipantList.clear();
+            validForceCount = 0;
+            //SetCompetitionWinner(-1, type);
+
+            pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
+
+            // 황제가 죽었거나 없을 경우 패스
+            if (null == Emperor)
+            {
+                return;
+            }
+            else if (Emperor.mibun == 신분_사망)
+            {
+                return;
+            }
+
+            for (int i = 0; i < 도시_끝; ++i)
+            {
+                pk::force@ force = pk::get_force(i);
+
+                if (true == force.is_alive())
+                {
+                    // 황제 보유국 유무 체크
+                    if (true == pk::is_protecting_the_emperor(force))
+                    {
+                        // 황제는 보호받는 중임
+                        //isProtecting = true;
+
+                        // 황제 보유국의 참가여부 체크
+                        if (true == IsExistQualification(force, type, 대회_4강))
+                        {
+                            @hostForce = force;
+                            validForceCount++;
+                        }
+
+                        continue;
+                    }
+                    else
+                    {
+                        // 황제 옹립 안하면서 국호 있으면 패스
+                        if (force.kokugou != -1)
+                        {
+                            continue;
+                        }
+                    }
+
+                    // 자격요건 검사
+                    if (false == IsExistQualification(force, type, 대회_4강))
+                    {
+                        continue;
+                    }
+
+                    validForceCount++;
+
+                    if (true == force.is_player())
+                    {
+                        validPlayerCompetitonList.add(force);
+                    }
+                    else
+                    {
+                        validAICompetitionList.add(force);
+                    }
+                }
+            }
+        }
+
         // 무술대회 씬
         void DuelCompetitonScene()
         {
             pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
             array<pk::force@> forceArray = GetParticipatingForceArray(대회_무술);
 
-            string ment = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+            string ment0 = pk::format("\x1b[2x무술대회\x1b[0x를 개최하도록 하겠소. 참가하는 세력은 \x1b[2x{}\x1b[0x,", pk::u8decode(pk::get_name(forceArray[0])));
             pk::person@ winner = null;
             pk::person@ runnerUp = null;
 
             pk::message_box(pk::u8encode("황제로부터 \x1b[2x무술대회\x1b[0x를 개최한다는 칙서가 내려왔습니다."));
             pk::move_screen(Emperor.get_pos());
-            
+
             pk::fade(0);
             pk::sleep();
             pk::background(1);
             pk::fade(255);
 
-            pk::message_box(pk::u8encode(pk::format("\x1b[2x무술대회\x1b[0x를 개최하도록 하겠소. 참가하는 세력은 \x1b[2x{}\x1b[0x,", pk::u8decode(pk::get_name(forceArray[0])))), Emperor);
-            
-            if (8 == validForceCount)
+            if (4 == validForceCount)
             {
-                ment = ment + "의 세력이오";
+                ment0 = ment0 + pk::format(" \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오.", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])));
+                pk::message_box(pk::u8encode(ment0), Emperor);
             }
-            else if(16 == validForceCount)
+            else if (8 == validForceCount)
             {
-                pk::message_box(pk::u8encode(ment), Emperor);
-                ment = pk::format("그리고 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[8])), pk::u8decode(pk::get_name(forceArray[9])), pk::u8decode(pk::get_name(forceArray[10])), pk::u8decode(pk::get_name(forceArray[11])), pk::u8decode(pk::get_name(forceArray[12])), pk::u8decode(pk::get_name(forceArray[13])), pk::u8decode(pk::get_name(forceArray[14])), pk::u8decode(pk::get_name(forceArray[15])));
+                string ment1 = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+                pk::message_box(pk::u8encode(ment0), Emperor);
+                ment1 = ment1 + "의 세력이오";
+                pk::message_box(pk::u8encode(ment1), Emperor);
             }
-            pk::message_box(pk::u8encode(ment), Emperor);
+            else if (16 == validForceCount)
+            {
+                string ment1 = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+                pk::message_box(pk::u8encode(ment0), Emperor);
+                pk::message_box(pk::u8encode(ment1), Emperor);
+                ment1 = pk::format("그리고 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[8])), pk::u8decode(pk::get_name(forceArray[9])), pk::u8decode(pk::get_name(forceArray[10])), pk::u8decode(pk::get_name(forceArray[11])), pk::u8decode(pk::get_name(forceArray[12])), pk::u8decode(pk::get_name(forceArray[13])), pk::u8decode(pk::get_name(forceArray[14])), pk::u8decode(pk::get_name(forceArray[15])));
+                pk::message_box(pk::u8encode(ment1), Emperor);
+            }
+
+            int requireCount = 1;
+
+            if (4 == validForceCount)
+            {
+                requireCount = 2;
+            }
 
             // 참가무장 선발
             for (int i = 0; i < forceArray.length; ++i)
@@ -5340,20 +5454,30 @@
                 auto validList = GetSortedCompetitionPersonList(list, 무장능력_무력);
                 if (false == forceArray[i].is_player())
                 {
-                    competitonParticipantList.add(validList[0]);
+                    for (int i = 0; i < requireCount; ++i)
+                    {
+                        competitonParticipantList.add(validList[i]);
+                    }
                 }
                 else
                 {
                     pk::message_box(pk::u8encode("무술대회에 참가할 무장을 선택해주십시오."));
-                    pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("무술 대회에 참가할 무장을 선택합니다.)"), validList, 1, 1);
-                    if (person_sel.count == 0)
+                    pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("무술대회에 참가할 무장을 선택합니다.)"), validList, requireCount, requireCount);
+                    if (person_sel.count <= 0)
                     {
                         pk::message_box(pk::u8encode("무장을 선택을 취소했습니다. 자동으로 무장이 선택됩니다."));
-                        competitonParticipantList.add(validList[0]);
+
+                        for (int i = 0; i < requireCount; ++i)
+                        {
+                            competitonParticipantList.add(validList[i]);
+                        }
                     }
                     else
                     {
-                        competitonParticipantList.add(person_sel[0]);
+                        for (int i = 0; i < requireCount; ++i)
+                        {
+                            competitonParticipantList.add(person_sel[i]);
+                        }
                     }
                 }
             }
@@ -5384,7 +5508,7 @@
             pk::add_gold(runnerUpBuilding, 준우승_상금, true);
             pk::add_kouseki(runnerUp, 준우승_공적);
             pk::message_box(pk::u8encode(pk::format("\x1b[2x상금\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다", 준우승_상금, 준우승_공적)));
-            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), Emperor);
+            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소."), Emperor);
             pk::play_se(6);
             pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 통솔과 무력 경험치가 상승했습니다."));
             for (int i = 0; i < backUpArray.length; ++i)
@@ -5402,8 +5526,24 @@
             pk::fade(255);
         }
 
-        void RunDuelCompetition(pk::list<pk::person@> personList, pk::person@ &winner, pk::person@ &runnerUp, bool isSingleCompetition)
+        void RunDuelCompetition(pk::list<pk::person@> personList, pk::person@& winner, pk::person@& runnerUp, bool isSingleCompetition)
         {
+            // 4세력 2무장일 경우 순번을 섞어준다
+            if (4 == validForceCount)
+            {
+                pk::person@ temp = personList[7];
+                @personList[7] = personList[1];
+                @personList[1] = temp;
+
+                @temp = personList[5];
+                @personList[5] = personList[3];
+                @personList[3] = temp;
+
+                @temp = personList[7];
+                @personList[7] = personList[5];
+                @personList[5] = temp;
+            }
+
             pk::person@ moo = pk::get_person(무장_병사);
             int remain = personList.count;
             int round = 1;
@@ -5420,7 +5560,18 @@
                     pk::message_box(pk::u8encode(pk::format("{}회전 {}경기에 참가할 무장은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님 입니다.", round, n, pk::u8decode(pk::get_name(p1)), pk::u8decode(pk::get_name(p2)))), moo);
                     bool c1 = false;                            // 무장1 조종여부
                     bool c2 = false;                            // 무장2 조종여부
-                    if (false == isSingleCompetition)
+                    bool skip = false;
+
+                    if (true == isSingleCompetition)
+                    {
+                        skip = true;
+                    }
+                    else if (true == personList[i].is_player() && true == personList[i + 1].is_player())
+                    {
+                        skip = true;
+                    }
+
+                    if (false == skip)
                     {
                         if (true == personList[i].is_player())
                         {
@@ -5432,7 +5583,7 @@
                             c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 경기를 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[i + 1])))));
                         }
                     }
-                                                                                        // 1 조종, 2 조종, 관전선택여부
+                    // 1 조종, 2 조종, 관전선택여부
                     pk::int_bool win = pk::duel(null, null, p1, null, null, p2, null, null, c1, c2, 0, true);
                     list.add(personList[i + win.first]);
                     pk::play_se(6);
@@ -5449,10 +5600,21 @@
             }
 
             pk::message_box(pk::u8encode(pk::format("결승은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님의 경기입니다.", pk::u8decode(pk::get_name(personList[0])), pk::u8decode(pk::get_name(personList[1])))), moo);
-            
+
             bool c1 = false;                            // 무장1 조종여부
             bool c2 = false;                            // 무장2 조종여부
-            if (false == isSingleCompetition)
+            bool skip = false;
+
+            if (true == isSingleCompetition)
+            {
+                skip = true;
+            }
+            else if (true == personList[0].is_player() && true == personList[1].is_player())
+            {
+                skip = true;
+            }
+
+            if (false == skip)
             {
                 if (true == personList[0].is_player())
                 {
@@ -5464,7 +5626,7 @@
                     c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 경기를 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[1])))));
                 }
             }
-                                                                                                        // 1 조종, 2 조종,   관전여부
+            // 1 조종, 2 조종,   관전여부
             pk::int_bool win = pk::duel(null, null, personList[0], null, null, personList[1], null, null, c1, c2, 0, true);
 
             @winner = personList[win.first];
@@ -5478,7 +5640,7 @@
             pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
             array<pk::force@> forceArray = GetParticipatingForceArray(대회_설전);
 
-            string ment = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+            string ment0 = pk::format("\x1b[2x설전대회\x1b[0x를 개최하도록 하겠소. 참가하는 세력은 \x1b[2x{}\x1b[0x,", pk::u8decode(pk::get_name(forceArray[0])));
             pk::person@ winner = null;
             pk::person@ runnerUp = null;
 
@@ -5490,40 +5652,66 @@
             pk::background(1);
             pk::fade(255);
 
-            pk::message_box(pk::u8encode(pk::format("\x1b[2x설전대회\x1b[0x를 개최하도록 하겠소. 참가하는 세력은 \x1b[2x{}\x1b[0x,", pk::u8decode(pk::get_name(forceArray[0])))), Emperor);
-
-            if (8 == validForceCount)
+            if (4 == validForceCount)
             {
-                ment = ment + "의 세력이오";
+                ment0 = ment0 + pk::format(" \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])));
+                pk::message_box(pk::u8encode(ment0), Emperor);
+            }
+            else if (8 == validForceCount)
+            {
+                string ment1 = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+                pk::message_box(pk::u8encode(ment0), Emperor);
+                ment1 = ment1 + "의 세력이오";
+                pk::message_box(pk::u8encode(ment1), Emperor);
             }
             else if (16 == validForceCount)
             {
-                pk::message_box(pk::u8encode(ment), Emperor);
-                ment = pk::format("그리고 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[8])), pk::u8decode(pk::get_name(forceArray[9])), pk::u8decode(pk::get_name(forceArray[10])), pk::u8decode(pk::get_name(forceArray[11])), pk::u8decode(pk::get_name(forceArray[12])), pk::u8decode(pk::get_name(forceArray[13])), pk::u8decode(pk::get_name(forceArray[14])), pk::u8decode(pk::get_name(forceArray[15])));
+                string ment1 = pk::format("\x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x", pk::u8decode(pk::get_name(forceArray[1])), pk::u8decode(pk::get_name(forceArray[2])), pk::u8decode(pk::get_name(forceArray[3])), pk::u8decode(pk::get_name(forceArray[4])), pk::u8decode(pk::get_name(forceArray[5])), pk::u8decode(pk::get_name(forceArray[6])), pk::u8decode(pk::get_name(forceArray[7])));
+                pk::message_box(pk::u8encode(ment0), Emperor);
+                pk::message_box(pk::u8encode(ment1), Emperor);
+                ment1 = pk::format("그리고 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x의 세력이오", pk::u8decode(pk::get_name(forceArray[8])), pk::u8decode(pk::get_name(forceArray[9])), pk::u8decode(pk::get_name(forceArray[10])), pk::u8decode(pk::get_name(forceArray[11])), pk::u8decode(pk::get_name(forceArray[12])), pk::u8decode(pk::get_name(forceArray[13])), pk::u8decode(pk::get_name(forceArray[14])), pk::u8decode(pk::get_name(forceArray[15])));
+                pk::message_box(pk::u8encode(ment1), Emperor);
             }
-            pk::message_box(pk::u8encode(ment), Emperor);
+
+            int requireCount = 1;
+
+            if (4 == validForceCount)
+            {
+                requireCount = 2;
+            }
 
             // 참가무장 선발
             for (int i = 0; i < forceArray.length; ++i)
             {
                 auto list = GetCompetitionPersonList(forceArray[i], 대회_설전, false);
                 auto validList = GetSortedCompetitionPersonList(list, 무장능력_지력);
+
                 if (false == forceArray[i].is_player())
                 {
-                    competitonParticipantList.add(validList[0]);
+                    for (int i = 0; i < requireCount; ++i)
+                    {
+                        competitonParticipantList.add(validList[i]);
+                    }
                 }
                 else
                 {
                     pk::message_box(pk::u8encode("설전대회에 참가할 무장을 선택해주십시오."));
-                    pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("설전 대회에 참가할 무장을 선택합니다.)"), validList, 1, 1);
-                    if (person_sel.count == 0)
+                    pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("설전대회에 참가할 무장을 선택합니다.)"), validList, requireCount, requireCount);
+                    if (person_sel.count <= 0)
                     {
                         pk::message_box(pk::u8encode("무장을 선택을 취소했습니다. 자동으로 무장이 선택됩니다."));
-                        competitonParticipantList.add(validList[0]);
+
+                        for (int i = 0; i < requireCount; ++i)
+                        {
+                            competitonParticipantList.add(validList[i]);
+                        }
                     }
                     else
                     {
-                        competitonParticipantList.add(person_sel[0]);
+                        for (int i = 0; i < requireCount; ++i)
+                        {
+                            competitonParticipantList.add(person_sel[i]);
+                        }
                     }
                 }
             }
@@ -5552,7 +5740,7 @@
             pk::add_tp(pk::get_force(runnerUp.get_force_id()), 준우승_기교 * 2, Emperor.get_pos());
             pk::add_kouseki(runnerUp, 준우승_공적);
             pk::message_box(pk::u8encode(pk::format("\x1b[2x기교\x1b[0x \x1b[1x{}\x1b[0x을 받고 그 명성으로 \n\x1b[2x공적\x1b[0x이 \x1b[1x{}\x1b[0x만큼 올랐습니다.", 준우승_기교, 준우승_공적)));
-            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소"), Emperor);
+            pk::message_box(pk::u8encode("이것으로 대회를 폐하겠소."), Emperor);
             pk::play_se(6);
             pk::message_box(pk::u8encode("대회에 참가한 모든 무장의 지력과 정치 경험치가 상승했습니다."));
             for (int i = 0; i < backUpArray.length; ++i)
@@ -5573,6 +5761,22 @@
 
         void RunEloquenceCompetition(pk::list<pk::person@> personList, pk::person@& winner, pk::person@& runnerUp, bool isSingleCompetition)
         {
+            // 4세력 2무장일 경우 순번을 섞어준다
+            if (4 == validForceCount)
+            {
+                pk::person@ temp = personList[7];
+                @personList[7] = personList[1];
+                @personList[1] = temp;
+
+                @temp = personList[5];
+                @personList[5] = personList[3];
+                @personList[3] = temp;
+
+                @temp = personList[7];
+                @personList[7] = personList[5];
+                @personList[5] = temp;
+            }
+
             pk::person@ moo = pk::get_person(무장_문관);
             int remain = personList.count;
             int round = 1;
@@ -5589,8 +5793,18 @@
                     pk::message_box(pk::u8encode(pk::format("{}회전 {}경기에 참가할 무장은 \x1b[2x{}\x1b[0x, \x1b[2x{}\x1b[0x님 입니다.", round, n, pk::u8decode(pk::get_name(p1)), pk::u8decode(pk::get_name(p2)))), moo);
                     bool c1 = false;                            // 무장1 조종여부
                     bool c2 = false;                            // 무장2 조종여부
+                    bool skip = false;
 
-                    if (false == isSingleCompetition)
+                    if (true == isSingleCompetition)
+                    {
+                        skip = true;
+                    }
+                    else if (true == personList[i].is_player() && true == personList[i + 1].is_player())
+                    {
+                        skip = true;
+                    }
+
+                    if (false == skip)
                     {
                         if (true == personList[i].is_player())
                         {
@@ -5602,7 +5816,7 @@
                             c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 설전을 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[i + 1])))));
                         }
                     }
-                                                       // 1 조종, 2 조종, 관전선택여부
+                    // 1 조종, 2 조종, 관전선택여부
                     pk::int_int_bool win = pk::debate(p1, p2, c1, c2, false, true);
                     list.add(personList[i + win.first]);
                     pk::play_se(6);
@@ -5623,7 +5837,18 @@
             bool c1 = false;                            // 무장1 조종여부
             bool c2 = false;                            // 무장2 조종여부
 
-            if (false == isSingleCompetition)
+            bool skip = false;
+
+            if (true == isSingleCompetition)
+            {
+                skip = true;
+            }
+            else if (true == personList[0].is_player() && true == personList[1].is_player())
+            {
+                skip = true;
+            }
+
+            if (false == skip)
             {
                 if (true == personList[0].is_player())
                 {
@@ -5635,7 +5860,7 @@
                     c2 = pk::yes_no(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 설전을 직접 조종하시겠습니까?", pk::u8decode(pk::get_name(personList[1])))));
                 }
             }
-                                                                      // 1 조종, 2 조종,   관전여부
+            // 1 조종, 2 조종,   관전여부
             pk::int_int_bool win = pk::debate(personList[0], personList[1], c1, c2, false, true);
 
             @winner = personList[win.first];
@@ -5710,10 +5935,10 @@
         }
 
         // 참가자격
-        bool IsExistQualification(pk::force@ force, int competitionType, bool isWorld)
+        bool IsExistQualification(pk::force@ force, int competitionType, int participateType)
         {
             pk::list<pk::person@> personList;
-            if (true == isWorld)
+            if (participateType <= 대회_4강)
             {
                 personList = pk::get_person_list(force, pk::mibun_flags(신분_군주, 신분_도독, 신분_태수, 신분_일반));
             }
@@ -5731,10 +5956,10 @@
                 {
                     if (true == person.is_alive())
                     {
-                        if (person.stat[무장능력_무력] >= 80)
+                        if (person.stat[무장능력_무력] >= 대회_무력제한)
                         {
-                            // 황제가 여는 대회면 바로 반환
-                            if (true == isWorld)
+                            // 황제가 여는 8세력 이상 대회면 바로 반환
+                            if (대회_8강이상 == participateType)
                             {
                                 return true;
                             }
@@ -5749,10 +5974,10 @@
                 {
                     if (true == person.is_alive())
                     {
-                        if (person.stat[무장능력_지력] >= 80)
+                        if (person.stat[무장능력_지력] >= 대회_지력제한)
                         {
-                            // 황제가 여는 대회면 바로 반환
-                            if (true == isWorld)
+                            // 황제가 여는 8세력 이상 대회면 바로 반환
+                            if (대회_8강이상 == participateType)
                             {
                                 return true;
                             }
@@ -5765,18 +5990,29 @@
                 }
             }
 
-            if (count >= 8)
+            if (대회_4강 == participateType)
             {
-                return true;
+                if (count >= 2)
+                {
+                    return true;
+                }
+            }
+
+            if (대회_자세력 == participateType)
+            {
+                if (count >= 8)
+                {
+                    return true;
+                }
             }
 
             return false;
         }
-        
+
         pk::list<pk::person@> GetCompetitionPersonList(pk::force@ force, int competitionType, bool isSingleCompetition)
         {
             pk::list<pk::person@> list;
-            
+
             if (false == isSingleCompetition)
             {
                 list = pk::get_person_list(force, pk::mibun_flags(신분_군주, 신분_도독, 신분_태수, 신분_일반));
@@ -5792,14 +6028,14 @@
             {
                 if (대회_무술 == competitionType)
                 {
-                    if (list[i].stat[무장능력_무력] >= 80)
+                    if (list[i].stat[무장능력_무력] >= 대회_무력제한)
                     {
                         validList.add(list[i]);
                     }
                 }
                 else if (대회_설전 == competitionType)
                 {
-                    if (list[i].stat[무장능력_지력] >= 80)
+                    if (list[i].stat[무장능력_지력] >= 대회_지력제한)
                     {
                         validList.add(list[i]);
                     }
@@ -6451,59 +6687,11 @@
                 gold = pk::get_gold(building);
             }
 
-            bool isRebel = false;
-
-            pk::person@ Emperor = pk::get_person(pk::get_scenario().emperor);
-
-            // 반역자 검사
-            if (force.kokugou != -1 && false == pk::is_protecting_the_emperor(force))
+            if (force.title >= 작위_대사마)
             {
-                isRebel = true;
+                return 4;
             }
 
-            // 반역자가 아닌경우
-            if (false == isRebel)
-            {
-                // 황제가 없는경우
-                if (null == Emperor)
-                {
-                    
-                }
-                else if (Emperor.mibun == 신분_사망)
-                {
-
-                }
-                // 황제가 있는경우
-                else
-                {
-                    // 반역자 아닌 세력갯수 확인
-                    auto forceList = pk::get_force_list();
-                    int count = 0;
-
-                    for (int i = 0; i < forceList.count; ++i)
-                    {
-                        if (true == IsValidForce(forceList[i]))
-                        {
-                            if (forceList[i].kokugou != -1 && false == pk::is_protecting_the_emperor(forceList[i]))
-                            {
-                                continue;
-                            }
-
-                            count++;
-                        }
-                    }
-
-                    if (count >= 8)
-                    {
-                        return 3;
-                    }
-                }
-
-                if (force.title >= 작위_대사마)
-                {
-                    return 4;
-                }
-            }
 
             // 대회 개최 유무
             if (true == IsHoldCompetition(force.get_force_id()))
@@ -6524,8 +6712,8 @@
             }
 
             // 장수 자격요건 검사
-            bool duelCheck = IsExistQualification(force, 대회_무술, false);
-            bool EloquencyCheck = IsExistQualification(force, 대회_설전, false);
+            bool duelCheck = IsExistQualification(force, 대회_무술, 대회_자세력);
+            bool EloquencyCheck = IsExistQualification(force, 대회_설전, 대회_자세력);
 
             // 모두 개최가능
             if (true == duelCheck && true == EloquencyCheck)
@@ -10855,7 +11043,7 @@
 
         string GetCompetitionDescription()
         {
-            // 012 : 개최가능,  3 : 한황실 대회 개최가능, 4 : 작위부족 , 5 : 이미 대회를 개최함,  6 : 기교 부족, 7 : 금 부족, 8 : 장수부족
+            // 012 : 개최가능,  3 : 한황실 대회 개최가능(사용안함) , 4 : 작위부족 , 5 : 이미 대회를 개최함,  6 : 기교 부족, 7 : 금 부족, 8 : 장수부족
             switch (tradeData)
             {
             case -1:
@@ -10869,8 +11057,9 @@
                 break;
 
             case 3:
-                return pk::u8encode("아직 황제를 따르는 제후들이 많이 남아있습니다.");
+                return pk::u8encode("아직 황제를 따르는 제후들이 많이 남아있습니다.");      // 사용안함
                 break;
+
             case 4:
                 return pk::u8encode("대회를 개최하려면 공 이상의 작위가 필요합니다.");
                 break;
