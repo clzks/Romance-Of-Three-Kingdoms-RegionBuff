@@ -83,9 +83,6 @@
     const int 짝수년도 = 1;
     const int 매년 = 2;
 
-    // =============================================== 고유기교 커스텀 ========================================================================
-
-
     const int 고유기교_없음 = 0;       // 고유기교가 없다는 것을 계산할 항목이기 때문에 고유기교_없음에 관련된 것은 수정하지 말것
     const int 고유기교_위무지강 = 1;    // 최대병력에서 줄어들 수록 부대 능력치 강화, 부대의 병량소모 감소
     const int 고유기교_대기대덕 = 2;    // 매 턴 부대의 부상병 일부가 회복, 도시 점령 시 내정시설 추가 보존
@@ -100,10 +97,10 @@
     const int 고유기교_유시 = 11;       // 건물의 공격이 낮은확률로 부상유발
     const int 고유기교_팔준 = 12;       // 매 분기마다 교련 발생
     const int 고유기교_오두미도 = 13;   // 아군의 부상병 전환율 추가, 농가가 아닌 시설에서도 군량 일부 획득
-    const int 고유기교_서량철기 = 14;   // 기병전법 성공 시, 기병부대의 주변 적에게 추가적으로 피해를 입힘
+    const int 고유기교_서량철기 = 14;   // 기병전법 성공 시, 기병부대의 주변 적에게 추가적으로 피해를 입힘, 고유기교 보유 무장의 경우 효과 2배
     const int 고유기교_남만왕 = 15;     // 아군 영토내의 적 부대 기동력 하락 및 기력감소
     const int 고유기교_속전고수 = 16;   // 아군의 모든부대 기동력 증가 
-    const int 고유기교_황천당립 = 17;   // 아군 부대의 기력이 줄어들수록 부대 공격력 증가
+    const int 고유기교_황천당립 = 17;   // 아군 부대의 기력이 줄어들수록 부대 공격력 증가, 검병부대 공,방,이동 증가
     const int 고유기교_덕왕위덕 = 18;   // 인접한 적 도시의 치안하락 가속, 아군 영토내에 본거지가 발생하지 않음
     const int 고유기교_팔진도 = 19;     // 건물의 공격이 확률로 추가효과 (화계, 교란, 허보, 기력저하)
     const int 고유기교_군신 = 20;       // 아군 부대의 전법 성공률 증가
@@ -119,17 +116,17 @@
     const int 고유기교_일신시담 = 30;  // 상태이상인 아군 부대 받는피해 반감, (인접한 적 부대 수 - 아군 부대 수) 에 비례해 부대 방어력 증가
     const int 고유기교_왕좌지재 = 31;  // 거점의 부상병 회복 증가, 거점의 시장이 아닌 다른 건물도 일부 금수입
     const int 고유기교_팔문금쇄 = 32;  // 자세력 영토일 시 부대 방어력 증가 및 반격 데미지 증가
-    const int 고유기교_허유엄살 = 33;  // 교란,위보,동토 성공 후 인접한 임의의 적 1부대에 아군 부대의 병력수와 적 부대와의 지력차에 비례한 피해
+    const int 고유기교_허유엄살 = 33;  // 교란,위보,동토 성공 후 2칸 이내의 임의의 적 1부대에 아군 부대의 병력수 및 적 부대와의 지력차에 비례한 피해, 허유엄살 보유 무장의 경우 효과가 2배가 됩니다.
     const int 고유기교_일치단결 = 34;  // 인접한 아군 부대수에 비례해 부대 능력치 상승
-    const int 고유기교_신기 = 35;      // 적의 전법 성공률 하락
+    const int 고유기교_신기 = 35;      // 적의 전법 성공률 하락 (아군 부대에 대한)
     const int 고유기교_후위대 = 36;    // 부대가 전멸 당할 경우 포로 확률 감소
     const int 고유기교_이간계 = 37;    // 무장이 2명 이상인 부대에 계략성공률 증가        
     const int 고유기교_정예수군 = 38;  // 수군의 공,방,기동력 증가
     const int 고유기교_인화 = 39;      // 모든 부대의 지원공격 확률 증가 
     const int 고유기교_침략황폐 = 40;  // 내정시설에 대한 피해 증가, 부대가 일정거리 이하의 도시에 매 턴 치안 감소부여 (6칸, 확률)
-    const int 고유기교_왕귀 = 41;      // 플레이어 전용(싱글모드 전용). 고유기교를 채택하면 무장 1명 선택, 5년 뒤 무장의 능력치 증가 (무장의 능력치가 낮을 수록 효과 극대화), 도중 고유기교를 빼거나 무장이 하야, 배신, 사망 시 무효
-    const int 고유기교_결사항전 = 42;  // 병사가 남아있다면 거점의 내구도가 0 이하로 떨어지지 않음. 내구도가 200 이하인 경우 병력의 피해 급증
-    const int 고유기교43 = 43;
+    const int 고유기교_결사항전 = 41;  // 미구현
+    const int 고유기교_왕귀 = 42;      // 플레이어 전용(1인게임 전용). 고유기교를 채택하면 무장 1명 선택, 4년 뒤 무장의 능력치 증가 (무장의 능력치가 낮을 수록 효과 극대화), 도중 고유기교를 빼거나 무장이 하야, 배신, 사망 시 무효
+    const int 고유기교_폐월수화 = 43;  // 미구현
     const int 고유기교44 = 44;
     const int 고유기교45 = 45;
     const int 고유기교46 = 46;
@@ -187,7 +184,9 @@
     const int 고유기교98 = 98;
     const int 고유기교99 = 99;
 
-    // 출력될 고유기교의 이름. 없음은 수정 X, 없음을 포함해서 최대 100개까지 사용가능
+    const int 고유기교_끝 = 40;
+
+    // 출력될 고유기교의 이름. 없음은 수정하지 말것 , 없음을 포함해서 최대 100개까지 사용가능
     const array<string> 고유기교_이름 = 
     {   "\x1b[1x없음\x1b[0x", 
         "\x1b[1x위무지강\x1b[0x", 
@@ -230,9 +229,9 @@
         "\x1b[1x정예수군\x1b[0x",
         "\x1b[1x인화\x1b[0x",
         "\x1b[1x침략황폐\x1b[0x",
-        "\x1b[1x왕귀\x1b[0x",
         "\x1b[1x결사항전\x1b[0x",
-        "\x1b[1x고유기교43\x1b[0x",
+        "\x1b[1x왕귀\x1b[0x",
+        "\x1b[1x폐월수화\x1b[0x",
         "\x1b[1x고유기교44\x1b[0x",
         "\x1b[1x고유기교45\x1b[0x",
         "\x1b[1x고유기교46\x1b[0x",
@@ -291,8 +290,6 @@
         "\x1b[1x고유기교99\x1b[0x",
     };
 
-    // ============================================================== 고유기교 커스텀 끝 =================================================================
-
     const array<string> 팔준_이름 = { pk::u8encode("통솔 교육"), pk::u8encode("무력 교육"), pk::u8encode("지력 교육"), pk::u8encode("정치 교육"), pk::u8encode("교육 안함") };
     const array<string> 무장능력_이름 = { "\x1b[1x통솔\x1b[0x", "\x1b[1x무력\x1b[0x", "\x1b[1x지력\x1b[0x", "\x1b[1x정치\x1b[0x" };
     const array<string> 칭호_이름 = { "\x1b[2x천하무쌍\x1b[0x", "\x1b[1x천하기재\x1b[0x", "\x1b[16x국사무쌍\x1b[0x" };
@@ -308,6 +305,8 @@
     const int 고유기교_카운트_시작 = 900;    // 900 ~ 941     => 세력 갯수 42개
     const int 우승횟수_시작 = 1000;         // 1000 ~ 1998   => 유효무장 999명
     const int 칭호_시작 = 2000;             // 2000 ~ 2002   => 칭호 3개
+    const int 세력별_고유기교타입_시작 = 2010; // 2010 ~ 2051 => 세력 42개
+    const int AI_고유기교시드_시작 = 2100;   // 2100 ~ 3099  => int 하나당 4개의 고유기교 순서값, 1~40 까지의 랜덤 고유기교 순서를 가지기 위해서 10개의 int값이 필요함. 2100~3099는 세력별 고유기교 랜덤 우선순위값을 100개까지 가짐.
     const int 설정_시작 = 60000;            // 각종 설정을 저장할 인덱스 (최대값 : 65535)
     const int 설정_지역이점_사용여부 = 60000;  // 1 : 사용, 0 : 사용안함
     const int 설정_이민족_지원_사용여부 = 60001;  // 1 : 사용, 0 : 사용안함
@@ -318,14 +317,14 @@
     const int 설정_설전대회_개최달 = 60013;  // 1 ~ 12 
     const int 설정_자세력_대회_사용여부 = 60014; // 1 : 사용, 0 : 사용안함
     const int 설정_고유기교_사용여부 = 60020;  // 1 : 사용, 0 : 사용안함
-    const int 설정_세력별_최대_고유기교 = 60021; // 1 ~ 4 
-    const int 설정_군주고유기교 = 60022;       // 0 : 자유 ,  1 : 강제
-    const int 설정_최초_고유기교_제공여부 = 60023; // 0 : 제공안함, 1 : 제공
-    const int 설정_고유기교_공적제한 = 60024;  // 0 : 없음, 1 : 부하무장만, 2 : 모든무장
+    const int 설정_능력연구_표시_사용여부 = 60021; // 1: 사용, 0 : 사용안함
+    const int 설정_이민족외교_표시_사용여부 = 60022; // 1: 사용, 0 : 사용안함
+    const int 설정_교역_표시_사용여부 = 60023; // 1: 사용, 0 : 사용안함
+    const int 설정_왕귀_표시_사용여부 = 60024; // 1: 사용, 0 : 사용안함
     const int 설정_백출_기력반감 = 60030;     // 1 : 사용, 0 : 원본사용
-    const int 설정_부상병시스템_사용여부 = 60031;      // 1 : 사용, 0 : 사용안함
-    const int 설정_수정된_등용확률 = 60032;   // 1 : 사용, 0 : 원본
-    const int 설정_수정된_포로확률 = 60033;   // 1 : 사용, 0 : 원본
+    const int 설정_부상병시스템_사용여부 = 60031;   // 1 : 사용, 0 : 사용안함
+    const int 설정_수정된_등용확률 = 60032;   // 3: 유저만 2: AI만  1 : 모두, 0 : 원본
+    const int 설정_수정된_포로확률 = 60033;   // 3: 유저만 2: AI만  1 : 모두, 0 : 원본
     const int 설정_멸망시_공적감소 = 60034;   // 1 : 사용, 0 : 원본
 
     // ============================================== Customize ======================================================
@@ -481,7 +480,7 @@
     const int 암기_점수 = 2;
 
     // AI의 설전 선별무장 성격 점수
-    const int 설전_소심 = 9;
+    const int 설전_소심 = 11;
     const int 설전_대담 = 6;
     const int 설전_저돌 = 2;
     const int 설전_냉정 = 0;
@@ -491,7 +490,7 @@
     const int 설전_대갈 = 5;
     const int 설전_무시 = 1;
     const int 설전_진정 = 2;
-    const int 설전_흥분 = 3;
+    const int 설전_흥분 = 3;        // = 역상
 
     // ========================================================== 대회 우승자 특전 =======================================================
 
@@ -526,13 +525,15 @@
     // 세력별로 총 4개의 고유기교까지 적용할 수 있습니다.
     // 세력이 개발완료한 기교들의 총합 포인트에 따라서 고유기교 슬롯이 개방됩니다.
     // 
-    // 첫번째 슬롯에 고유기교를 적용할 때에는 무료이지만, 두번째 이후부터는 적용 시 기교포인트가 소모되고, 고유기교를 교체할때도 기교포인트가 소모됩니다.
-    // 이는 소소한 난이도 증가와, 필요에 따라 자유롭게 고유기교를 바꿔 플레이어의 이익을 극대화하는 것을 방지하기 위함입니다.
+    // 군주 무장의 경우에는 고유기교의 공적제한이 없지만, 수하 무장의 고유기교를 적용시키기 위해서는
+    // 수하 무장 자신의 공적치 제한을 만족시켜야 합니다. 
     // 
-    // 군주의 경우에는 공적제한이 없지만, 수하 무장의 고유기교를 적용시키기 위해서는
-    // 기존의 기교포인트 총합조건에 더하여 수하 무장 자신의 공적치 제한을 만족시켜야 합니다. 
+    //  AI의 세력의 경우 매 달 고유기교 슬롯과 현재 사용 가능한 고유기교 목록에 따라서
+    //  게임 시작시 책정된 우선순위에 의해서 자동으로 교체합니다.
+    //
+    //  플레이어의 경우는 새로운 고유기교를 적용하려면 500의 기교포인트가 필요합니다.
 
-    const array<array<int>> 세력별_고유기교 = 
+    const array<array<int>> 고유기교_무장목록 = 
     {
         //무장 번호, 고유 기교,  부하무장일 경우 필요 공적
         {무장_조조, 고유기교_위무지강, 40000},
@@ -540,46 +541,57 @@
         {무장_손견, 고유기교_맹호조아, 30000},
         {무장_손책, 고유기교_소패왕, 30000},
         {무장_손권, 고유기교_수성강화, 40000},
-        {무장_동탁, 고유기교_주지육림, 50000},
+        {무장_동탁, 고유기교_주지육림, 45000},
         {무장_여포, 고유기교_비마대, 40000},
         {무장_원소, 고유기교_자모위용, 40000},
         {무장_원술, 고유기교_당도고, 60000},
         {무장_공손찬, 고유기교_백마의종, 40000},
         {무장_유언, 고유기교_동주병, 40000},
-        {무장_유장, 고유기교_동주병, 40000},
+        {무장_유장, 고유기교_동주병, 50000},
         {무장_유표, 고유기교_팔준, 30000},
         {무장_장노, 고유기교_오두미도, 40000},
         {무장_마등, 고유기교_서량철기, 40000},
         {무장_마초, 고유기교_서량철기, 40000},
         {무장_맹획, 고유기교_남만왕, 30000},
         {무장_사마의, 고유기교_속전고수, 30000},
-        {무장_장각, 고유기교_황천당립, 60000},
+        {무장_장각, 고유기교_황천당립, 50000},
         {무장_엄백호, 고유기교_덕왕위덕, 40000},
         {무장_제갈량, 고유기교_팔진도, 10000},
         {무장_관우, 고유기교_군신, 20000},
-        {무장_육손, 고유기교_신기, 30000},
+        {무장_육손, 고유기교_신기, 25000},
         {무장_장임, 고유기교_유시, 20000},
         {무장_주유, 고유기교_미주랑, 20000},
-        {무장_장비, 고유기교_만인지적, 40000},
+        {무장_장비, 고유기교_만인지적, 30000},
         {무장_장료, 고유기교_효명진천, 30000},
-        {무장_조운, 고유기교_일신시담, 40000},
+        {무장_조운, 고유기교_일신시담, 30000},
         {무장_순욱, 고유기교_왕좌지재, 10000},
         {무장_노숙, 고유기교_왕좌지재, 10000},
-        {무장_조인, 고유기교_팔문금쇄, 8000},
+        {무장_조인, 고유기교_팔문금쇄, 30000},
         {무장_가후, 고유기교_허유엄살, 20000},
         {무장_강유, 고유기교_일치단결, 30000},
-        {무장_고순, 고유기교_함진영, 20000}
+        {무장_고순, 고유기교_함진영, 20000},
+        {무장_한수, 고유기교_침략황폐, 30000},
+        {무장_유우, 고유기교_인화, 40000},
+        {무장_채모, 고유기교_정예수군, 25000}
 
-        // 추가 시 {무장_유선, 고유기교_원융노병, 16000}  같은 식으로 추가하시면 됩니다.
-        // 신무장의 경우는 신무장의 번호를 직접 적어주셔야 합니다 { 900, 고유기교_함진영, 12000 }
-        // 군주를 중복으로 넣을 시 먼저 입력된 고유기교가 적용됩니다.
+        // 추가 시 {무장_황충, 고유기교_질풍, 30000}  같은 식으로 추가하시면 됩니다.
+        // 주의사항 :
+        // 
+        //    맨 마지막의 괄호 끝에는 ',' 가 없어야 합니다.
+        //    신무장의 경우는 신무장의 번호를 직접 적어주셔야 합니다 { 900, 고유기교_함진영, 12000 }
+        //    무장을 중복으로 입력하면 안됩니다.
     };
     
-    // 개발된 기교의 필요p의 총합을 아래 수치만큼 달성할때마다 슬롯이 하나씩 추가로 개방됩니다. 
-    // 개방조건 배열의 뒤의 숫자가 앞의 숫자보다 작으면 안됩니다.
-    const array<int> 고유기교_개방조건 =
+    // 개발된 기교의 필요p의 총합을 아래 수치만큼 달성할때마다 슬롯이 하나씩 추가로 개방됩니다. (최대 4개로 고정)
+    // 작은 순서대로 입력해야 합니다.
+    const array<int> 플레이어_고유기교_개방조건 =
     {
         6000, 12000, 24000, 40000
+    };
+
+    const array<int> AI_고유기교_개방조건 =
+    {
+        4000, 8000, 16000, 32000
     };
 
     const int 위무지강_병량경감 = 20;       // 0 ~ 100;
@@ -617,7 +629,7 @@
     const int 백마의종_기력감소_돌진 = 5;       // 기병의 돌진 성공시 감소되는 주변 적부대 기력
     const int 백마의종_기력감소_추가 = 2;       // 기병의 전법 성공시 추가되는 기력하락 (돌진 = 5, 돌파 = 7, 돌격 = 9)
 
-    const int 유시_부상확률 = 4;           // %, 건물의 공격이 부상을 입힐 확률 
+    const int 유시_부상확률 = 8;           // %, 건물의 공격이 부상을 입힐 확률 
 
     const int 오두미도_추가_전환율 = 20;    // %, 부대의 피해가 부상병으로 전환되는 추가 비율(기본 20, 오두미도 포함 40) 
     const int 오두미도_시설당_추가병량 = 20; // 농장 1단의 추수량의 20%
@@ -636,7 +648,7 @@
 
     const int 덕왕위덕_치안감소 = 3;       // 매 턴 주변 적도시가 감소하는 치안
 
-    const int 팔진도_상태이상확률 = 4;     // %, 건물의 공격이 상태이상을 일으킬 확률
+    const int 팔진도_상태이상확률 = 8;     // %, 건물의 공격이 상태이상을 일으킬 확률
 
     const int 군신_전법성공률 = 16;        // 추가될 전법 성공확률 
 
@@ -671,8 +683,6 @@
     const int 정예수군_공방증가 = 10;       // (%)
     const int 정예수군_이속증가 = 6;        // (+)
 
-    const int 인화_지원공격증가 = 6;        // (+), 혐오무장도 지원
-
     const int 침략황폐_내정시설피해증가 = 25;    // 내정시설에 입히는 추가 피해량(%) 
     const int 침략황폐_치안감소량 = 1;      //   매 턴 감소시키는 도시의 치안
     const int 침략황폐_치안감소확률 = 50;   //   부대마다 치안을 감소시킬 확률(최소 1000명 이상인 부대만 적용) (%)
@@ -681,12 +691,19 @@
     const int 팔문금쇄_방어증가 = 15;       // (+)
     const int 팔문금쇄_반격증가 = 30;       // (%)
 
-    const int 인화_지원증가 = 5;            // (+)
+    const int 인화_지원증가 = 8;            // (+)
+
+    const int 허유엄살_최대피해 = 800;
+    const int 허유엄살_최소피해 = 200;
+    const int 허유엄살_지력차_배율 = 2;      // 지력차 50을 기준으로 100%의 데미지, 1증감당 2% 씩 차이, 최대 200%까지 
+    const int 허유엄살_병력계수 = 20;       // 기본데미지 : 부대 병력 1000명 미만은 무효, 1000~5000 까지는 250, 5000 이상인 경우는 (병력수 / 20)  
 
     const int 비마대_계략감소 = 20;         // (%)
     const int 청주병_계략감소 = 20;         // (%)
     const int 동주병_계략감소 = 20;         // (%)
     const int 원융노병_계략감소 = 20;         // (%)
+
+    const int 왕귀_날짜 = 144;              // 1년 = 36
 
     // ==================================================================================================================================
     // ==================================================================================================================================
@@ -716,8 +733,10 @@
         pk::list<pk::person@> competitonParticipantList;               // 대회 참가무장
         array<int> woundedUnitArray(500);                              // 부대 부상병 배열
         array<int> woundedBuildingArray(87);                           // 거점 부상병 배열
-        array<array<int>> uniqueTechArray(도시_끝);                     // 세력별 고유기교 배열
-        array<int> uniqueTechCount(도시_끝);                            // 세력별 개방된 고유기교 슬롯        
+        array<int> ai_uniqueTech_perfer_type(도시_끝);                  // ai 고유기교 우선순위 타입
+        array<int> uniqueTechArray(도시_끝);                            // 세력별 고유기교 배열(100진수)
+        array<int> uniqueTechCount(도시_끝);                            // 세력별 개방된 고유기교 슬롯
+        array<int> ai_prefer_uniqueTech_data(1000);                      // 세력별 고유기교 우선순위 배열
         array<int> competitionCountArray(신무장_끝);                   // 대회 우승횟수 카운트 배열. 우승횟수는 1000의 자리가 무술대회, 1의자리가 설전대회가 될것
         array<int> titleArray(3);                                     // 칭호 배열
 
@@ -728,16 +747,15 @@
         int 이민족지원_사용여부 = -1;
         int 이민족_특기전수_사용여부 = -1;
         int 고유기교_사용여부 = -1;
-        int 세력별_최대_고유기교 = -1;
-        int 군주고유기교 = -1;
-        int 최초_고유기교_제공여부 = -1;
-        int 고유기교_공적제한 = -1;
+        int 능력연구_표시_사용여부 = -1;
+        int 이민족외교_표시_사용여부 = -1;
+        int 교역_표시_사용여부 = -1;
+        int 왕귀_표시_사용여부 = -1;
         int 백출_기력반감 = -1;
         int 부상병시스템_사용여부 = -1;
         int 수정된_등용확률 = -1;
         int 수정된_포로확률 = -1;
         int 멸망시_공적감소 = -1;
-
         pk::func101_t@ prev_callback_101;                              // 이전 징병 치안 증감
         pk::func102_t@ prev_callback_102;                              // 이전 병기생산량
         pk::func111_t@ prev_callback_111;                              // 이전 등용확률
@@ -745,7 +763,8 @@
         pk::func151_t@ prev_callback_151;                              // 이전 병량 수입
         pk::func158_t@ prev_callback_158;                              // 이전 본거지 발생 확률
         pk::func163_t@ prev_callback_163;                              // 이전 부대 능력치
-        pk::func165_t@ prev_callback_165;                              // 이전 부대의 병량 소비
+	    pk::func164_t@ prev_callback_164;         		               // 이전 부대 혼란 확률
+	    pk::func165_t@ prev_callback_165;                              // 이전 부대의 병량 소비
         pk::func200_t@ prev_callback_200;                              // 이전 지원 공격 확률;
         pk::func201_t@ prev_callback_201;                              // 이전 공격 크리티컬 확률 
         pk::func202_t@ prev_callback_202;                              // 이전 전법 성공 확률
@@ -754,7 +773,7 @@
         pk::func210_t@ prev_callback_210;                              // 이전 지원 공격 데미지
         pk::func211_t@ prev_callback_211;                              // 이전 건물의 공격 데미지
 
-        // 부상병 계산을 위한 자료들
+        // 부상병 계산을 위한 변수들
         pk::unit@ temp_attacker;
         pk::list<pk::unit@> target_unit_list;
         pk::list<pk::building@> target_building_list;
@@ -763,7 +782,7 @@
         array<int> origin_unit_leader_array(500);
         array<int> unit_origin_troops_array(500);                       // 부대의 초기 병사
         array<int> building_origin_troops_array(건물_거점끝);           // 건물의 초기 병사
-
+        
         int waiting_leader_id;
         int waiting_unit_id;
         bool is_waiting = false;
@@ -812,6 +831,10 @@
             @prev_callback_163 = cast<pk::func163_t@>(pk::get_func(163));
             pk::reset_func(163);
             pk::set_func(163, pk::func163_t(func163));                // 163 부대 능력치
+
+            @prev_callback_164 = cast<pk::func164_t@>(pk::get_func(164));
+            pk::reset_func(164);
+            pk::set_func(164, pk::func164_t(func164));                // 164 부대 혼란 확률
 
             @prev_callback_165 = cast<pk::func165_t@>(pk::get_func(165));
             pk::reset_func(165);
@@ -863,7 +886,8 @@
             AddUniqueTechHelpMenu();                                  // 고유기교 설명
             AddCheckCompetitionCountMenu();                           // 대회 우승횟수 체크
             AddSettingDataMenu();                                     // 지역이점 설정
-            AddReturnOfKingMenu();                                    // 왕귀메뉴 추가
+            AddReturnOfKingMenu();                                    // 왕귀메뉴 추가.
+            AddUniqueTechMenu();                                      // 고유기교 세팅메뉴 추가
         }
 
         // 게임 최초 실행시 지역이점 적용여부 확인작업
@@ -874,8 +898,14 @@
             InitBarbarianMooArray();
  
             validForceUpdate(true);
+            
+            if(ai_prefer_uniqueTech_data[0] == 0)
+                PrioritizeUniqueTech();
 
-            if (pk::get_scenario().loaded) return;
+            if (pk::get_scenario().loaded)
+                return;
+            
+
             if (pk::choose(pk::u8encode("지역이점 스크립트에 대해 설정하시겠습니까?"), { pk::u8encode("예"), pk::u8encode("아니오") }) == 0)
             {
                 CheckSettingDataHandler();
@@ -924,7 +954,7 @@
 
             for (int i = 고유기교_시작; i < 고유기교_시작 + 도시_끝; ++i)
             {
-                uniqueTechArray[i - 고유기교_시작] = int(pk::load(KEY, i, {0,0,0,0}));
+                uniqueTechArray[i - 고유기교_시작] = int(pk::load(KEY, i, 0));
             }
 
             for (int i = 고유기교_카운트_시작; i < 고유기교_카운트_시작 + 도시_끝; ++i)
@@ -942,6 +972,16 @@
                 titleArray[i - 칭호_시작] = int(pk::load(KEY, i, -1));
             }
 
+            for (int i = 세력별_고유기교타입_시작; i < 세력별_고유기교타입_시작 + 도시_끝; ++i)
+            {
+                ai_uniqueTech_perfer_type[i - 세력별_고유기교타입_시작] = int(pk::load(KEY, i, 0));
+            }
+
+            for (int i = AI_고유기교시드_시작; i < AI_고유기교시드_시작 + 1000; ++i)
+            {
+                ai_prefer_uniqueTech_data[i - AI_고유기교시드_시작] = int(pk::load(KEY, i, 0));
+            }
+
             지역이점_사용여부 = int(pk::load(KEY, 설정_지역이점_사용여부, 1));
             이민족지원_사용여부 = int(pk::load(KEY, 설정_이민족_지원_사용여부, 1));
             이민족_특기전수_사용여부 = int(pk::load(KEY, 설정_이민족_특기전수_사용여부, 1));
@@ -951,14 +991,14 @@
             대회_개최시기_설전 = int(pk::load(KEY, 설정_설전대회_개최달, 4));
             자세력_대회_개최여부 = int(pk::load(KEY, 설정_자세력_대회_사용여부, 1));
             고유기교_사용여부 = int(pk::load(KEY, 설정_고유기교_사용여부, 1));
-            세력별_최대_고유기교 = int(pk::load(KEY, 설정_세력별_최대_고유기교, 4));
-            군주고유기교 = int(pk::load(KEY, 설정_군주고유기교, 1));
-            최초_고유기교_제공여부 = int(pk::load(KEY, 설정_최초_고유기교_제공여부, 0));
-            고유기교_공적제한 = int(pk::load(KEY, 설정_고유기교_공적제한, 1));
+            능력연구_표시_사용여부 = int(pk::load(KEY, 설정_능력연구_표시_사용여부, 1));
+            이민족외교_표시_사용여부 = int(pk::load(KEY, 설정_이민족외교_표시_사용여부, 1));
+            교역_표시_사용여부 = int(pk::load(KEY, 설정_교역_표시_사용여부, 1));
+            왕귀_표시_사용여부 = int(pk::load(KEY, 설정_왕귀_표시_사용여부, 1));
             백출_기력반감 = int(pk::load(KEY, 설정_백출_기력반감, 1));
             부상병시스템_사용여부 = int(pk::load(KEY, 설정_부상병시스템_사용여부, 1));
-            수정된_등용확률 = int(pk::load(KEY, 설정_수정된_등용확률, 1));
-            수정된_포로확률 = int(pk::load(KEY, 설정_수정된_포로확률, 1));
+            수정된_등용확률 = int(pk::load(KEY, 설정_수정된_등용확률, 3));
+            수정된_포로확률 = int(pk::load(KEY, 설정_수정된_포로확률, 3));
             멸망시_공적감소 = int(pk::load(KEY, 설정_멸망시_공적감소, 1));
 
             loadSuccess = true;
@@ -1021,6 +1061,16 @@
                 pk::store(KEY, i, titleArray[i - 칭호_시작]);
             }
 
+            for (int i = 세력별_고유기교타입_시작; i < 세력별_고유기교타입_시작 + 도시_끝; ++i)
+            {
+                pk::store(KEY, i, ai_uniqueTech_perfer_type[i - 세력별_고유기교타입_시작]);
+            }
+
+            for (int i = AI_고유기교시드_시작; i < AI_고유기교시드_시작 + 1000; ++i)
+            {
+                pk::store(KEY, i, ai_prefer_uniqueTech_data[i - AI_고유기교시드_시작]);
+            }
+
             pk::store(KEY, 설정_지역이점_사용여부, 지역이점_사용여부);
             pk::store(KEY, 설정_이민족_지원_사용여부, 이민족지원_사용여부);
             pk::store(KEY, 설정_이민족_특기전수_사용여부, 이민족_특기전수_사용여부);
@@ -1030,10 +1080,10 @@
             pk::store(KEY, 설정_설전대회_개최달, 대회_개최시기_설전);
             pk::store(KEY, 설정_자세력_대회_사용여부, 자세력_대회_개최여부);
             pk::store(KEY, 설정_고유기교_사용여부, 고유기교_사용여부);
-            pk::store(KEY, 설정_세력별_최대_고유기교, 세력별_최대_고유기교);
-            pk::store(KEY, 설정_군주고유기교, 군주고유기교);
-            pk::store(KEY, 설정_최초_고유기교_제공여부, 최초_고유기교_제공여부);
-            pk::store(KEY, 설정_고유기교_공적제한, 고유기교_공적제한);
+            pk::store(KEY, 설정_능력연구_표시_사용여부, 고유기교_사용여부);
+            pk::store(KEY, 설정_이민족외교_표시_사용여부, 고유기교_사용여부);
+            pk::store(KEY, 설정_교역_표시_사용여부, 고유기교_사용여부);
+            pk::store(KEY, 설정_왕귀_표시_사용여부, 고유기교_사용여부);
             pk::store(KEY, 설정_백출_기력반감, 백출_기력반감);
             pk::store(KEY, 설정_부상병시스템_사용여부, 부상병시스템_사용여부);
             pk::store(KEY, 설정_수정된_등용확률, 수정된_등용확률);
@@ -1078,7 +1128,6 @@
             CheckEloquenceCompetition();
             //CheckUniqueTech();
             UpdateHoryo();
-            UpdateUniqueTech();
         }
 
         // 새분기 적용될 것
@@ -1105,6 +1154,7 @@
             UpdatePillage(force);
             UpdateKingOfVirtue(force);
             UpdateDevastation(force);
+            UpdateUniqueTech(force);
         }
 
         // 턴 종료시 적용될 것
@@ -1122,7 +1172,7 @@
         {
             if (부상병시스템_사용여부 == 1 && 게임화면_부상병_표시)
                 displayWoundedTroops();
-
+            DisplayProgress();
             CheckWaitingUnit();
         }
 
@@ -1165,6 +1215,113 @@
 
             pk::draw_filled_rect(pk::rectangle(pk::point(width / 2 - 130, height - 62), pk::size(260, 20)), 0xaa555555);
             pk::draw_text(pk::u8encode(pk::format("{}, \x1b[2x부상병\x1b[0x : \x1b[31x{}\x1b[0x", name, troops)), pk::point(width / 2 - 100, height - 60), -1, FONT_SMALL, 0x000000);
+        }
+
+        void DisplayProgress()
+        {
+            int force_id = pk::get_current_turn_force_id();
+            pk::force@ force = pk::get_force(force_id);
+            
+            if (null == force)
+                return;
+
+            int width = int(pk::get_resolution().width);
+            int height = int(pk::get_resolution().height);
+
+            // pk::draw_text(pk::format("\x1b[" + "{}" + "x{}\x1b[0x", 타이머색상 ,timer + 1), pk::point(width / 2 - 60, 62), -1, FONT_BIG, 0x000000);
+            if (force.is_player())
+            {
+                if (능력연구_표시_사용여부 == 1)
+                {
+                    if (force.researching_ability_timer > 0)
+                    {
+                        pk::draw_text(pk::u8encode(pk::format("능력연구 : \x1b[2x{}\x1b[0x턴" , force.researching_ability_timer)), pk::point(width / 100, height / 8 + 20), -1, FONT_BIG, 0x000000);
+                    }
+                    else
+                    {
+                        pk::draw_text(pk::u8encode ("능력연구 \x1b[29x없음\x1b[0x"), pk::point(width / 100, height / 8 + 20), -1, FONT_BIG, 0x000000);
+                    }
+                }
+
+                if (이민족외교_표시_사용여부 == 1)
+                {
+                    bool isExist = false;
+                    int 오환 = dataArray[force_id][1] % 4;
+                    int 강 = (dataArray[force_id][1] / 4) % 4;
+                    int 남만 = (dataArray[force_id][1] / 16) % 4;
+                    int 산월 = (dataArray[force_id][1] / 64) % 4;
+                    string s = "이민족 외교 : ";
+                    if (오환 > 0)
+                    {
+                        s = s + pk::format("오환 : \x1b[2x{}\x1b[0x턴", 오환);
+                        isExist = true;
+                    }
+
+                    if (강 > 0)
+                    {
+                        if (isExist)
+                        {
+                            s = s + ", ";
+                        }
+
+                        s = s + pk::format("강 : \x1b[2x{}\x1b[0x턴", 강);
+
+                        isExist = true;
+                    }
+
+                    if (남만 > 0)
+                    {
+                        if (isExist)
+                        {
+                            s = s + ", ";
+                        }
+
+                        s = s + pk::format("남만 : \x1b[2x{}\x1b[0x턴", 남만);
+
+                        isExist = true;
+                    }
+
+                    if (산월 > 0)
+                    {
+                        if (isExist)
+                        {
+                            s = s + ", ";
+                        }
+
+                        s = s + pk::format("산월 : \x1b[2x{}\x1b[0x턴", 산월);
+
+                        isExist = true;
+                    }
+                    if (isExist)
+                    {
+                        pk::draw_text(pk::u8encode(s), pk::point(width / 100, height / 8 + 50), -1, FONT_BIG, 0x000000);
+                    }
+                    else
+                    {
+                        pk::draw_text(pk::u8encode("이민족 외교 \x1b[29x없음\x1b[0x"), pk::point(width / 100, height / 8 + 50), -1, FONT_BIG, 0x000000);
+                    }
+                }
+
+                if (교역_표시_사용여부 == 1)
+                {
+                    if (GetTradeDay(force) > 0)
+                    {
+                        pk::draw_text(pk::u8encode(pk::format("교역 : \x1b[2x{}\x1b[0x턴", GetTradeDay(force))), pk::point(width / 100, height / 8 + 80), -1, FONT_BIG, 0x000000);
+                    }
+                    else
+                    {
+                        pk::draw_text(pk::u8encode("교역 \x1b[29x없음\x1b[0x"), pk::point(width / 100, height / 8 + 80), -1, FONT_BIG, 0x000000);
+                    }
+                }
+
+                if (왕귀_표시_사용여부 == 1)
+                {
+                    if (GetReturnOfKingDate() > 0 && GetReturnOfKingMoo() != null)
+                    {
+                        pk::draw_text(pk::u8encode(pk::format("왕귀 : \x1b[1x{}\x1b[0x, \x1b[2x{}\x1b[0x턴", pk::u8decode(pk::get_name(GetReturnOfKingMoo())), GetReturnOfKingDate())), pk::point(width / 100, height / 8 + 110), -1, FONT_BIG, 0x000000);
+                    }
+                }
+            }
         }
 
         // 부대 생성시 호출되는 함수 (부상병이 초기화 되지 않았을 경우 초기화)
@@ -1289,6 +1446,9 @@
                     if (damage > 서량철기_최대피해)
                         damage = 서량철기_최대피해;
 
+                    if (HasUnitUniqueTechMoo(unit, 고유기교_서량철기))
+                        damage *= 2;
+
                     if (dst.troops <= damage)
                     {
                         pk::kill(dst, unit, true);
@@ -1305,13 +1465,20 @@
                         if (!is_damage)
                         {
                             // 대사
-                            if (pk::rand_bool(50))
+                            if (unit.member[0] == 무장_마초 || unit.member[1] == 무장_마초 || unit.member[2] == 무장_마초)
                             {
-                                pk::say(pk::u8encode("서량철기의 맛을 봐라...!"), pk::get_person(unit.leader), unit);
+                                pk::say(pk::u8encode("내가 서량의 금마초다!"), pk::get_person(무장_마초), unit);
                             }
                             else
                             {
-                                pk::say(pk::u8encode("하하하, 모조리 짓밟아주마!"), pk::get_person(unit.leader), unit);
+                                if (pk::rand_bool(50))
+                                {
+                                    pk::say(pk::u8encode("서량철기의 맛을 봐라...!"), pk::get_person(unit.leader), unit);
+                                }
+                                else
+                                {
+                                    pk::say(pk::u8encode("하하하, 모조리 짓밟아주마!"), pk::get_person(unit.leader), unit);
+                                }
                             }
 
                             if (pk::rand_bool(50) && dst.is_alive())
@@ -1449,6 +1616,105 @@
                         }
                     }
                     pk::attack(unit, target_list[0]);
+                }
+            }
+
+            if (HasUniqueTech(force_id, 고유기교_허유엄살))
+            {
+                if (type == 60 || type == 61 || type == 63 || type == 64 || type == 72 || type == 73)
+                {
+                    int source_int = unit.attr.stat[부대능력_지력];
+
+                    array<pk::point> arr = pk::range(unit.get_pos(), 1, 2);
+
+                    pk::list<pk::unit@> unit_list;
+
+                    for (int i = 0; i < arr.length; ++i)
+                    {
+                        pk::unit@ dst = pk::get_unit(arr[i]);
+
+                        if (dst == null || !pk::is_enemy(unit, dst))
+                        {
+                            continue;
+                        }
+
+                        unit_list.add(dst);
+                    }
+
+                    if (unit_list.count > 0)
+                    {
+                        unit_list.shuffle();
+
+                        int damage = 0;
+                        int base_damage = 0;
+                        if (unit.troops < 1000)
+                            return;
+                        else if (unit.troops <= 5000)
+                        {
+                            base_damage = 250;
+                        }
+                        else
+                        {
+                            base_damage = unit.troops / 20;
+                        }
+
+                        int cof; // 계수
+
+                        int dst_int = unit_list[0].attr.stat[부대능력_지력];
+                        cof = (source_int - dst_int) * 허유엄살_지력차_배율;
+
+                        if (cof > 200)
+                            cof = 200;
+
+                        damage = pk::max(0, base_damage * cof / 100);
+
+                        if (damage <= 허유엄살_최소피해)
+                            damage = 허유엄살_최소피해;
+                        if (damage > 허유엄살_최대피해)
+                            damage = 허유엄살_최대피해;
+
+                        if (HasUnitUniqueTechMoo(unit, 고유기교_허유엄살))
+                            damage *= 2;
+
+                        if (unit_list[0].troops <= damage)
+                        {
+                            pk::kill(unit_list[0], unit, true);
+                        }
+                        else
+                        {
+                            pk::add_troops(unit_list[0], -damage, true);
+                        }
+
+                        pk::point pos = unit_list[0].get_pos();
+
+                        if (pk::is_in_screen(unit.get_pos()))
+                        {
+                            if (unit.member[0] == 무장_가후 || unit.member[1] == 무장_가후 || unit.member[2] == 무장_가후)
+                            {
+                                pk::say(pk::u8encode("하하하. 이 가문화의 책략을 우습게 보지 말게"), pk::get_person(무장_가후), unit);
+                            }
+                            else
+                            {
+                                if (pk::rand_bool(50))
+                                {
+                                    pk::say(pk::u8encode("주저하지 말고 모든 수단을 쓴다!"), pk::get_person(unit.leader), unit);
+                                }
+                                else
+                                {
+                                    pk::say(pk::u8encode("적의 실책을 놓치지 마라!"), pk::get_person(unit.leader), unit);
+                                }
+                            }
+
+                            if (pk::rand_bool(50) && unit_list[0].is_alive())
+                            {
+                                pk::say(pk::u8encode("이런 부끄러운 실수를.."), pk::get_person(unit_list[0].leader), unit_list[0]);
+                            }
+                            else
+                            {
+                                pk::say(pk::u8encode("으으... 대체 무슨일이.."), pk::get_person(unit_list[0].leader), unit_list[0]);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1631,7 +1897,10 @@
 
                     if (-1 == officers[i].skill)
                     {
-                        temp.add(officers[i]);
+                        if (officers[i].get_id() < 적장_시작)
+                        {
+                            temp.add(officers[i]);
+                        }
                     }
                 }
 
@@ -2741,6 +3010,18 @@
             {
                 titleArray[i] = -1;
             }
+
+            for (int i = 0; i < 도시_끝; ++i)
+            {
+                uniqueTechArray[i] = 0;
+                uniqueTechCount[i] = 0;
+                ai_prefer_uniqueTech_data[i] = 0;
+            }
+
+            for (int i = 0; i < 도시_끝; ++i)
+            {
+                ai_prefer_uniqueTech_data[i] = pk::rand(100);
+            }
         }
 
         void validForceTrigger()
@@ -2880,8 +3161,8 @@
             for (int i = 0; i < 3; ++i)
             {
                 dataArray[forceId][i] = 0;
-                uniqueTechArray[i] = { 0,0,0,0 };
-                uniqueTechCount[i] = 0;
+                uniqueTechArray[forceId] = 0;
+                uniqueTechCount[forceId] = 0;
             }
 
             if (1 == 자세력_대회_개최여부)
@@ -2896,8 +3177,8 @@
             for (int i = 0; i < 3; ++i)
             {
                 dataArray[forceId][i] = 0;
-                uniqueTechArray[i] = { 0,0,0,0 };
-                uniqueTechCount[i] = 0;
+                uniqueTechArray[forceId] = 0;
+                uniqueTechCount[forceId] = 0;
             }
 
             if (1 == 자세력_대회_개최여부)
@@ -3776,9 +4057,47 @@
                         }
                     }
 
-                    if (GetUniqueTech(force.get_force_id()) > 0)
+                    if (고유기교_사용여부 == 1)
                     {
-                        pk::history_log(pk::get_person(force.kunshu).get_pos(), force.color, pk::u8encode(pk::format("고유기교 : {}", 고유기교_이름[GetUniqueTech(force.get_force_id())])));
+                        if (GetUniqueTechData(force.get_force_id()) > 0)
+                        {
+                            string s = "고유기교 : ";
+                            int unique_tech_data = GetUniqueTechData(force.get_force_id());
+                            int count = 0;
+                            if (unique_tech_data / 1000000 > 0)
+                            {
+                                s = s + 고유기교_이름[unique_tech_data / 1000000];
+                                count++;
+                            }
+                            if ((unique_tech_data / 10000) % 100 > 0)
+                            {
+                                if (count > 0)
+                                {
+                                    s = s + ", ";
+                                }
+                                s = s + 고유기교_이름[(unique_tech_data / 10000) % 100];
+                                count++;
+                            }
+                            if ((unique_tech_data / 100) % 100 > 0)
+                            {
+                                if (count > 0)
+                                {
+                                    s = s + ", ";
+                                }
+                                s = s + 고유기교_이름[(unique_tech_data / 100) % 100];
+                                count++;
+                            }
+                            if (unique_tech_data % 100 > 0)
+                            {
+                                if (count > 0)
+                                {
+                                    s = s + ", ";
+                                }
+                                s = s + 고유기교_이름[unique_tech_data % 100];
+                            }
+
+                            pk::history_log(pk::get_person(force.kunshu).get_pos(), force.color, pk::u8encode(s));
+                        }
                     }
                 }
             }
@@ -5845,6 +6164,9 @@
 
         void ExecuteAISupport(pk::force@ force)
         {
+            if (이민족지원_사용여부 == 0)
+                return;
+
             int year = pk::get_elapsed_years();
             int percentage = AI_이민족지원_기본확률;
             pk::person@ barbarianMoo;
@@ -5994,6 +6316,18 @@
             }
 
             validCityList.clear();
+        }
+
+        pk::point _movePos;
+        void MoveScreen(pk::point pos)
+        {
+            _movePos = pos;
+            pk::scene(pk::scene_t(move_screen_scene));
+        }
+
+        void move_screen_scene()
+        {
+            pk::move_screen(_movePos);
         }
 
         int GetBarbarianSupportUnitCount()
@@ -8162,21 +8496,7 @@
             }
         }
 
-        pk::point move_screen_pos;
 
-        // Scene이 아닌 함수에서 화면 이동만 시키고 싶을때 쓸것
-        void MoveScreen(pk::point pos)
-        {
-            move_screen_pos = pos;
-            pk::scene(pk::scene_t(MoveScreen_Scene_t))
-        }
-
-        void MoveScreen_Scene_t()
-        {
-            pk::move_screen(move_screen_pos);
-        }
-
-        void
         // ================================================= 101 징병 치안 증감 =====================================================================
 
         int func101(pk::city@ city, const pk::detail::arrayptr<pk::person@>& in actors, int troops)
@@ -8584,8 +8904,42 @@
 
             if (HasUniqueTech(force_id, 고유기교_미주랑) && pk::is_on_fire(leader.get_pos()))
             {
-                atk = atk + 미주랑_공방증가;
-                def = def + 미주랑_공방증가;
+                bool is_exist = false;
+
+                if (member[0] != null)
+                {
+                    if (GetPersonUniqueTech(member[0].get_id()) == 고유기교_미주랑)
+                    {
+                        is_exist = true;
+                    }
+                }
+
+                if (member[1] != null)
+                {
+                    if (GetPersonUniqueTech(member[1].get_id()) == 고유기교_미주랑)
+                    {
+                        is_exist = true;
+                    }
+                }
+
+                if (member[2] != null)
+                {
+                    if (GetPersonUniqueTech(member[2].get_id()) == 고유기교_미주랑)
+                    {
+                        is_exist = true;
+                    }
+                }
+
+                if (is_exist)
+                {
+                    atk = atk + 미주랑_공방증가 * 2;
+                    def = def + 미주랑_공방증가 * 2;
+                }
+                else
+                {
+                    atk = atk + 미주랑_공방증가;
+                    def = def + 미주랑_공방증가;
+                }
             }
 
             // 소패왕 특정 숫자로 증가
@@ -9319,39 +9673,56 @@
                 }
             }
 
-            if (수정된_등용확률 == 0)
+            // 모두 등용 난이도 상승이 아닌 경우
+            if (수정된_등용확률 != 1)
             {
-                // 목표 무장의 의형제가 다른 세력에 소속되어 있다면 항상 실패
-                if (pk::is_alive(target_gikyoudai) and @target_gikyoudai != @target)
+                bool is_valid = true;
+
+                // 유저만 상승일때 actor 가 유저 세력인 경우
+                if (수정된_등용확률 == 3 && actor.is_player())
                 {
-                    int gikyoudai_force_id = target_gikyoudai.get_force_id();
-                    if (is_valid_target_force_id or target_force_id != gikyoudai_force_id)
+                    is_valid = false;
+                }
+
+                // AI만 상승일때 actor가 AI 세력인 경우
+                if (수정된_등용확률 == 2 && !actor.is_player())
+                {
+                    is_valid = false;
+                }
+
+                if (is_valid)
+                {
+                    // 목표 무장의 의형제가 다른 세력에 소속되어 있다면 항상 실패
+                    if (pk::is_alive(target_gikyoudai) and @target_gikyoudai != @target)
                     {
-                        if (pk::is_valid_force_id(gikyoudai_force_id) and actor_kunshu.get_force_id() != gikyoudai_force_id)
-                            return pk::bool_bool(true, false);
+                        int gikyoudai_force_id = target_gikyoudai.get_force_id();
+                        if (is_valid_target_force_id or target_force_id != gikyoudai_force_id)
+                        {
+                            if (pk::is_valid_force_id(gikyoudai_force_id) and actor_kunshu.get_force_id() != gikyoudai_force_id)
+                                return pk::bool_bool(true, false);
+                        }
+                    }
+
+
+                    // 목표 무장의 배우자가 다른 세력에 소속되어 있다면 항상 실패
+                    if (pk::is_alive(target_spouse))
+                    {
+                        int spouse_force_id = target_spouse.get_force_id();
+                        if (is_valid_target_force_id or target_force_id != spouse_force_id)
+                        {
+                            if (pk::is_valid_force_id(spouse_force_id) and actor_kunshu.get_force_id() != spouse_force_id)
+                                return pk::bool_bool(true, false);
+                        }
+                    }
+
+
+                    // 목표 무장의 배우자가 실행 무장이거나 실행 무장의 군주인 경우 항상 성공
+                    if (pk::is_alive(target_spouse))
+                    {
+                        if (@target_spouse == @actor_kunshu or @target_spouse == @actor)
+                            return pk::bool_bool(true, true);
                     }
                 }
-                
-
-                // 목표 무장의 배우자가 다른 세력에 소속되어 있다면 항상 실패
-                if (pk::is_alive(target_spouse))
-                {
-                    int spouse_force_id = target_spouse.get_force_id();
-                    if (is_valid_target_force_id or target_force_id != spouse_force_id)
-                    {
-                        if (pk::is_valid_force_id(spouse_force_id) and actor_kunshu.get_force_id() != spouse_force_id)
-                            return pk::bool_bool(true, false);
-                    }
-                }
-                
-
-                // 목표 무장의 배우자가 실행 무장이거나 실행 무장의 군주인 경우 항상 성공
-                if (pk::is_alive(target_spouse))
-                {
-                    if (@target_spouse == @actor_kunshu or @target_spouse == @actor)
-                        return pk::bool_bool(true, true);
-                }
-                
             }
 
             // 목표 무장이 실행 무장의 군주를 혐오하는 경우 항상 실패
@@ -9365,6 +9736,22 @@
             int actor_force_id = actor.get_force_id();
             int target_kunshu_id = pk::get_kunshu_id(target);
 
+            bool is_hard = false;
+
+            if (수정된_등용확률 == 1)
+                is_hard = true;
+            else
+            {
+                if (수정된_등용확률 == 3 && actor.is_player())
+                {
+                    is_hard = true;
+                }
+                else if (수정된_등용확률 == 2 && !actor.is_player())
+                {
+                    is_hard = true;
+                }
+            }
+
             if (type == 0) //일반적인 등용
             {
                 // 목표 무장이 재야이면서 실행 무장과 의형제나 부부이거나, 실행 무장의 군주와 의형제나 부부인경우 항상 성공
@@ -9375,7 +9762,7 @@
                 }
 
                 // 목표 무장의 충성도, 의리x4의 합이 92 이상인 경우 항상 실패
-                if (수정된_등용확률 == 1)
+                if (is_hard)
                 {
                     if (target.loyalty + target.giri * 4 >= 92) return pk::bool_bool(true, false);
                 }
@@ -9384,7 +9771,7 @@
                     if (target.loyalty + target.giri >= 96) return pk::bool_bool(true, false);
                 }
 
-                if (수정된_등용확률 == 0)
+                if (!is_hard)
                 {
                     // 목표 무장의 의형제가 실행 무장의 세력에 소속되어 있다면 항상 성공
                     if (pk::is_alive(target_gikyoudai) and target_gikyoudai.get_force_id() == actor_force_id) return pk::bool_bool(true, true);
@@ -9402,7 +9789,7 @@
             }
             else //포로에 대한 등용
             {
-                if (수정된_등용확률 == 0)
+                if (!is_hard)
                 {
                     // 목표 무장의 의형제가 실행 무장의 세력에 소속되어 있다면 항상 성공
                     for (int i = 0; i < target_gikyoudai_list.size; i++)
@@ -9496,6 +9883,26 @@
             bool has_hobaku_skill = false;
             int hobaku_chance = 0;
             pk::list<pk::person@> prisoner_list;
+
+
+            bool is_hard = false;
+
+            // 둘다 포로 난이도 상승인 경우
+            if (수정된_포로확률 == 1)
+                is_hard = true;
+            else
+            {
+                // 유저만 상승인 경우, 공격자가 플레이어 라면
+                if (수정된_포로확률 == 3 && attacker.is_player())
+                {
+                    is_hard = true;
+                }
+                // AI만 난이도 상승인 경우, 공격자가 AI 라면
+                else if (수정된_포로확률 == 2 && !attacker.is_player())
+                {
+                    is_hard = true;
+                }
+            }
 
             // 공격 오브젝트의 포박 특기 보유 확인
             if (pk::is_alive(attacker_unit))
@@ -9605,13 +10012,25 @@
                     continue;
                 }
 
-                if (수정된_포로확률 == 0)
+                //세력이 멸망할 경우 마지막 거점의 무장을
+                if (not info.releasable)
                 {
-                    //세력이 멸망할 경우 마지막 거점의 모든 무장을 포획
-                    if (not info.releasable)
+                    // 포박 난이도 증가가 아닌 경우 모두 포박
+                    if (!is_hard)
                     {
                         captured.push_back(person);
                         continue;
+                    }
+                    // 포박 난이도 증가인 경우 25% 확률로 포박
+                    else
+                    {
+                        int r = pk::rand(1000);
+                        
+                        if (r % 4 == 0)
+                        {
+                            captured.push_back(person);
+                            continue;
+                        }
                     }
                 }
 
@@ -9709,8 +10128,6 @@
 
                 n -= 3;
 
-                
-
                 if (pk::rand_bool(n))
                     captured.push_back(person);
                 else
@@ -9721,7 +10138,7 @@
                     }
                     else 
                     {
-                        if (수정된_포로확률 == 1)
+                        if (is_hard)
                         {
                             //세력이 멸명할 경우 탈출한 무장들은 의리, 인간관계, 상성에 따라 확률적으로 멸망시킨 세력에 대한 사관금지기간 설정
                             int kunshu_id = pk::get_kunshu_id(attacker);
@@ -9878,9 +10295,12 @@
 
             if (HasUniqueTech(attacker.get_force_id(), 고유기교_침략황폐))
             {
-                if (pk::is_military_type(target_building))
+                if (target_building != null)
                 {
-                    info.hp_damage = info.hp_damage * (100 + 침략황폐_내정시설피해증가) / 100;
+                    if (pk::is_military_type(target_building))
+                    {
+                        info.hp_damage = info.hp_damage * (100 + 침략황폐_내정시설피해증가) / 100;
+                    }
                 }
             }
 
@@ -10135,7 +10555,25 @@
             }
         }
         
-        // 부대의 병량 소비
+        // 164 부대 혼란 확률
+        int func164(pk::unit@ unit)
+        {
+            int value = prev_callback_164(unit);
+
+            int force_id = unit.get_force_id();
+
+            if (force_id >= 0 && force_id < 도시_끝)
+            {
+                if (HasUniqueTech(force_id, 고유기교_맹호조아))
+                {
+                    value = 0;
+                }
+            }
+
+            return value;
+        }
+
+        // 165 부대의 병량 소비
         int func165(pk::unit@ unit)
         {
             int value = prev_callback_165(unit);
@@ -10396,91 +10834,149 @@
             }
         }
 
-        void CheckUniqueTech()
+        // AI 세력별 고유기교 우선순위 정하기 (랜덤)
+        void PrioritizeUniqueTech()
         {
-            //if (!세력_고유기교_사용)
-            //    return;
-
-            auto force_array = pk::list_to_array(pk::get_force_list());
-
-            for (int i = 0; i < force_array.length; ++i)
+            // 초기화
+            for (int i = 0; i < ai_prefer_uniqueTech_data.length; ++i)
             {
-                pk::force@ force = force_array[i];
-                if (!pk::is_alive(force))
-                    continue;
+                ai_prefer_uniqueTech_data[i] = 0;
+            }
 
-                if (force.is_player())
-                    continue;
+            // shuffle 함수용 무장 리스트
+            pk::list<pk::person@> person_list;
 
-                int force_id = force.get_id();
-                int tp = 0;
+            for (int m = 1; m < 40; ++m)
+            {
+                person_list.add(pk::get_person(m));
+            }
 
-                if (force_id >= 세력_강)
-                {
-                    continue;
-                }
-                else
-                {
-                    for (int i = 0; i < 기교_끝; ++i)
-                    {
-                        if (force.tech[i] == true)
-                        {
-                            tp += pk::get_tech(i).tp_cost;
-                        }
-                    }
-
-                    // 아직 고유 기교가 없는 경우
-                    if (GetUniqueTech(force_id) == 0)
-                    {
-                        auto arr = GetValidTech(force.kunshu);
-                        
-                        if (arr[0] == -1)
-                        {
-                            // 세력에 배정된 고유기교 없음
-                        }
-                        else
-                        {
-                            // 조건을 만족한 경우
-                            if (tp >= arr[2])
-                            {
-                                string name;
-
-                                if (force.kokugou != -1)
-                                {
-                                    if (force.is_player())
-                                    {
-                                        name = "아군";
-                                    }
-                                    else
-                                    {
-                                        name = pk::format("\x1b[2x{}\x1b[0x군", pk::u8decode(pk::get_kokugou(force.kokugou).get_name()));
-                                    }
-                                }
-                                else
-                                {
-                                    if (force.is_player())
-                                    {
-                                        name = "아군";
-                                    }
-                                    else
-                                    {
-                                        name = pk::format("\x1b[2x{}\x1b[0x군", pk::u8decode(pk::get_name(pk::get_person(force.kunshu))));
-                                    }
-                                }
-
-                                uniqueTechArray[force_id] = arr[1];
-
-                                pk::message_box(pk::u8encode(pk::format("{}이 고유기교 {}(을)를 획득했습니다", name, 고유기교_이름[arr[1]])));
-                                pk::history_log(pk::get_person(force.kunshu).get_pos(), force.color, pk::u8encode(pk::format("{} 고유기교 {} 획득.", name, 고유기교_이름[arr[1]])));
-                            }
-                        }
-                    }
-                }
+            for (int i = 0; i < 100; ++i)
+            {
+                person_list.shuffle();
+                
+                ConvertMooListToIntArray(person_list, i);
             }
         }
 
+        void ConvertMooListToIntArray(pk::list<pk::person@> person_list, int arrayIndex)
+        {
+            int start = arrayIndex * 10;
+
+            array<pk::person@> arr = pk::list_to_array(person_list);
+            array<int> arr_int(arr.length);
+            
+            for (int i = 0; i < arr_int.length; ++i)
+            {
+                int s = i / 4;
+                int r = i % 4;
+
+                ai_prefer_uniqueTech_data[s + start] += GetDigit(r) * arr_int[i];
+            }
+        }
+
+        int GetDigit(int i)
+        {
+            int value = 1;
+
+            for (int y = 3 - i; y > 0; --y)
+            {
+                value *= 100;
+            }
+
+            return value;
+        }
+
+        //void CheckUniqueTech()
+        //{
+        //    //if (!세력_고유기교_사용)
+        //    //    return;
+        //
+        //    auto force_array = pk::list_to_array(pk::get_force_list());
+        //
+        //    for (int i = 0; i < force_array.length; ++i)
+        //    {
+        //        pk::force@ force = force_array[i];
+        //        if (!pk::is_alive(force))
+        //            continue;
+        //
+        //        if (force.is_player())
+        //            continue;
+        //
+        //        int force_id = force.get_id();
+        //        int tp = 0;
+        //
+        //        if (force_id >= 세력_강)
+        //        {
+        //            continue;
+        //        }
+        //        else
+        //        {
+        //            for (int i = 0; i < 기교_끝; ++i)
+        //            {
+        //                if (force.tech[i] == true)
+        //                {
+        //                    tp += pk::get_tech(i).tp_cost;
+        //                }
+        //            }
+        //
+        //            // 아직 고유 기교가 없는 경우
+        //            if (GetUniqueTech(force_id) == 0)
+        //            {
+        //                auto arr = GetValidTech(force.kunshu);
+        //                
+        //                if (arr[0] == -1)
+        //                {
+        //                    // 세력에 배정된 고유기교 없음
+        //                }
+        //                else
+        //                {
+        //                    // 조건을 만족한 경우
+        //                    if (tp >= arr[2])
+        //                    {
+        //                        string name;
+        //
+        //                        if (force.kokugou != -1)
+        //                        {
+        //                            if (force.is_player())
+        //                            {
+        //                                name = "아군";
+        //                            }
+        //                            else
+        //                            {
+        //                                name = pk::format("\x1b[2x{}\x1b[0x군", pk::u8decode(pk::get_kokugou(force.kokugou).get_name()));
+        //                            }
+        //                        }
+        //                        else
+        //                        {
+        //                            if (force.is_player())
+        //                            {
+        //                                name = "아군";
+        //                            }
+        //                            else
+        //                            {
+        //                                name = pk::format("\x1b[2x{}\x1b[0x군", pk::u8decode(pk::get_name(pk::get_person(force.kunshu))));
+        //                            }
+        //                        }
+        //
+        //                        uniqueTechArray[force_id] = arr[1];
+        //
+        //                        pk::message_box(pk::u8encode(pk::format("{}이 고유기교 {}(을)를 획득했습니다", name, 고유기교_이름[arr[1]])));
+        //                        pk::history_log(pk::get_person(force.kunshu).get_pos(), force.color, pk::u8encode(pk::format("{} 고유기교 {} 획득.", name, 고유기교_이름[arr[1]])));
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        pk::force@ unique_tech_player_force;
+
         void UpdateUniqueTech(pk::force@ force)
         {
+            if (고유기교_사용여부 == 0)
+                return;
+
             int force_id = force.get_force_id();
             
             if (force_id >= 세력_강)
@@ -10502,52 +10998,437 @@
 
             if (force.is_player())
             {
+                Update_Player_UniqueTech(force_id, slot_count);
+
                 if (slot_count >= 4)
                     return;
 
-                if (tp >= 고유기교_개방조건[slot_count])
+                if (tp >= 플레이어_고유기교_개방조건[slot_count])
                 {
                     slot_count += 1;
-
+                    uniqueTechCount[force_id] = slot_count;
                     // 슬롯 추가 이벤트
+                    @unique_tech_player_force = force;
                     pk::scene(pk::scene_t(UniqueTech_Event));
+
+                    pk::person@ kunshu = pk::get_person(force.kunshu);
+                    string s = "";
+                    if (force.kokugou != -1)
+                    {
+                        s = pk::u8decode(pk::get_name(pk::get_kokugou(force.kokugou)));
+                    }
+                    else
+                    {
+                        s = pk::u8decode(pk::get_name(kunshu));
+                    }
+                    pk::history_log(kunshu.get_pos(), force.color, pk::u8encode(pk::format("\x1b[2x{}군\x1b[0x 고유기교 슬롯 추가.", s)));
                 }
             }
             else
             {
-                
+                int day = pk::get_day();
 
-                // AI의 경우 게임 정해진 우선순위의 고유기교를 슬롯에 먼저 채워넣는다.
+                if (day != 1)
+                    return;
 
+                if (slot_count < 4)
+                {
+                    // AI의 경우 게임 정해진 우선순위의 고유기교를 슬롯에 먼저 채워넣는다.
+                    if (tp >= AI_고유기교_개방조건[slot_count])
+                    {
+                        pk::person@ kunshu = pk::get_person(force.kunshu);
+                        string s = "";
+                        if (force.kokugou != -1)
+                        {
+                            s = pk::u8decode(pk::get_name(pk::get_kokugou(force.kokugou)));
+                        }
+                        else
+                        {
+                            s = pk::u8decode(pk::get_name(kunshu));
+                        }
+
+                        slot_count += 1;
+                        uniqueTechCount[force_id] = slot_count;
+                        pk::history_log(kunshu.get_pos(), force.color, pk::u8encode(pk::format("\x1b[2x{}군\x1b[0x 고유기교 슬롯 추가.", s)));
+                    }
+                }
+
+                Update_AI_UniqueTech(force_id, slot_count);
             }
         }
 
-        void UniqueTech_Event()
+        // 유저의 고유기교 체크 (매턴)
+        void Update_Player_UniqueTech(int force_id, int slot_count)
         {
-            int slot_count = uniqueTechCount[force_id];
+            pk::list<pk::person@> list;
+            //pk::list<pk::person@> originList;
+            int kunshu = pk::get_force(force_id).kunshu;
+            pk::person@ kunshu_moo = pk::get_person(kunshu);
+            pk::force@ force = pk::get_force(force_id);
+            for (int i = 0; i < 고유기교_무장목록.length; ++i)
+            {
+                pk::person@ moo = pk::get_person(고유기교_무장목록[i][0]);
 
-            
+                if (moo.get_force_id() == force_id)
+                {
+                    // 생존중이고 포로가 아닌 무장
+                    if (moo.is_alive() && moo.mibun != 신분_포로)
+                    {
+                        int unique_id = GetPersonUniqueTech(moo.get_id());
+
+                        // 한실중시 군주인 경우 당도고 패스
+                        if (unique_id == 고유기교_당도고 && kunshu_moo.kanshitsu == 한실_중시)
+                            continue;
+
+                        // 군주의 경우 목록에 추가
+                        if (moo.get_id() == kunshu)
+                        {
+                            list.add(moo);
+                        }
+                        else
+                        {
+                            // 부하의 경우 공적조건 체크
+                            if (IsSatisfyKouseki(moo.get_id()))
+                            {
+                                list.add(moo);
+                            }
+                        }
+                    }
+                }
+            }
+            array<int> unique_tech_array(4);
+            int unique_tech_data = GetUniqueTechData(force_id);
+            unique_tech_array[0] = unique_tech_data / 1000000;
+            unique_tech_array[1] = (unique_tech_data / 10000) % 100;
+            unique_tech_array[2] = (unique_tech_data / 100) % 100;
+            unique_tech_array[3] = unique_tech_data % 100;
+
+            string s = "";
+            if (force.kokugou != -1)
+            {
+                s = pk::u8decode(pk::get_name(pk::get_kokugou(force.kokugou)));
+            }
+            else
+            {
+                s = pk::u8decode(pk::get_name(kunshu_moo));
+            }
+
+            for (int i = 0; i < 4; ++i)
+            {
+                if (unique_tech_array[i] == 0)
+                    continue;
+                else
+                {
+                    bool isExist = false;
+
+                    for (int j = 0; j < list.count; ++j)
+                    {
+                        if (GetPersonUniqueTech(list[j].get_id()) == unique_tech_array[i])
+                        {
+                            isExist = true;
+                            break;
+                        }
+                    }
+
+                    if(!isExist)
+                    {
+                        // 메시지 후 고유기교 삭제
+                        SetUniqueTech(force_id, 0, i);
+                        pk::play_se(27);
+                        pk::history_log(kunshu_moo.get_pos(), force.color, pk::u8encode(pk::format("\x1b[2x{}군\x1b[0x의 고유기교 {} 해제", s, 고유기교_이름[unique_tech_array[i]])));
+                        pk::message_box(pk::u8encode(pk::format("고유기교 {}(이)가 해제 되었습니다.", 고유기교_이름[unique_tech_array[i]])));
+                    }
+                }
+            }
         }
 
-        array<int> GetValidTech(int kunshuId)
+        void Update_AI_UniqueTech(int force_id, int slot_count)
         {
-            for (int i = 0; i < 세력별_고유기교.length; ++i)
+            if (slot_count <= 0)
+                return;
+
+            pk::list<pk::person@> list;
+            pk::list<pk::person@> originList;
+            int kunshu = pk::get_force(force_id).kunshu;
+
+            for (int i = 0; i < 고유기교_무장목록.length; ++i)
             {
-                if (세력별_고유기교[i][0] == kunshuId)
+                pk::person@ moo = pk::get_person(고유기교_무장목록[i][0]);
+                
+                if (moo.get_force_id() == force_id)
                 {
-                    return 세력별_고유기교[i];
+                    // AI의 경우 부하 무장이 생존중이면 고유기교 적용 가능
+                    if (moo.is_alive())
+                    {
+                        list.add(moo);
+                        originList.add(moo);
+                    }
                 }
             }
 
-            return { -1 };
+            array<int> prefer_arr = GetUniqueTechPriority(force_id);
+
+            // 원본 데이터 백업
+            array<int> originSkill(originList.count);
+            for (int i = 0; i < originList.count; ++i)
+            {
+                originSkill[i] = originList[i].skill;
+            }
+
+            // skill을 고유기교 우선순위로 변경 (군주일 경우는 -1로 변환해서 최우선 처리)
+            for (int i = 0; i < list.count; ++i)
+            {
+                if (list[i].get_id() == kunshu)
+                    list[i].skill = -1;
+                else
+                {
+                    list[i].skill = GetRankUniqueTechPriority(GetPersonUniqueTech(list[i].get_id()), prefer_arr);
+                }
+            }
+
+            list.sort(function(a, b)
+            {
+                return (a.skill < b.skill);
+            });
+
+            
+            int currIndex = 0;
+            uniqueTechArray[force_id] = 0;
+
+            pk::person@ kunshu_moo = pk::get_person(kunshu);
+            // 조건에 맞춰서 고유기교 세팅
+            // 1. 군주의 고유기교가 있다면 최우선으로, 중복고유기교는 패스
+            for (int i = 0; i < list.count; ++i)
+            {
+                if (currIndex >= slot_count)
+                {
+                    break;
+                }
+
+                int unique_id = GetPersonUniqueTech(list[i].get_id());
+
+                // 한실중시 군주는 당도고 패스
+                if (unique_id == 고유기교_당도고 && kunshu_moo.kanshitsu == 한실_중시)
+                    continue;
+
+                // 군주가 최우선
+                if (list[i].get_id() == kunshu)
+                {
+                    uniqueTechArray[force_id] += GetDigit(currIndex) * unique_id;
+                    currIndex++;
+                }
+                else
+                {
+                    // 중복 체크
+                    if (HasUniqueTech(force_id, unique_id))
+                    {
+                        continue;
+                    }
+
+                    // 공적 체크
+                    if (IsSatisfyKouseki(list[i].get_id()))
+                    {
+                        uniqueTechArray[force_id] += GetDigit(currIndex) * unique_id;
+                        currIndex++;
+                    }
+                }
+            }
+
+            // 데이터 롤백
+            for (int i = 0; i < originList.count; ++i)
+            {
+                originList[i].skill = originSkill[i];
+            }
         }
-        
-        int GetUniqueTech(int forceId)
+
+
+        void UniqueTech_Event()
         {
-            if (forceId >= 도시_끝 || forceId <= -1)
+            //int slot_count = uniqueTechCount[force_id];
+
+            // 짤막한 상황극
+        }
+
+        array<int> GetUniqueTechPriority(int force_id)
+        {
+            array<int> arr(40);
+            int type = ai_uniqueTech_perfer_type[force_id];
+
+            for (int i = 0; i < 10; ++i)
+            {
+                arr[i * 4] = ai_prefer_uniqueTech_data[type * 10 + i] / 1000000;
+                arr[i * 4 + 1] = (ai_prefer_uniqueTech_data[type * 10 + i] / 10000) % 100;
+                arr[i * 4 + 2] = (ai_prefer_uniqueTech_data[type * 10 + i] / 100) % 100;
+                arr[i * 4 + 3] = ai_prefer_uniqueTech_data[type * 10 + i] % 100;
+            }
+
+            return arr;
+        }
+
+        int GetRankUniqueTechPriority(int ut, array<int> priority)
+        {
+            for (int i = 0; i < priority.length; ++i)
+            {
+                if (priority[i] == ut)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        int GetPersonUniqueTech(int moo)
+        {
+            if (moo == -1)
                 return 0;
 
-            return uniqueTechArray[forceId];
+            for (int i = 0; i < 고유기교_무장목록.length; ++i)
+            {
+                if (고유기교_무장목록[i][0] == moo)
+                    return 고유기교_무장목록[i][1];
+            }
+
+            return 0;
+        }
+
+        bool IsSatisfyKouseki(int moo)
+        {
+            pk::person@ p = pk::get_person(moo);
+
+            for (int i = 0; i < 고유기교_무장목록.length; ++i)
+            {
+                if (고유기교_무장목록[i][0] == moo)
+                {
+                    if (p.kouseki >= 고유기교_무장목록[i][2])
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        //array<int> GetValidTech(int kunshuId)
+        //{
+        //    for (int i = 0; i < 고유기교_무장목록.length; ++i)
+        //    {
+        //        if (고유기교_무장목록[i][0] == kunshuId)
+        //        {
+        //            return 고유기교_무장목록[i];
+        //        }
+        //    }
+        //
+        //    return { -1 };
+        //}
+        //
+
+        // 세력별 적용 고유기교 데이터 반환
+        int GetUniqueTechData(int force_id)
+        {
+            if (force_id >= 도시_끝 || force_id <= -1)
+                return 0;
+        
+            return uniqueTechArray[force_id];
+        }
+
+        // 플레이어 세력의 고유기교 적용을 위한 데이터    0 : 슬롯 부족,  1 : 고유기교 무장 없음, 2 : 기교p 부족, 3 : 정상, 4 : 사용안함 설정
+        int GetUniqueTechApplyData(pk::force@ force)
+        {
+            if (고유기교_사용여부 == 0)
+                return 4;
+
+            int slot_count = uniqueTechCount[force.get_force_id()];
+
+            if (slot_count <= 0)
+                return 0;
+
+            int valid_count = GetValidUniqueTechMooList(force).count;
+
+            if (valid_count <= 0)
+                return 1;
+
+            if (force.tp < 500)
+                return 2;
+
+            return 3;
+        }
+
+        pk::list<pk::person@> GetValidUniqueTechMooList(pk::force@ force)
+        {
+            pk::list<pk::person@> list;
+            int kunshu = pk::get_force(force.get_force_id()).kunshu;
+
+            for (int i = 0; i < 고유기교_무장목록.length; ++i)
+            {
+                pk::person@ moo = pk::get_person(고유기교_무장목록[i][0]);
+
+                if (moo.get_force_id() == force.get_force_id())
+                {
+                    if (moo.is_alive())
+                    {
+                        list.add(moo);
+                    }
+                }
+            }
+
+            pk::list<pk::person@> valid_list;
+
+            if (list.count > 0)
+            {
+                for (int i = 0; i < list.count; ++i)
+                {
+                    if (list[i].get_id() == kunshu)
+                    {
+                        valid_list.add(list[i]);
+                        continue;
+                    }
+
+                    if (IsSatisfyKouseki(list[i].get_id()))
+                    {
+                        valid_list.add(list[i]);
+                    }
+                }
+            }
+
+            return valid_list;
+        }
+
+        void SetUniqueTech(int force_id, int unique_tech, int digit)
+        {
+            int data = uniqueTechArray[force_id];
+            int origin;
+            switch (digit)
+            {
+            case 0 :
+                origin = data / 1000000;
+                data -= 1000000 * origin;
+                data += 1000000 * unique_tech;
+                break;
+
+            case 1:
+                origin = (data / 10000) % 100;
+                data -= 10000 * origin;
+                data += 10000 * unique_tech;
+                break;
+
+            case 2:
+                origin = (data / 100) % 100;
+                data -= 100 * origin;
+                data += 100 * unique_tech;
+                break;
+
+            case 3:
+                origin = data % 100;
+                data -= origin;
+                data += unique_tech;
+                break;
+            }
+
+            uniqueTechArray[force_id] = data;
         }
 
         void UpdateHoryo()
@@ -10797,7 +11678,14 @@
                     {
                         if (enabled == false)
                         {
-                            enabled = pk::rand_bool(미주랑_크리확률증가);
+                            if (HasUnitUniqueTechMoo(attacker, 고유기교_미주랑))
+                            {
+                                enabled = pk::rand_bool(미주랑_크리확률증가 * 2);
+                            }
+                            else
+                            {
+                                enabled = pk::rand_bool(미주랑_크리확률증가);
+                            }
                         }
                     }
                 }
@@ -11327,6 +12215,31 @@
         {
             if (GetReturnOfKingMoo() == null)
                 return;
+            else
+            {
+                pk::force@ force = pk::get_force(GetReturnOfKingMoo().get_force_id());
+
+                // 플레이어 세력이 아닐 경우 무효화
+                if (!force.is_player())
+                {
+                    SetReturnOfKingMoo(-1);
+                }
+                // 왕귀무장이 플레이어 세력인 경우
+                else
+                {
+                    // 왕귀 고유기교 미적용 시 무효화
+                    if (!HasUniqueTech(force.get_force_id(), 고유기교_왕귀))
+                    {
+                        SetReturnOfKingMoo(-1);
+                    }
+                    
+                    // 무장이 사망한 경우 초기화
+                    if (!GetReturnOfKingMoo().is_alive())
+                    {
+                        SetReturnOfKingMoo(-1);
+                    }
+                }
+            }
 
             if (GetReturnOfKingDate() == 1)
             {
@@ -11347,19 +12260,19 @@
 
                 if (total <= 0)
                 {
-
+                    pk::message_box(pk::u8encode("전혀 성장하지 않았다.. 시간만 낭비했군."), moo);
                 }
-                else if (total <= 10)
+                else if (total <= 30)
                 {
-
+                    pk::message_box(pk::u8encode("조금은 성장한 기분이다."), moo);
                 }
-                else if (total <= 40)
+                else if (total <= 100)
                 {
-
+                    pk::message_box(pk::u8encode("이전의 나와는 다르다. 효과가 확실히 느껴지는군."), moo);
                 }
                 else
                 {
-
+                    pk::message_box(pk::u8encode("하하하하. 활약할 날이 너무 기대되는군, 상대가 누구든 모조리 상대해주마!"), moo);
                 }
 
                 if (total > 0)
@@ -11410,7 +12323,7 @@
         void SetReturnOfKingMoo(int id)
         {
             ReturnOfKingMoo.kouseki = id + 10000;
-            ReturnOfKingDateMoo.kouseki = 180;
+            ReturnOfKingDateMoo.kouseki = 왕귀_날짜;
         }
 
         // 왕귀계산기
@@ -11421,26 +12334,69 @@
 
             int value;
 
-            value = (100 - origin) * (100 - origin) / 250 + 1;
+            value = (100 - origin) * (100 - origin) / 125 + 1;
 
             return value;
         }
 
+        bool HasUnitUniqueTechMoo(pk::unit@ unit, int ut)
+        {
+            bool is_valid = false;
+
+            if (unit.member[0] != -1)
+            {
+                if (GetPersonUniqueTech(unit.member[0]) == ut)
+                {
+                    is_valid = true;
+                }
+            }
+
+            if (unit.member[1] != -1)
+            {
+                if (GetPersonUniqueTech(unit.member[1]) == ut)
+                {
+                    is_valid = true;
+                }
+            }
+
+            if (unit.member[2] != -1)
+            {
+                if (GetPersonUniqueTech(unit.member[2]) == ut)
+                {
+                    is_valid = true;
+                }
+            }
+
+            return is_valid;
+        }
 
         bool HasUniqueTech(int forceId, int techId)
         {
+            if (고유기교_사용여부 == 0)
+                return false;
+
             if (forceId >= 도시_끝 || forceId <= -1)
                 return false;
 
-            int enabled = false;
+            bool enabled = false;
             
-            for (int i = 0; i < 4; ++i)
+            int data = uniqueTechArray[forceId];
+
+            if ((data / 1000000) == techId)
             {
-                if (uniqueTechArray[forceId][i] == techId)
-                {
-                    enabled = true;
-                    break;
-                }
+                enabled = true;
+            }
+            else if ((data / 10000) % 100 == techId)
+            {
+                enabled = true;
+            }
+            else if ((data / 100) % 100 == techId)
+            {
+                enabled = true;
+            }
+            else if (data % 100 == techId)
+            {
+                enabled = true;
             }
 
             return enabled;
@@ -11605,7 +12561,7 @@
 
                 if (moo == null)
                 {
-                    return pk::u8encode("5년 이후의 성장을 지켜볼 무장을 선택합니다");
+                    return pk::u8encode("4년 이후의 성장을 지켜볼 무장을 선택합니다");
                 }
                 else
                 {
@@ -11630,7 +12586,7 @@
                 else
                 {
                     @moo = person_sel[0];
-                    pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 육성을 시작합니다. 5년 후의 성장을 기대합니다.", pk::u8decode(pk::get_name(moo)))));
+                    pk::message_box(pk::u8encode(pk::format("\x1b[2x{}\x1b[0x의 육성을 시작합니다. 4년 후의 성장을 기대합니다.", pk::u8decode(pk::get_name(moo)))));
                     SetReturnOfKingMoo(moo.get_id());
                     return true;
                 }
@@ -13620,6 +14576,285 @@
 
         // ================================================================================================================================================
 
+        // ============================================ 고유기교 선택 ================================================================
+
+        void AddUniqueTechMenu()
+        {
+            pk::menu_item item;
+            item.menu = 105;
+            item.pos = 8;
+            item.shortcut = "U";
+            item.init = pk::building_menu_item_init_t(UniqueTechInit);
+            item.is_enabled = pk::menu_item_is_enabled_t(UniqueTechEnabled);
+            item.get_text = pk::menu_item_get_text_t(GetUniqueTechText);
+            item.get_desc = pk::menu_item_get_desc_t(GetUniqueTechDescription);
+            item.handler = pk::menu_item_handler_t(UniqueTechHandler);
+            pk::add_menu_item(item);
+        }
+
+        void UniqueTechInit(pk::building@ building)
+        {
+            @helpMoo = pk::get_person(무장_문관);
+            @tradeBuilding = @building;
+            @tradeForce = pk::get_force(building.get_force_id());
+        }
+
+        bool UniqueTechEnabled()
+        {
+            return true;
+        }
+
+        string GetUniqueTechText()
+        {
+            return  pk::u8encode("고유기교");
+        }
+
+        string GetUniqueTechDescription()
+        {
+            int data = GetUniqueTechApplyData(tradeForce);
+
+            if (data == 4)
+                return pk::u8encode("고유기교가 Off로 설정되어 있습니다.");
+
+            return pk::u8encode("세력의 고유기교를 설정합니다. (추가 시 필요 기교p : 500)");
+        }
+
+        string GetUniqueTechAddDescription(int data)
+        {
+            switch (data)
+            {
+            case 0:
+                return "고유기교 슬롯이 부족합니다.";
+
+            case 1:
+                return "적용 가능한 고유기교 무장이 없습니다.";
+
+            case 2:
+                return "기교p가 부족합니다. (기교p : 500)";
+
+            case 3:
+                return "세력의 고유기교를 설정합니다. (필요 기교p : 500).";
+            
+            case 4:
+                return "고유기교가 Off로 설정되어 있습니다.";
+
+            default:
+                return "예상치 못한 오류가 발생했습니다.";
+            }
+
+            return "";
+        }
+
+        bool UniqueTechHandler()
+        {
+            int data = GetUniqueTechApplyData(tradeForce);
+
+            array<string> helpList =
+            {
+                pk::u8encode("고유기교 \x1b[2x추가\x1b[0x"),
+                pk::u8encode("교유기교 \x1b[29x해제\x1b[0x"),
+                pk::u8encode("뒤로가기")
+            };
+
+            int n = pk::choose(helpList, pk::u8encode("항목을 선택해 주십시오."), helpMoo);
+
+            if (n == 0)
+            {
+                if (data == 3)
+                {
+                    return UniqueTechAdd();
+                }
+                else
+                {
+                    pk::message_box(pk::u8encode(GetUniqueTechAddDescription(data)), helpMoo);
+                    return  UniqueTechHandler();
+                }
+            }
+            else if (n == 1)
+            {
+                return  UniqueTechDelete();
+            }
+
+            return false;
+        }
+
+        bool UniqueTechAdd()
+        {
+            array<string> arr(5);
+            int force_id = tradeForce.get_force_id();
+
+            int slot_count = uniqueTechCount[force_id];
+            int data = GetUniqueTechData(force_id);
+
+            array<int> uniqueTechArr(4);
+
+            uniqueTechArr[0] = data / 1000000;
+            uniqueTechArr[1] = (data / 10000) % 100;
+            uniqueTechArr[2] = (data / 100) % 100;
+            uniqueTechArr[3] = data % 100;
+
+            for (int i = 0; i < 4; ++i)
+            {
+                if (i >= slot_count)
+                {
+                    arr[i] = pk::u8encode("미개방");
+                }
+                else
+                {
+                    if (uniqueTechArr[i] == 0)
+                    {
+                        arr[i] = pk::u8encode("빈 슬롯");
+                    }
+                    else
+                    {
+                        arr[i] = pk::u8encode(고유기교_이름[uniqueTechArr[i]]);
+                    }
+                }
+            }
+
+            arr[4] = pk::u8encode("뒤로 가기");
+
+            pk::list<pk::person@> valid_list = GetValidUniqueTechMooList(tradeForce);
+
+            int n = pk::choose(arr, pk::u8encode("변경할 고유기교 슬롯을 선택해 주십시오."), helpMoo);
+
+            if (n == 4)
+                return UniqueTechHandler();
+            else
+            {
+                if (n >= slot_count)
+                    return UniqueTechAdd();
+
+                pk::list<pk::person@> person_sel = pk::person_selector(pk::u8encode("무장 선택"), pk::u8encode("적용할 고유기교를 가진 무장을 선택해 주십시오."), valid_list, 1, 1);
+                
+                if (person_sel.count <= 0)
+                {
+                    UniqueTechAdd();
+                }
+                else
+                {
+                    int sel_ut = GetPersonUniqueTech(person_sel[0].get_id());
+
+                    int result = IsOverapUniqueTech(uniqueTechArr, n, sel_ut);
+
+                    switch (result)
+                    {
+                    case 0:
+                        if (pk::yes_no(pk::u8encode(pk::format("고유기교 {}(을)를 적용하시겠습니까?", 고유기교_이름[sel_ut]))))
+                        {
+                            SetUniqueTech(force_id, sel_ut, n);
+                            pk::play_se(10);
+                            pk::add_tp(tradeForce, -500, tradeBuilding.get_pos());
+                            pk::message_box(pk::u8encode("고유기교가 변경 되었습니다."));
+                        }
+                        else
+                        {
+                            return  UniqueTechAdd();
+                        }
+                        break;
+
+                    case 1:
+                    case 2: 
+                        pk::play_se(27);
+                        pk::message_box(pk::u8encode(pk::format("고유기교 {}(은)는 이미 적용중입니다.", 고유기교_이름[sel_ut])));
+                        return UniqueTechAdd();
+                    }
+                }
+            }
+
+            return UniqueTechHandler();
+        }
+
+        bool UniqueTechDelete()
+        {
+            array<string> arr(5);
+            int force_id = tradeForce.get_force_id();
+
+            int slot_count = uniqueTechCount[force_id];
+            int data = GetUniqueTechData(force_id);
+
+            array<int> uniqueTechArr(4);
+
+            uniqueTechArr[0] = data / 1000000;
+            uniqueTechArr[1] = (data / 10000) % 100;
+            uniqueTechArr[2] = (data / 100) % 100;
+            uniqueTechArr[3] = data % 100;
+
+            for (int i = 0; i < 4; ++i)
+            {
+                if (i >= slot_count)
+                {
+                    arr[i] = pk::u8encode("미개방");
+                }
+                else
+                {
+                    if (uniqueTechArr[i] == 0)
+                    {
+                        arr[i] = pk::u8encode("빈 슬롯");
+                    }
+                    else
+                    {
+                        arr[i] = pk::u8encode(고유기교_이름[uniqueTechArr[i]]);
+                    }
+                }
+            }
+
+            arr[4] = pk::u8encode("뒤로 가기");
+
+            int n = pk::choose(arr, pk::u8encode("제거할 고유기교 슬롯을 선택해 주십시오."), helpMoo);
+
+            if(n == 4)
+                return UniqueTechHandler();
+            else
+            {
+                if (uniqueTechArr[n] != 0)
+                {
+                    if (pk::yes_no(pk::u8encode(pk::format("고유기교 {}(을)를 해제하시겠습니까?", 고유기교_이름[uniqueTechArr[n]]))))
+                    {
+                        SetUniqueTech(force_id, 0, n);
+                    }
+                }
+
+                return UniqueTechDelete();
+            }
+
+            return UniqueTechHandler();
+        }
+
+        // 0 중복없음, 1 현재 자리와 동일한 고유기교, 2 현재 자리와는 동일하지 않지만 중복된 고유기교 
+        int IsOverapUniqueTech(array<int> arr, int curr_slot, int sel_ut)
+        {
+            bool is_overap = false;
+            bool is_same = false;
+            int slot_ut = arr[curr_slot];
+
+            for (int i = 0; i < arr.length; ++i)
+            {
+                if (arr[i] == sel_ut)
+                {
+                    is_overap = true;
+
+                    if (i == curr_slot)
+                    {
+                        is_same = true;
+                    }
+                }
+            }
+
+            if (!is_overap)
+                return 0;
+            else
+            {
+                if (is_same)
+                    return 1;
+                else
+                    return 2;
+            }
+
+            return -1;
+        }
+        // ========================================================================================================================
+
         // ============================================ 고유기교 설명 =================================================================
 
         void AddUniqueTechHelpMenu()
@@ -13654,6 +14889,34 @@
 
             array<string> helpList =
             {
+                pk::u8encode("첫번째 항목"),
+                pk::u8encode("두번째 항목"),
+                pk::u8encode("뒤로가기")
+            };
+
+            int n = pk::choose(helpList, pk::u8encode("항목을 선택해주십시오."), helpMoo);
+
+            switch (n)
+            {
+            case 0:
+                return UniqueTechHelpFirstHandler();
+
+            case 1:
+                return UniqueTechHelpSecondHandler();
+
+            case 2:
+                return false;
+            }
+
+            return false;
+        }
+
+        bool UniqueTechHelpFirstHandler()
+        {
+            @helpMoo = pk::get_person(무장_제갈량);
+
+            array<string> helpList =
+            {
                 pk::u8encode("위무지강, 대기대덕, 맹호조아, 소패왕, 수성강화"),
                 pk::u8encode("주지육림, 비마대, 자모위용, 당도고, 백마의종"),
                 pk::u8encode("유시, 팔준, 오두미도, 서량철기, 남만왕"),
@@ -13682,10 +14945,42 @@
                 return HelpUnique5();
 
             case 5:
-                return false;
+                return UniqueTechHelpHandler();
             }
 
-            return false;
+            return UniqueTechHelpHandler();
+        }
+
+        bool UniqueTechHelpSecondHandler()
+        {
+            @helpMoo = pk::get_person(무장_제갈량);
+
+            array<string> helpList =
+            {
+                pk::u8encode("미주랑, 묘수, 만인지적, 효명진천, 일신시담"),
+                pk::u8encode("왕좌지재, 팔문금쇄, 허유엄살, 일치단결, 후위대"),
+                pk::u8encode("이간계, 정예수군, 인화, 침략황폐, 왕귀"),
+                pk::u8encode("뒤로가기")
+            };
+
+            int n = pk::choose(helpList, pk::u8encode("궁금한 사항을 선택해주십시오."), helpMoo);
+
+            switch (n)
+            {
+            case 0:
+                return HelpUnique6();
+
+            case 1:
+                return HelpUnique7();
+
+            case 2:
+                return HelpUnique8();
+
+            case 5:
+                return UniqueTechHelpHandler();
+            }
+
+            return UniqueTechHelpHandler();
         }
 
         bool HelpUnique1()
@@ -13703,7 +14998,7 @@
 
             pk::message_box(pk::u8encode("\x1b[2x수성강화\x1b[0x의 효과는 아군 영토에서 아군 \x1b[1x건물\x1b[0x이 받는 피해를 크게 경감시켜줍니다."), helpMoo);
 
-            return UniqueTechHelpHandler();
+            return UniqueTechHelpFirstHandler();
         }
 
         bool HelpUnique2()
@@ -13724,7 +15019,7 @@
             pk::message_box(pk::u8encode("\x1b[2x백마의종\x1b[0x의 효과는 아군 기마대가 \x1b[1x일반공격\x1b[0x 후 일정 기력을 얻게되고,"), helpMoo);
             pk::message_box(pk::u8encode("\x1b[1x전법공격\x1b[0x에 성공했다면, 전법 후 주변 적 부대의 기력을 감소시킵니다."), helpMoo);
 
-            return UniqueTechHelpHandler();
+            return UniqueTechHelpFirstHandler();
         }
 
         bool HelpUnique3()
@@ -13739,18 +15034,19 @@
             pk::message_box(pk::u8encode("그리고 농가가 아닌 도시시설에서도 \x1b[1x군량\x1b[0x을 일부 생산합니다."), helpMoo);
 
             pk::message_box(pk::u8encode("\x1b[2x서량철기\x1b[0x의 효과는 기마부대가 전법공격에 성공했다면, 전법 후 주변 적 부대에 약간의 피해를 추가로 입힙니다."), helpMoo);
+            pk::message_box(pk::u8encode("해당 고유기교 \x1b[1x보유자\x1b[0x는 두배의 효과가 적용됩니다."), helpMoo);
 
             pk::message_box(pk::u8encode("\x1b[2x남만왕\x1b[0x의 효과는 아군 영토내의 적 부대의 \x1b[1x이동력\x1b[0x을 감소시키고,"), helpMoo);
             pk::message_box(pk::u8encode("매턴 \x1b[1x기력\x1b[0x을 추가로 감소시킵니다."), helpMoo);
 
-            return UniqueTechHelpHandler();
+            return UniqueTechHelpFirstHandler();
         }
 
         bool HelpUnique4()
         {
             pk::message_box(pk::u8encode("\x1b[2x속전고수\x1b[0x의 효과는 모든 아군부대의 \x1b[1x이동력\x1b[0x을 증가시킵니다."), helpMoo);
 
-            pk::message_box(pk::u8encode("\x1b[2x황천당립\x1b[0x의 아군 부대의 기력이 적을수록 \x1b[1x전투력\x1b[0x이 상승합니다."), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[2x황천당립\x1b[0x의 아군 부대의 기력이 적을수록 \x1b[1x전투력\x1b[0x이 상승하고, \x1b[1x검병\x1b[0x부대의 공격,방어,이동이 증가합니다."), helpMoo);
 
             pk::message_box(pk::u8encode("\x1b[2x덕왕위덕\x1b[0x의 자세력에서 \x1b[1x본거지\x1b[0x가 발생하지 않고, 주변 적 도시의 \x1b[1x치안\x1b[0x을 매 턴 하락시킵니다."), helpMoo);
 
@@ -13760,23 +15056,86 @@
 
             pk::message_box(pk::u8encode("\x1b[1x질풍\x1b[0x의 효과는 아군 노병부대가 전법공격에 성공했다면 임의의 주변 적 부대에 추가 사격을 실시합니다."), helpMoo);
 
-            return UniqueTechHelpHandler();
+            return UniqueTechHelpFirstHandler();
         }
 
 
         bool HelpUnique5()
         {
-            pk::message_box(pk::u8encode("\x1b[2x원융노병\x1b[0x의 효과는 아군 노병부대의 \x1b[1x적성\x1b[0x이 최소 A로 고정됩니다."), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[2x원융노병\x1b[0x의 효과는 아군 노병부대의 \x1b[1x적성\x1b[0x이 최소 A로 고정되며,"), helpMoo);
+            pk::message_box(pk::u8encode("아군 노병부대가 \x1b[1x교란\x1b[0x, \x1b[1x위보\x1b[0x에 걸릴 확률이 감소됩니다."), helpMoo);
+            pk::message_box(pk::u8encode("이 효과는 무장의 \x1b[1x특기\x1b[0x로 인해 확정되는 확률은 감소시키지 않습니다."), helpMoo);
 
-            pk::message_box(pk::u8encode("\x1b[2x청주병\x1b[0x의 효과는 아군 창병부대의 \x1b[1x적성\x1b[0x이 최소 A로 고정됩니다."), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[2x청주병\x1b[0x의 효과는 아군 창병부대의 \x1b[1x적성\x1b[0x이 최소 A로 고정되며,"), helpMoo);
+            pk::message_box(pk::u8encode("아군 창병부대가 \x1b[1x교란\x1b[0x, \x1b[1x위보\x1b[0x에 걸릴 확률이 감소됩니다."), helpMoo);
+            pk::message_box(pk::u8encode("이 효과는 무장의 \x1b[1x특기\x1b[0x로 인해 확정되는 확률은 감소시키지 않습니다."), helpMoo);
 
-            pk::message_box(pk::u8encode("\x1b[2x동주병\x1b[0x의 효과는 아군 극병부대의 \x1b[1x적성\x1b[0x이 최소 A로 고정됩니다."), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[2x동주병\x1b[0x의 효과는 아군 극병부대의 \x1b[1x적성\x1b[0x이 최소 A로 고정되며,"), helpMoo);
+            pk::message_box(pk::u8encode("아군 극병부대가 \x1b[1x교란\x1b[0x, \x1b[1x위보\x1b[0x에 걸릴 확률이 감소됩니다."), helpMoo);
+            pk::message_box(pk::u8encode("이 효과는 무장의 \x1b[1x특기\x1b[0x로 인해 확정되는 확률은 감소시키지 않습니다."), helpMoo);
 
             pk::message_box(pk::u8encode("\x1b[2x함진영\x1b[0x의 효과는 거점에 주는 피해가 증가하고 적 \x1b[1x건물\x1b[0x에게 받는 피해가 감소합니다."), helpMoo);
 
             pk::message_box(pk::u8encode("\x1b[2x신기\x1b[0x의 효과는 적 부대의 공성을 제외한 전법 성공률을 하락시킵니다."), helpMoo);
 
-            return UniqueTechHelpHandler();
+            return UniqueTechHelpFirstHandler();
+        }
+
+        bool HelpUnique6()
+        {
+            pk::message_box(pk::u8encode("\x1b[2x미주랑\x1b[0x의 효과는 \x1b[1x화계 지형\x1b[0x에 있는 적 부대에 대한 전법 크리티컬 확률을 증가시키고,"), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[1x화계 지형\x1b[0x에 있는 아군 부대의 전투력을 증가시킵니다."), helpMoo);
+            pk::message_box(pk::u8encode("해당 고유기교 \x1b[1x보유자\x1b[0x는 두배의 효과가 적용됩니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x묘수\x1b[0x의 효과는 \x1b[1x전법\x1b[0x의 피해량이 적 부대와의 \x1b[1x지력차\x1b[0x에 비례해 증가합니다."), helpMoo);
+            pk::message_box(pk::u8encode("해당 증가량은 광역 전법의 경우 경감합니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x만인지적\x1b[0x의 효과는 \x1b[1x공격력\x1b[0x이 낮은 적 부대에 주는 피해량이 증가하고,"), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[1x공격력\x1b[0x이 낮은 적에게 받는 피해량이 감소합니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x효명진천\x1b[0x의 효과는 \x1b[1x상태이상\x1b[0x인 적 부대에게 주는 피해량이 증가하고,"), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[2x인접\x1b[0x 적군부대가 아군부대보다 많을 수록 부대 공격력이 증가합니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x일신시담\x1b[0x의 효과는 \x1b[1x상태이상\x1b[0x인 아군 부대가 받는 피해량이 감소하고,"), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[2x인접\x1b[0x 적군부대가 아군부대보다 많을 수록 부대 방어력이 증가합니다."), helpMoo);
+
+            return UniqueTechHelpSecondHandler();
+        }
+
+        bool HelpUnique7()
+        {
+            pk::message_box(pk::u8encode("\x1b[2x왕좌지재\x1b[0x의 효과는 거점의 \x1b[1x부상병\x1b[0x 회복량이 증가하고,"), helpMoo);
+            pk::message_box(pk::u8encode("\x1b[1x시장\x1b[0x이 아닌 도시시설에도 금 수입이 일부 발생합니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x팔문금쇄\x1b[0x의 효과는 자세력 영토에서 부대의 \x1b[1x방어력\x1b[0x과 \x1b[1x반격 피해\x1b[0x를 증가시킵니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x허유엄살\x1b[0x의 효과는 \x1b[1x교란, 위보, 동토\x1b[0x가 성공했을 경우 인접한 임의의 적 1부대에게"), helpMoo);
+            pk::message_box(pk::u8encode("아군 부대의 \x1b[1x병력 수\x1b[0x 및 적 부대와의 \x1b[1x지력 차\x1b[0x에 비례해 추가 피해를 입힙니다."), helpMoo);
+            pk::message_box(pk::u8encode("해당 고유기교 \x1b[1x보유자\x1b[0x는 두배의 효과가 적용됩니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x일치단결\x1b[0x의 효과는 \x1b[1x인접한\x1b[0x 아군 부대 수에 비례해 부대의 전투력을 증가시킵니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x후위대\x1b[0x의 효과는 아군 부대가 전멸했을 경우 포로 확률을 감소시킵니다."), helpMoo);
+
+            return UniqueTechHelpSecondHandler();
+        }
+
+        bool HelpUnique8()
+        {
+            pk::message_box(pk::u8encode("\x1b[2x이간계\x1b[0x의 효과는 무장이 \x1b[1x2명 이상\x1b[0x인 적 부대에 대한 계략 \x1b[1x성공률\x1b[0x이 증가합니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x정예수군\x1b[0x의 효과는 아군 수군부대의 \x1b[1x공격,방어,기동력\x1b[0x이 증가합니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x인화\x1b[0x의 효과는 모든 아군 부대의 \x1b[1x지원공격\x1b[0x 확률을 증가시킵니다."), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x침략황폐\x1b[0x의 효과는 \x1b[1x내정시설\x1b[0x에 주는 피해가 증가하고,"), helpMoo);
+            pk::message_box(pk::u8encode("6칸 이하의 적 도시의 \x1b[1x치안\x1b[0x을 매 턴마다 일정 확률로 감소시킵니다. "), helpMoo);
+
+            pk::message_box(pk::u8encode("\x1b[2x왕귀\x1b[0x의 효과는 선택한 무장의 능력치를 4년 후 증가시킵니다."), helpMoo);
+            pk::message_box(pk::u8encode("해당 효과는 \x1b[1x낮은\x1b[0x 능력치일 수록 효과가 증가하고, AI 세력은 사용할 수 없습니다."), helpMoo);
+            pk::message_box(pk::u8encode("선택된 무장이 \x1b[1x하야,배신,사망\x1b[0x할 경우 또는 왕귀 고유기교가 해제된 경우 무효처리 됩니다."), helpMoo);
+
+            return UniqueTechHelpSecondHandler();
         }
 
         // ============================================= 대회 우승 횟수 =============================================================
@@ -13945,8 +15304,8 @@
             {
                 pk::u8encode("지역이점 설정"),
                 pk::u8encode("대회 설정"),
-                //pk::u8encode("고유기교 설정"),
                 pk::u8encode("기타 설정"),
+                pk::u8encode("진행도 표시 설정"),
                 pk::u8encode("뒤로가기")
             };
 
@@ -13960,13 +15319,13 @@
             case 1:
                 return SettingCompetition();
 
-            //case 2:
-            //    return SettingUniqueTech();
+            case 3:
+                return SettingProgress();
 
             case 2:
                 return SettingEtcetera();
 
-            case 3:
+            case 4:
                 return false;
             }
 
@@ -13978,6 +15337,7 @@
             string 지역이점_사용여부_출력;
             string 이민족지원_사용여부_출력;
             string 이민족_특기전수_사용여부_출력;
+            string 고유기교_사용여부_출력;
 
             if (지역이점_사용여부 == 1)
             {
@@ -14006,11 +15366,21 @@
                 이민족_특기전수_사용여부_출력 = "이민족 특기전수 \x1b[29xOff\x1b[0x";
             }
 
+            if (고유기교_사용여부 == 1)
+            {
+                고유기교_사용여부_출력 = "고유기교 \x1b[2xOn\x1b[0x";
+            }
+            else
+            {
+                고유기교_사용여부_출력 = "고유기교 \x1b[29xOff\x1b[0x";
+            }
+
             array<string> helpList =
             {
                 pk::u8encode(지역이점_사용여부_출력),
                 pk::u8encode(이민족지원_사용여부_출력),
                 pk::u8encode(이민족_특기전수_사용여부_출력),
+                pk::u8encode(고유기교_사용여부_출력),
                 pk::u8encode("뒤로가기")
             };
 
@@ -14032,6 +15402,9 @@
                 break;
 
             case 3:
+                고유기교_사용여부 = (고유기교_사용여부 + 1) % 2;
+                break;
+            case 4:
                 return CheckSettingDataHandler();
             }
 
@@ -14134,95 +15507,92 @@
             return SettingCompetition();
         }
 
-        bool SettingUniqueTech()
+        bool SettingProgress()
         {
-            string 고유기교_사용여부_출력;
-            string 세력별_최대_고유기교_출력;
-            string 군주고유기교_출력;
-            string 최초_고유기교_제공여부_출력;
-            string 고유기교_공적제한_출력;
+            //const int 설정_능력연구_표시_사용여부 = 60021; // 1: 사용, 0 : 사용안함
+            //const int 설정_이민족외교_표시_사용여부 = 60022; // 1: 사용, 0 : 사용안함
+            //const int 설정_교역_표시_사용여부 = 60023; // 1: 사용, 0 : 사용안함
+            //const int 설정_왕귀_표시_사용여부 = 60024; // 1: 사용, 0 : 사용안함
 
-            if (고유기교_사용여부 == 1)
+
+            string 능력연구_표시_사용여부_출력;
+            string 이민족외교_표시_사용여부_출력;
+            string 교역_표시_사용여부_출력;
+            string 왕귀_표시_사용여부_출력;
+        
+            if (능력연구_표시_사용여부 == 1)
             {
-                고유기교_사용여부_출력 = "세력 고유기교 \x1b[2xOn\x1b[0x";
+                능력연구_표시_사용여부_출력 = "능력연구_표시 \x1b[2xOn\x1b[0x";
             }
             else
             {
-                고유기교_사용여부_출력 = "세력 고유기교 \x1b[29xOff\x1b[0x";
+                능력연구_표시_사용여부_출력 = "능력연구_표시 \x1b[29xOff\x1b[0x";
             }
-
-            if (군주고유기교 == 0)
+            
+            if (이민족외교_표시_사용여부 == 1)
             {
-                군주고유기교_출력 = "군주 고유기교 : \x1b[2x자유\x1b[0x";
+                이민족외교_표시_사용여부_출력 = "이민족외교_표시 : \x1b[2xOn\x1b[0x";
             }
             else
             {
-                군주고유기교_출력 = "군주 고유기교 : \x1b[29x강제\x1b[0x";
+                이민족외교_표시_사용여부_출력 = "이민족외교_표시 : \x1b[29xOff\x1b[0x";
             }
-
-            if (최초_고유기교_제공여부 == 1)
+            
+            if (교역_표시_사용여부 == 1)
             {
-                최초_고유기교_제공여부_출력 = "고유기교 기본 제공 : \x1b[2xOn\x1b[0x";
+                교역_표시_사용여부_출력 = "교역_표시 : \x1b[2xOn\x1b[0x";
             }
             else
             {
-                최초_고유기교_제공여부_출력 = "고유기교 기본 제공 : \x1b[29xOff\x1b[0x";
+                교역_표시_사용여부_출력 = "교역_표시 : \x1b[29xOff\x1b[0x";
             }
-
-            if (고유기교_공적제한 == 0)
+            
+            if (왕귀_표시_사용여부 == 1)
             {
-                고유기교_공적제한_출력 = "고유기교 공적 제한 : \x1b[2x없음\x1b[0x";
-            }
-            else if(고유기교_공적제한 == 1)
-            {
-                고유기교_공적제한_출력 = "고유기교 공적 제한 : \x1b[1x군주 제외\x1b[0x";
+                왕귀_표시_사용여부_출력 = "왕귀_표시 : \x1b[2xOn\x1b[0x";
             }
             else
             {
-                고유기교_공적제한_출력 = "고유기교 공적 제한 : \x1b[29x모든 무장\x1b[0x";
+                왕귀_표시_사용여부_출력 = "왕귀_표시 : \x1b[29xOff\x1b[0x";
             }
 
-            세력별_최대_고유기교_출력 = pk::format("세력별 최대 고유기교 : \x1b[2x{}\x1b[0x개", 세력별_최대_고유기교);
-
+            //
+            //세력별_최대_고유기교_출력 = pk::format("세력별 최대 고유기교 : \x1b[2x{}\x1b[0x개", 세력별_최대_고유기교);
+            //
             array<string> helpList =
             {
-                pk::u8encode(고유기교_사용여부_출력),
-                pk::u8encode(세력별_최대_고유기교_출력),
-                pk::u8encode(군주고유기교_출력),
-                pk::u8encode(최초_고유기교_제공여부_출력),
-                pk::u8encode(고유기교_공적제한_출력),
+                pk::u8encode(능력연구_표시_사용여부_출력),
+                pk::u8encode(이민족외교_표시_사용여부_출력),
+                pk::u8encode(교역_표시_사용여부_출력),
+                pk::u8encode(왕귀_표시_사용여부_출력),
                 pk::u8encode("뒤로가기")
             };
-
+            //
             int n = pk::choose(helpList, pk::u8encode("변경할 기능을 선택해주십시오."), helpMoo);
-
+            
             switch (n)
             {
             case 0:
-                고유기교_사용여부 = (고유기교_사용여부 + 1) % 2;
+                능력연구_표시_사용여부 = (능력연구_표시_사용여부 + 1) % 2;
                 break;
-
+            
             case 1:
-                세력별_최대_고유기교 = pk::numberpad(pk::u8encode("숫자 입력"), 1, 4, 세력별_최대_고유기교, pk::numberpad_t(pad_callback)).first;
+                이민족외교_표시_사용여부 = (이민족외교_표시_사용여부 + 1) % 2;
                 break;
-
+            
             case 2:
-                군주고유기교 = (군주고유기교 + 1) % 2;
+                교역_표시_사용여부 = (교역_표시_사용여부 + 1) % 2;
                 break;
-
+            
             case 3:
-                최초_고유기교_제공여부 = (최초_고유기교_제공여부 + 1) % 2;
+                왕귀_표시_사용여부 = (왕귀_표시_사용여부 + 1) % 2;
                 break;
-
+            
             case 4:
-                고유기교_공적제한 = (고유기교_공적제한 + 1) % 3;
-                break;
-
-            case 5:
                 return CheckSettingDataHandler();
             }
-
-            return SettingUniqueTech();
+            
+            return SettingProgress();
         }
 
         bool SettingEtcetera()
@@ -14251,18 +15621,34 @@
                 부상병시스템_사용여부_출력 = "부상병 \x1b[29xOff\x1b[0x";
             }
 
-            if (수정된_등용확률 == 1)
+            if (수정된_등용확률 == 3)
             {
-                수정된_등용확률_출력 = "등용 난이도 : \x1b[29x증가\x1b[0x";
+                수정된_등용확률_출력 = "등용 난이도 : 유저만 \x1b[29x증가\x1b[0x";
+            }
+            else if (수정된_등용확률 == 2)
+            {
+                수정된_등용확률_출력 = "등용 난이도 : AI만 \x1b[29x증가\x1b[0x";
+            }
+            else if (수정된_등용확률 == 1)
+            {
+                수정된_등용확률_출력 = "등용 난이도 : 모두 \x1b[29x증가\x1b[0x";
             }
             else
             {
                 수정된_등용확률_출력 = "등용 난이도 : \x1b[2x원본\x1b[0x";
             }
 
-            if (수정된_포로확률 == 1)
+            if (수정된_포로확률 == 3)
             {
-                수정된_포로확률_출력 = "포로 확률 : \x1b[29x감소\x1b[0x";
+                수정된_포로확률_출력 = "포로 난이도 : 유저만 \x1b[29x증가\x1b[0x";
+            }
+            else if (수정된_포로확률 == 2)
+            {
+                수정된_포로확률_출력 = "포로 난이도 : AI만 \x1b[29x증가\x1b[0x";
+            }
+            else if (수정된_포로확률 == 1)
+            {
+                수정된_포로확률_출력 = "포로 난이도 : 모두 \x1b[29x증가\x1b[0x";
             }
             else
             {
@@ -14302,11 +15688,11 @@
                 break;
 
             case 2:
-                수정된_등용확률 = (수정된_등용확률 + 1) % 2;
+                수정된_등용확률 = (수정된_등용확률 + 1) % 4;
                 break;
 
             case 3:
-                수정된_포로확률 = (수정된_포로확률 + 1) % 2;
+                수정된_포로확률 = (수정된_포로확률 + 1) % 4;
                 break;
 
             case 4:
